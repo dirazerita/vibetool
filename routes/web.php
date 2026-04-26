@@ -9,6 +9,7 @@ use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PendingController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\MemberController;
@@ -16,12 +17,16 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\LandingPageController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/p/{slug}', [HomeController::class, 'show'])->name('product.show');
+
+// Halaman pending aktivasi member (publik & untuk user yang sudah login tapi belum aktif).
+Route::get('/pending', [PendingController::class, 'show'])->name('pending');
 
 // Webhook (no CSRF)
 Route::post('/webhook/xendit', [WebhookController::class, 'xendit'])->name('webhook.xendit');
@@ -31,14 +36,17 @@ Route::get('/download/{token}', [DownloadController::class, 'download'])->name('
 
 // Auth required
 Route::middleware('auth')->group(function () {
-    // Checkout
-    Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('checkout');
-    Route::post('/checkout/{slug}', [CheckoutController::class, 'process'])->name('checkout.process');
-    Route::post('/checkout/{slug}/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    // Member-only (akun harus sudah diaktifkan admin)
+    Route::middleware('active')->group(function () {
+        // Checkout
+        Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('checkout');
+        Route::post('/checkout/{slug}', [CheckoutController::class, 'process'])->name('checkout.process');
+        Route::post('/checkout/{slug}/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
+        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    });
 
-    // Dashboard
-    Route::prefix('dashboard')->name('dashboard')->group(function () {
+    // Dashboard (member only, butuh akun aktif)
+    Route::middleware('active')->prefix('dashboard')->name('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/products', [DashboardProductController::class, 'index'])->name('.products');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
@@ -48,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('.settings');
         Route::put('/settings', [SettingController::class, 'update'])->name('.settings.update');
     });
+    // (penutup grup `active` di atas)
 
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -66,12 +75,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/members', [MemberController::class, 'index'])->name('members');
         Route::get('/members/{user}/edit', [MemberController::class, 'edit'])->name('members.edit');
         Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');
+        Route::patch('/members/{user}/activate', [MemberController::class, 'activate'])->name('members.activate');
+        Route::patch('/members/{user}/deactivate', [MemberController::class, 'deactivate'])->name('members.deactivate');
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
         Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+        Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings');
+        Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
     });
 });
 

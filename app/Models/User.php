@@ -26,6 +26,7 @@ class User extends Authenticatable
         'bank_account',
         'balance',
         'role',
+        'status',
     ];
 
     protected $hidden = [

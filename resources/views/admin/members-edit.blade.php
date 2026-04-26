@@ -51,6 +51,13 @@
                 </div>
 
                 <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <p class="text-sm text-gray-600">Status:
+                        @if(($user->status ?? 'active') === 'active')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                        @endif
+                    </p>
                     <p class="text-sm text-gray-600">Saldo: <strong>Rp {{ number_format($user->balance, 0, ',', '.') }}</strong></p>
                     <p class="text-sm text-gray-600">Bergabung: <strong>{{ $user->created_at->format('d M Y H:i') }}</strong></p>
                 </div>
@@ -61,6 +68,18 @@
                 <a href="{{ route('admin.members') }}" class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Batal</a>
             </div>
         </form>
+
+        @if(($user->status ?? 'active') === 'pending')
+            <form method="POST" action="{{ route('admin.members.activate', $user) }}" class="mt-4 pt-4 border-t border-gray-200">
+                @csrf @method('PATCH')
+                <button type="submit" class="bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-medium">Aktifkan Member</button>
+            </form>
+        @else
+            <form method="POST" action="{{ route('admin.members.deactivate', $user) }}" class="mt-4 pt-4 border-t border-gray-200" onsubmit="return confirm('Set status member ini menjadi pending? Member tidak akan bisa login sampai diaktifkan kembali.')">
+                @csrf @method('PATCH')
+                <button type="submit" class="bg-yellow-600 text-white px-6 py-2.5 rounded-lg hover:bg-yellow-700 font-medium">Nonaktifkan (Set ke Pending)</button>
+            </form>
+        @endif
     </div>
 </div>
 @endsection

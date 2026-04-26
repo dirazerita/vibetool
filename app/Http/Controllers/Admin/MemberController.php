@@ -73,6 +73,20 @@ class MemberController extends Controller
         return redirect()->route('admin.members')->with('success', 'Member berhasil diperbarui.');
     }
 
+    public function activate(User $user)
+    {
+        $user->update(['status' => 'active']);
+
+        return redirect()->back()->with('success', "Member {$user->name} berhasil diaktifkan.");
+    }
+
+    public function deactivate(User $user)
+    {
+        $user->update(['status' => 'pending']);
+
+        return redirect()->back()->with('success', "Member {$user->name} dinonaktifkan (status pending).");
+    }
+
     public function destroy(User $user)
     {
         $user->update([

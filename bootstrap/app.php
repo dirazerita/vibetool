@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'track.referral' => \App\Http\Middleware\TrackReferral::class,
         ]);
         $middleware->append(\App\Http\Middleware\TrackReferral::class);

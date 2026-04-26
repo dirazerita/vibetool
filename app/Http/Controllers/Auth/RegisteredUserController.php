@@ -74,6 +74,7 @@ class RegisteredUserController extends Controller
             'whatsapp_number' => $normalizedWhatsapp,
             'password' => Hash::make($request->password),
             'upline_id' => $uplineId,
+            'status' => 'pending',
         ]);
 
         Log::info('DEBUG register stored', [
@@ -87,24 +88,19 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Sistem aktivasi via WhatsApp: akun pending, tidak otomatis login.
+        // Simpan data user untuk halaman pending lalu logout & redirect.
+        session([
+            'pending_user_data' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'whatsapp_number' => $user->whatsapp_number,
+            ],
+        ]);
 
-        $intendedSlug = session('intended_product_slug');
-        if ($intendedSlug) {
-            session()->keep([
-                'auto_coupon',
-                'auto_coupon_member_name',
-                'auto_coupon_member_id',
-                'ref_code',
-                'intended_product_slug',
-            ]);
+        Auth::guard('web')->logout();
 
-            $redirectUrl = route('checkout', $intendedSlug);
-
-            return redirect($redirectUrl);
-        }
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('pending');
     }
 
     private function resolveRefCode(Request $request): ?string

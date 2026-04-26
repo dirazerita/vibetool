@@ -28,6 +28,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        if ($user && !$user->isAdmin() && ($user->status ?? 'active') === 'pending') {
+            session([
+                'pending_user_data' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'whatsapp_number' => $user->whatsapp_number,
+                ],
+            ]);
+
+            return redirect()->route('pending');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
