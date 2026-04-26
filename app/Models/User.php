@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\PhoneNumber;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -48,6 +49,11 @@ class User extends Authenticatable
                 $user->referral_code = strtoupper(Str::random(8));
             }
         });
+    }
+
+    public function setWhatsappNumberAttribute($value): void
+    {
+        $this->attributes['whatsapp_number'] = PhoneNumber::normalize(is_string($value) ? $value : (string) $value);
     }
 
     public function isAdmin(): bool

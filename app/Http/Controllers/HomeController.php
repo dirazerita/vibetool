@@ -31,9 +31,10 @@ class HomeController extends Controller
                     session([
                         'auto_coupon' => $autoCoupon->code,
                         'auto_coupon_member_name' => $refMember->name,
+                        'auto_coupon_member_id' => $refMember->id,
                     ]);
                 } else {
-                    session()->forget(['auto_coupon', 'auto_coupon_member_name']);
+                    session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id']);
                 }
             }
         }

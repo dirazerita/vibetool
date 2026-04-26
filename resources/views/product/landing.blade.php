@@ -20,7 +20,7 @@
     @endphp
 
     {{-- Navigation --}}
-    <nav class="bg-white/90 backdrop-blur-sm border-b border-gray-100 fixed top-0 left-0 right-0 z-50">
+    <nav class="bg-white border-b border-gray-100 relative z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -39,7 +39,7 @@
     </nav>
 
     {{-- Hero Section --}}
-    <section class="relative pt-16">
+    <section class="relative">
         @if($landingPage->hero_image)
             <div class="relative" style="height: 500px;">
                 <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="{{ $landingPage->hero_title }}" class="w-full object-cover" style="width: 100%; height: 500px; object-fit: cover;">

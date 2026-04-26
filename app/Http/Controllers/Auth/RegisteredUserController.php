@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -75,6 +76,15 @@ class RegisteredUserController extends Controller
             'upline_id' => $uplineId,
         ]);
 
+        Log::info('DEBUG register stored', [
+            'user_id' => $user->id,
+            'upline_id' => $user->upline_id,
+            'ref_code_used' => $refCode,
+            'session_auto_coupon' => session('auto_coupon'),
+            'session_ref_code' => session('ref_code'),
+            'session_auto_coupon_member_id' => session('auto_coupon_member_id'),
+        ]);
+
         event(new Registered($user));
 
         Auth::login($user);
@@ -84,6 +94,7 @@ class RegisteredUserController extends Controller
             session()->keep([
                 'auto_coupon',
                 'auto_coupon_member_name',
+                'auto_coupon_member_id',
                 'ref_code',
                 'intended_product_slug',
             ]);

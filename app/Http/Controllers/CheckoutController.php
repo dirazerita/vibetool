@@ -19,15 +19,17 @@ class CheckoutController extends Controller
         $user = $request->user();
         $referrer = $this->resolveReferrer($request, $user);
 
-        Log::info('Checkout session', [
+        Log::info('DEBUG checkout', [
             'user_id' => $user?->id,
-            'product_slug' => $slug,
-            'auto_coupon' => session('auto_coupon'),
-            'ref_code' => session('ref_code'),
-            'auto_coupon_member_name' => session('auto_coupon_member_name'),
-            'cookie_ref' => $request->cookie('ref'),
             'upline_id' => $user?->upline_id,
+            'product_slug' => $slug,
+            'session_ref' => session('ref_code'),
+            'session_auto_coupon' => session('auto_coupon'),
+            'session_auto_coupon_member_id' => session('auto_coupon_member_id'),
+            'session_auto_coupon_member_name' => session('auto_coupon_member_name'),
+            'cookie_ref' => $request->cookie('ref'),
             'resolved_referrer_id' => $referrer?->id,
+            'all_session' => session()->all(),
         ]);
 
         $this->ensureAutoCouponSession($product, $referrer);
@@ -52,7 +54,15 @@ class CheckoutController extends Controller
             return response()->json(['success' => false, 'message' => 'Kode kupon tidak ditemukan.']);
         }
 
-        if (!$coupon->isAccessibleBy($user, $referrer)) {
+        if (!$this->isCouponAccessible($coupon, $user, $referrer)) {
+            Log::info('DEBUG checkout applyCoupon rejected', [
+                'user_id' => $user?->id,
+                'upline_id' => $user?->upline_id,
+                'coupon_code' => $coupon->code,
+                'session_auto_coupon' => session('auto_coupon'),
+                'session_ref' => session('ref_code'),
+                'resolved_referrer_id' => $referrer?->id,
+            ]);
             return response()->json(['success' => false, 'message' => 'Kupon tidak valid untuk akun Anda.']);
         }
 
@@ -108,7 +118,7 @@ class CheckoutController extends Controller
             $coupon = Coupon::where('code', strtoupper($couponInput))->first();
 
             if ($coupon
-                && $coupon->isAccessibleBy($user, $referrer)
+                && $this->isCouponAccessible($coupon, $user, $referrer)
                 && $coupon->isValidForProduct($product)
                 && $product->price >= $coupon->min_purchase
             ) {
@@ -145,7 +155,7 @@ class CheckoutController extends Controller
         if (isset($invoice['invoice_url'])) {
             $order->update(['xendit_id' => $invoice['id']]);
 
-            session()->forget(['auto_coupon', 'auto_coupon_member_name', 'intended_product_slug', 'ref_code']);
+            session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id', 'intended_product_slug', 'ref_code']);
 
             return redirect($invoice['invoice_url']);
         }
@@ -170,10 +180,37 @@ class CheckoutController extends Controller
         }
 
         if ($user && $user->upline_id) {
-            return User::find($user->upline_id);
+            $upline = User::find($user->upline_id);
+            if ($upline) {
+                return $upline;
+            }
+        }
+
+        $autoCouponMemberId = session('auto_coupon_member_id');
+        if ($autoCouponMemberId) {
+            $autoMember = User::find($autoCouponMemberId);
+            if ($autoMember && (!$user || $autoMember->id !== $user->id)) {
+                return $autoMember;
+            }
         }
 
         return null;
+    }
+
+    private function isCouponAccessible(Coupon $coupon, ?User $user, ?User $referrer): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $sessionAuto = session('auto_coupon');
+        if ($sessionAuto && strtoupper($sessionAuto) === strtoupper($coupon->code)) {
+            return $coupon->is_active
+                && (!$coupon->expired_at || !$coupon->expired_at->isPast())
+                && (!$coupon->max_uses || $coupon->used_count < $coupon->max_uses);
+        }
+
+        return $coupon->isAccessibleBy($user, $referrer);
     }
 
     private function ensureAutoCouponSession(Product $product, ?User $referrer): void
@@ -214,10 +251,18 @@ class CheckoutController extends Controller
 
         $coupon = Coupon::where('code', $autoCouponCode)->first();
         if (!$coupon
-            || !$coupon->isAccessibleBy($user, $referrer)
+            || !$this->isCouponAccessible($coupon, $user, $referrer)
             || !$coupon->isValidForProduct($product)
             || $product->price < $coupon->min_purchase
         ) {
+            Log::info('DEBUG checkout buildAutoCouponData rejected', [
+                'user_id' => $user?->id,
+                'auto_coupon_code' => $autoCouponCode,
+                'coupon_found' => (bool) $coupon,
+                'is_accessible' => $coupon ? $this->isCouponAccessible($coupon, $user, $referrer) : null,
+                'is_valid_for_product' => $coupon ? $coupon->isValidForProduct($product) : null,
+                'min_purchase_ok' => $coupon ? ($product->price >= $coupon->min_purchase) : null,
+            ]);
             return null;
         }
 
