@@ -71,7 +71,7 @@ php artisan serve
 
 ### Publik
 | URL | Deskripsi |
-|-----|----------|
+|-----|-----------|
 | `/` | Beranda (daftar produk) |
 | `/p/{slug}?ref={kode}` | Detail produk |
 | `/checkout/{slug}` | Halaman checkout |
@@ -81,7 +81,7 @@ php artisan serve
 
 ### Dashboard Member (`/dashboard`)
 | URL | Deskripsi |
-|-----|----------|
+|-----|-----------|
 | `/dashboard` | Overview saldo & statistik |
 | `/dashboard/products` | Link afiliasi |
 | `/dashboard/commissions` | Riwayat komisi |
@@ -91,7 +91,7 @@ php artisan serve
 
 ### Admin Panel (`/admin`)
 | URL | Deskripsi |
-|-----|----------|
+|-----|-----------|
 | `/admin` | Overview platform |
 | `/admin/products` | CRUD produk |
 | `/admin/orders` | Semua pesanan |
