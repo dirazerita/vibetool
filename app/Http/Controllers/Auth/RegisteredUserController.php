@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\PhoneNumber;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -90,13 +91,23 @@ class RegisteredUserController extends Controller
 
         // Sistem aktivasi via WhatsApp: akun pending, tidak otomatis login.
         // Simpan data user untuk halaman pending lalu logout & redirect.
-        session([
-            'pending_user_data' => [
-                'name' => $user->name,
-                'email' => $user->email,
-                'whatsapp_number' => $user->whatsapp_number,
-            ],
-        ]);
+        $pendingData = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'whatsapp_number' => $user->whatsapp_number,
+        ];
+
+        $intendedSlug = session('intended_product_slug');
+        if ($intendedSlug) {
+            $product = Product::where('slug', $intendedSlug)->first();
+            if ($product) {
+                $pendingData['product_title'] = $product->title;
+                $pendingData['product_slug'] = $product->slug;
+                $pendingData['product_price'] = (float) $product->price;
+            }
+        }
+
+        session(['pending_user_data' => $pendingData]);
 
         Auth::guard('web')->logout();
 

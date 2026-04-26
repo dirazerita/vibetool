@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,13 +31,23 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
         if ($user && !$user->isAdmin() && ($user->status ?? 'active') === 'pending') {
-            session([
-                'pending_user_data' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'whatsapp_number' => $user->whatsapp_number,
-                ],
-            ]);
+            $pendingData = [
+                'name' => $user->name,
+                'email' => $user->email,
+                'whatsapp_number' => $user->whatsapp_number,
+            ];
+
+            $intendedSlug = session('intended_product_slug');
+            if ($intendedSlug) {
+                $product = Product::where('slug', $intendedSlug)->first();
+                if ($product) {
+                    $pendingData['product_title'] = $product->title;
+                    $pendingData['product_slug'] = $product->slug;
+                    $pendingData['product_price'] = (float) $product->price;
+                }
+            }
+
+            session(['pending_user_data' => $pendingData]);
 
             return redirect()->route('pending');
         }

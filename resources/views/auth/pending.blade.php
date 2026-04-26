@@ -22,6 +22,12 @@
         <p class="text-gray-700"><span class="text-gray-500">Nama:</span> <strong>{{ $name }}</strong></p>
         <p class="text-gray-700"><span class="text-gray-500">Email:</span> <strong>{{ $email }}</strong></p>
         <p class="text-gray-700"><span class="text-gray-500">No WA:</span> <strong>{{ $whatsappNumber ?: '-' }}</strong></p>
+        @if(!empty($product) && !empty($product['title']))
+            <p class="text-gray-700"><span class="text-gray-500">Produk:</span> <strong>{{ $product['title'] }}</strong></p>
+            @if(!empty($product['price']))
+                <p class="text-gray-700"><span class="text-gray-500">Harga:</span> <strong>Rp {{ number_format((float) $product['price'], 0, ',', '.') }}</strong></p>
+            @endif
+        @endif
     </div>
 
     @if($activationLink)
