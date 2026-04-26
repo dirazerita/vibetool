@@ -198,29 +198,6 @@
         </div>
     </footer>
 
-    {{-- Sticky CTA Bar --}}
-    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg z-50 py-3 px-4 sm:px-6" id="sticky-cta">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="hidden sm:block">
-                <p class="font-semibold text-gray-900 text-sm">{{ $product->title }}</p>
-                <p class="text-indigo-600 font-bold text-lg">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-            </div>
-            <div class="sm:hidden">
-                <p class="text-indigo-600 font-bold text-lg">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-            </div>
-            @auth
-                <a href="{{ route('checkout', $product->slug) }}" class="bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 font-bold text-sm sm:text-base shadow-md transition-all hover:scale-105 whitespace-nowrap">
-                    Beli Sekarang
-                </a>
-            @else
-                <a href="{{ $registerUrl }}" class="bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 font-bold text-sm sm:text-base shadow-md transition-all hover:scale-105 whitespace-nowrap">
-                    Beli Sekarang
-                </a>
-            @endauth
-        </div>
-    </div>
-
-    {{-- Bottom padding for sticky bar --}}
-    <div class="h-20"></div>
+    {{-- Sticky CTA bar dihilangkan: CTA sudah tersedia di hero section dan section CTA bawah. --}}
 </body>
 </html>

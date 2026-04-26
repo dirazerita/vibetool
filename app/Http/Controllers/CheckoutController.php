@@ -160,7 +160,20 @@ class CheckoutController extends Controller
             return redirect($invoice['invoice_url']);
         }
 
-        return back()->with('error', 'Gagal membuat invoice pembayaran. Silakan coba lagi.');
+        Log::error('CheckoutController::process invoice tidak ter-create', [
+            'order_id' => $order->id,
+            'amount' => $amount,
+            'xendit_response' => $invoice,
+        ]);
+
+        $errorMessage = 'Gagal membuat invoice pembayaran. Silakan coba lagi.';
+        if (($invoice['error_code'] ?? null) === 'XENDIT_SECRET_KEY_MISSING') {
+            $errorMessage = 'Konfigurasi pembayaran belum lengkap. Hubungi admin (XENDIT_SECRET_KEY belum di-set).';
+        } elseif (isset($invoice['message'])) {
+            $errorMessage = 'Gagal membuat invoice pembayaran: ' . $invoice['message'];
+        }
+
+        return back()->with('error', $errorMessage);
     }
 
     public function success(Order $order)
