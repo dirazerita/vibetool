@@ -13,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -84,6 +85,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/members/{user}/activate', [MemberController::class, 'activate'])->name('members.activate');
         Route::patch('/members/{user}/deactivate', [MemberController::class, 'deactivate'])->name('members.deactivate');
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
+        Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions');
+        Route::get('/commissions/{user}', [AdminCommissionController::class, 'show'])->name('commissions.show');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
