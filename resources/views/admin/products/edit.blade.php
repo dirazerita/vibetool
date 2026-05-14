@@ -69,8 +69,21 @@
                 <div>
                     <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Produk (kosongkan jika tidak ingin mengubah)</label>
                     <input type="file" name="file" id="file" class="w-full border-gray-300 rounded-lg shadow-sm">
-                    <p class="text-xs text-gray-500 mt-1">File saat ini: {{ $product->file_path }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        @if($product->file_path)
+                            File saat ini: {{ $product->file_path }}
+                        @else
+                            Belum ada file produk.
+                        @endif
+                    </p>
                     @error('file') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="file_url" class="block text-sm font-medium text-gray-700 mb-1">Link Eksternal (URL)</label>
+                    <input type="url" name="file_url" id="file_url" value="{{ old('file_url', $product->file_url) }}" placeholder="https://drive.google.com/..." class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">Misal: Google Drive, Dropbox, dsb. Jika diisi, member akan diarahkan ke link ini saat klik tombol download. Kosongkan untuk tetap pakai file yang di-upload.</p>
+                    @error('file_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 

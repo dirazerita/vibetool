@@ -21,7 +21,7 @@
                 $product = $order->product;
                 $lp = $product?->landingPage;
                 $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
-                $hasFile = $product && $product->file_path;
+                $hasFile = $product && ($product->file_path || $product->file_url);
                 $isPendingManual = $order->status === 'pending' && $order->payment_method === 'manual';
             @endphp
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
@@ -59,9 +59,15 @@
                                 </button>
                             </form>
                         @elseif($hasFile && $order->download_token)
-                            <a href="{{ route('download', $order->download_token) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Download Produk
+                            @php $isExternal = (bool) ($product->file_url ?? null); @endphp
+                            <a href="{{ route('download', $order->download_token) }}" @if($isExternal) target="_blank" rel="noopener" @endif class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
+                                @if($isExternal)
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    Buka Link Produk
+                                @else
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download Produk
+                                @endif
                             </a>
                         @else
                             <button disabled class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
