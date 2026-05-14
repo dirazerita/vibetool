@@ -28,11 +28,13 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'commission_percent' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
-            'file' => 'required|file|max:102400',
+            'file' => 'nullable|required_without:file_url|file|max:102400',
+            'file_url' => 'nullable|required_without:file|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
+        ], [
+            'file.required_without' => 'Upload file produk atau isi link eksternal.',
+            'file_url.required_without' => 'Isi link eksternal atau upload file produk.',
         ]);
-
-        $filePath = $request->file('file')->store('products', 'local');
 
         $data = [
             'title' => $request->title,
@@ -41,8 +43,12 @@ class ProductController extends Controller
             'price' => $request->price,
             'commission_percent' => $request->commission_percent,
             'upline_percent' => $request->upline_percent,
-            'file_path' => $filePath,
+            'file_url' => $request->input('file_url') ?: null,
         ];
+
+        if ($request->hasFile('file')) {
+            $data['file_path'] = $request->file('file')->store('products', 'local');
+        }
 
         if ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
@@ -67,6 +73,7 @@ class ProductController extends Controller
             'commission_percent' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
             'file' => 'nullable|file|max:102400',
+            'file_url' => 'nullable|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
         ]);
 
@@ -78,6 +85,7 @@ class ProductController extends Controller
             'commission_percent' => $request->commission_percent,
             'upline_percent' => $request->upline_percent,
             'is_active' => $request->boolean('is_active'),
+            'file_url' => $request->input('file_url') ?: null,
         ];
 
         if ($request->hasFile('file')) {

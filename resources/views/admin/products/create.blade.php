@@ -49,8 +49,16 @@
 
                 <div>
                     <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Produk</label>
-                    <input type="file" name="file" id="file" class="w-full border-gray-300 rounded-lg shadow-sm" required>
+                    <input type="file" name="file" id="file" class="w-full border-gray-300 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500 mt-1">Upload file produk (maks 100MB), <em>atau</em> isi link eksternal di bawah.</p>
                     @error('file') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="file_url" class="block text-sm font-medium text-gray-700 mb-1">Link Eksternal (URL)</label>
+                    <input type="url" name="file_url" id="file_url" value="{{ old('file_url') }}" placeholder="https://drive.google.com/..." class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">Misal: Google Drive, Dropbox, dsb. Isi <strong>salah satu</strong> antara File Produk atau Link Eksternal.</p>
+                    @error('file_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 

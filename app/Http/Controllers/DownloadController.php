@@ -13,10 +13,16 @@ class DownloadController extends Controller
             ->where('status', 'paid')
             ->firstOrFail();
 
-        $filePath = $order->product->file_path;
+        $product = $order->product;
 
-        if (Storage::disk('local')->exists($filePath)) {
-            return Storage::disk('local')->download($filePath, $order->product->title . '.' . pathinfo($filePath, PATHINFO_EXTENSION));
+        if ($product && $product->file_url) {
+            return redirect()->away($product->file_url);
+        }
+
+        $filePath = $product->file_path ?? null;
+
+        if ($filePath && Storage::disk('local')->exists($filePath)) {
+            return Storage::disk('local')->download($filePath, $product->title . '.' . pathinfo($filePath, PATHINFO_EXTENSION));
         }
 
         return back()->with('error', 'File tidak ditemukan.');
