@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -130,6 +132,8 @@ class CheckoutController extends Controller
             }
         }
 
+        $manualEnabled = Setting::get('manual_payment_enabled') === '1';
+
         $order = Order::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
@@ -139,8 +143,15 @@ class CheckoutController extends Controller
             'coupon_code' => $couponCode,
             'discount_amount' => $discountAmount,
             'status' => 'pending',
+            'payment_method' => $manualEnabled ? 'manual' : 'xendit',
             'download_token' => Str::uuid()->toString(),
         ]);
+
+        if ($manualEnabled) {
+            session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id', 'intended_product_slug', 'ref_code']);
+
+            return redirect()->route('checkout.manual', $order->id);
+        }
 
         $xendit = new XenditService();
         $invoice = $xendit->createInvoice([
@@ -179,6 +190,64 @@ class CheckoutController extends Controller
     public function success(Order $order)
     {
         return view('checkout-success', compact('order'));
+    }
+
+    public function manual(Request $request, Order $order)
+    {
+        $this->authorizeOrderOwner($request, $order);
+
+        if ($order->payment_method !== 'manual') {
+            return redirect()->route('checkout.success', $order->id);
+        }
+
+        $bankInfo = [
+            'bank_name' => Setting::get('manual_bank_name', ''),
+            'bank_account' => Setting::get('manual_bank_account', ''),
+            'bank_holder' => Setting::get('manual_bank_holder', ''),
+            'note' => Setting::get('manual_payment_note', ''),
+        ];
+
+        return view('checkout-manual', compact('order', 'bankInfo'));
+    }
+
+    public function uploadProof(Request $request, Order $order)
+    {
+        $this->authorizeOrderOwner($request, $order);
+
+        if ($order->payment_method !== 'manual') {
+            abort(404);
+        }
+
+        if ($order->status !== 'pending') {
+            return redirect()->route('checkout.manual', $order->id)
+                ->with('error', 'Pesanan ini sudah tidak dalam status menunggu pembayaran.');
+        }
+
+        $request->validate([
+            'proof' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ], [
+            'proof.required' => 'Bukti transfer wajib diupload.',
+            'proof.image' => 'File harus berupa gambar.',
+            'proof.mimes' => 'Format yang diterima: JPG, JPEG, PNG, WEBP.',
+            'proof.max' => 'Ukuran file maksimal 5 MB.',
+        ]);
+
+        if ($order->payment_proof) {
+            Storage::disk('public')->delete($order->payment_proof);
+        }
+
+        $path = $request->file('proof')->store('payment_proofs/' . $order->id, 'public');
+        $order->update(['payment_proof' => $path]);
+
+        return redirect()->route('checkout.manual', $order->id)
+            ->with('success', 'Bukti transfer berhasil diupload. Menunggu konfirmasi admin.');
+    }
+
+    private function authorizeOrderOwner(Request $request, Order $order): void
+    {
+        if (!$request->user() || $request->user()->id !== $order->user_id) {
+            abort(403);
+        }
     }
 
     private function resolveReferrer(Request $request, ?User $user): ?User

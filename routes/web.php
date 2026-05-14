@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/checkout/{slug}', [CheckoutController::class, 'process'])->name('checkout.process');
         Route::post('/checkout/{slug}/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
         Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+        Route::get('/checkout/manual/{order}', [CheckoutController::class, 'manual'])->name('checkout.manual');
+        Route::post('/checkout/manual/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('checkout.manual.proof');
     });
 
     // Dashboard (member only, butuh akun aktif)
@@ -74,6 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/products/{product}/landing-page/testimonials/{testimonial}', [LandingPageController::class, 'deleteTestimonial'])->name('products.landing-page.testimonials.delete');
         Route::post('/products/{product}/landing-page/testimonials/{testimonial}/toggle', [LandingPageController::class, 'toggleTestimonial'])->name('products.landing-page.testimonials.toggle');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+        Route::post('/orders/{order}/mark-paid', [OrderController::class, 'markPaid'])->name('orders.mark-paid');
         Route::get('/members', [MemberController::class, 'index'])->name('members');
         Route::get('/members/{user}/edit', [MemberController::class, 'edit'])->name('members.edit');
         Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');

@@ -12,7 +12,13 @@ class PurchaseController extends Controller
     {
         $purchases = Order::with(['product.landingPage'])
             ->where('user_id', $request->user()->id)
-            ->where('status', 'paid')
+            ->where(function ($query) {
+                $query->where('status', 'paid')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'pending')
+                            ->where('payment_method', 'manual');
+                    });
+            })
             ->latest()
             ->paginate(12);
 

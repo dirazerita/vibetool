@@ -20,6 +20,8 @@ class Order extends Model
         'coupon_code',
         'discount_amount',
         'status',
+        'payment_method',
+        'payment_proof',
         'xendit_id',
         'download_token',
     ];
