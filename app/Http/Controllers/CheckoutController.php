@@ -38,7 +38,19 @@ class CheckoutController extends Controller
 
         $autoCouponData = $this->buildAutoCouponData($product, $user, $referrer);
 
-        return view('checkout', compact('product', 'autoCouponData'));
+        $alreadyPurchased = Order::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->where('status', 'paid')
+            ->exists();
+
+        $pendingOrder = Order::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->where('status', 'pending')
+            ->where('payment_method', 'manual')
+            ->latest()
+            ->first();
+
+        return view('checkout', compact('product', 'autoCouponData', 'alreadyPurchased', 'pendingOrder'));
     }
 
     public function applyCoupon(Request $request, string $slug)
@@ -241,6 +253,40 @@ class CheckoutController extends Controller
 
         return redirect()->route('checkout.manual', $order->id)
             ->with('success', 'Bukti transfer berhasil diupload. Menunggu konfirmasi admin.');
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        $this->authorizeOrderOwner($request, $order);
+
+        if ($order->status !== 'pending') {
+            return redirect()->route('dashboard.purchases')
+                ->with('error', 'Pesanan ini tidak bisa dibatalkan karena bukan dalam status menunggu pembayaran.');
+        }
+
+        if ($order->payment_method !== 'manual') {
+            return redirect()->route('dashboard.purchases')
+                ->with('error', 'Pesanan ini tidak bisa dibatalkan dari sini.');
+        }
+
+        if ($order->payment_proof) {
+            Storage::disk('public')->delete($order->payment_proof);
+        }
+
+        if ($order->coupon_code) {
+            $coupon = Coupon::where('code', $order->coupon_code)->first();
+            if ($coupon && $coupon->used_count > 0) {
+                $coupon->decrement('used_count');
+            }
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+            'payment_proof' => null,
+        ]);
+
+        return redirect()->route('dashboard.purchases')
+            ->with('success', 'Pesanan #' . $order->id . ' berhasil dibatalkan.');
     }
 
     private function authorizeOrderOwner(Request $request, Order $order): void

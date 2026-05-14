@@ -2,7 +2,61 @@
 @section('title', 'Checkout - ' . $product->title)
 
 @section('content')
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+@php
+    $showDuplicateWarning = ($alreadyPurchased ?? false) || isset($pendingOrder);
+@endphp
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ showWarning: {{ $showDuplicateWarning ? 'true' : 'false' }} }">
+
+    @if($showDuplicateWarning)
+    <div
+        x-show="showWarning"
+        x-cloak
+        x-transition.opacity
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+    >
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" @click.outside="showWarning = false">
+            <div class="flex items-start gap-3 mb-4">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.19 16a2 2 0 001.74 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        @if($alreadyPurchased ?? false)
+                            Anda sudah pernah membeli produk ini
+                        @else
+                            Pesanan masih menunggu pembayaran
+                        @endif
+                    </h3>
+                    <div class="text-sm text-gray-600 mt-2 space-y-2">
+                        @if($alreadyPurchased ?? false)
+                            <p>Produk <strong>{{ $product->title }}</strong> sudah ada di akun Anda. Apakah Anda yakin ingin membelinya lagi?</p>
+                        @endif
+                        @if(isset($pendingOrder))
+                            <p>Anda masih memiliki pesanan <strong>#{{ $pendingOrder->id }}</strong> untuk produk ini yang menunggu pembayaran/konfirmasi. Sebaiknya selesaikan atau batalkan pesanan tersebut terlebih dahulu.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-2">
+                <a href="{{ route('product.show', $product->slug) }}"
+                   class="flex-1 text-center px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm">
+                    Batal
+                </a>
+                @if(isset($pendingOrder))
+                    <a href="{{ route('checkout.manual', $pendingOrder->id) }}"
+                       class="flex-1 text-center px-4 py-2.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 font-medium text-sm">
+                        Lihat Pesanan Pending
+                    </a>
+                @endif
+                <button type="button" @click="showWarning = false"
+                        class="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-medium text-sm">
+                    Ya, saya mengerti, lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
 
