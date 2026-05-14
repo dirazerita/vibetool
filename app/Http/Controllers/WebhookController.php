@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Commission;
 use App\Models\Order;
-use App\Models\User;
+use App\Services\OrderPaymentService;
 use Illuminate\Http\Request;
 
 class WebhookController extends Controller
 {
-    public function xendit(Request $request)
+    public function xendit(Request $request, OrderPaymentService $paymentService)
     {
         $webhookToken = config('services.xendit.webhook_token');
         if ($webhookToken && $request->header('x-callback-token') !== $webhookToken) {
@@ -31,45 +30,11 @@ class WebhookController extends Controller
         }
 
         if ($status === 'PAID') {
-            $order->update(['status' => 'paid']);
-            $this->processCommissions($order);
+            $paymentService->markAsPaid($order);
         } elseif ($status === 'EXPIRED') {
-            $order->update(['status' => 'expired']);
+            $paymentService->markAsExpired($order);
         }
 
         return response()->json(['message' => 'OK']);
-    }
-
-    private function processCommissions(Order $order): void
-    {
-        $product = $order->product;
-
-        if ($order->affiliate_id) {
-            $directCommission = $order->amount * ($product->commission_percent / 100);
-            Commission::create([
-                'user_id' => $order->affiliate_id,
-                'order_id' => $order->id,
-                'type' => 'direct',
-                'amount' => $directCommission,
-                'status' => 'approved',
-            ]);
-
-            $affiliate = User::find($order->affiliate_id);
-            $affiliate->increment('balance', $directCommission);
-        }
-
-        if ($order->upline_id) {
-            $uplineCommission = $order->amount * ($product->upline_percent / 100);
-            Commission::create([
-                'user_id' => $order->upline_id,
-                'order_id' => $order->id,
-                'type' => 'upline',
-                'amount' => $uplineCommission,
-                'status' => 'approved',
-            ]);
-
-            $upline = User::find($order->upline_id);
-            $upline->increment('balance', $uplineCommission);
-        }
     }
 }

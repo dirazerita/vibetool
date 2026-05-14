@@ -22,9 +22,10 @@
                 $lp = $product?->landingPage;
                 $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
                 $hasFile = $product && $product->file_path;
+                $isPendingManual = $order->status === 'pending' && $order->payment_method === 'manual';
             @endphp
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                <div class="h-40 bg-gray-100">
+                <div class="h-40 bg-gray-100 relative">
                     @if($heroImage)
                         <img src="{{ $heroImage }}" alt="{{ $product->title ?? 'Produk' }}" class="w-full h-full object-cover">
                     @else
@@ -32,15 +33,25 @@
                             <svg class="w-12 h-12 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                         </div>
                     @endif
+                    @if($isPendingManual)
+                        <span class="absolute top-2 left-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                            {{ $order->payment_proof ? 'Menunggu Konfirmasi' : 'Menunggu Pembayaran' }}
+                        </span>
+                    @endif
                 </div>
 
                 <div class="p-4 flex-1 flex flex-col">
                     <h3 class="text-lg font-bold text-gray-900 truncate mb-1">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
                     <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
-                    <p class="text-xs text-gray-500 mb-4">Dibeli {{ $order->created_at->format('d M Y H:i') }}</p>
+                    <p class="text-xs text-gray-500 mb-4">{{ $isPendingManual ? 'Dipesan' : 'Dibeli' }} {{ $order->created_at->format('d M Y H:i') }}</p>
 
                     <div class="mt-auto space-y-2">
-                        @if($hasFile && $order->download_token)
+                        @if($isPendingManual)
+                            <a href="{{ route('checkout.manual', $order->id) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                {{ $order->payment_proof ? 'Lihat Status Pembayaran' : 'Lanjutkan Pembayaran' }}
+                            </a>
+                        @elseif($hasFile && $order->download_token)
                             <a href="{{ route('download', $order->download_token) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 Download Produk
