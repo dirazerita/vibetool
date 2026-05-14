@@ -4,6 +4,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Dashboard\CommissionController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
+use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('active')->prefix('dashboard')->name('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/products', [DashboardProductController::class, 'index'])->name('.products');
+        Route::get('/purchases', [DashboardPurchaseController::class, 'index'])->name('.purchases');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
