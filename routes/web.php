@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/manual/{order}', [CheckoutController::class, 'manual'])->name('checkout.manual');
         Route::post('/checkout/manual/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('checkout.manual.proof');
+        Route::post('/checkout/manual/{order}/cancel', [CheckoutController::class, 'cancel'])->name('checkout.manual.cancel');
     });
 
     // Dashboard (member only, butuh akun aktif)
