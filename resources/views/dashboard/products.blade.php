@@ -10,11 +10,13 @@
             $lp = $product->landingPage;
             $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
             $affiliateLink = url('/p/' . $product->slug . '?ref=' . $user->referral_code);
-            $commissionAmount = $product->price * $product->commission_percent / 100;
-            $uplineAmount = $product->price * $product->upline_percent / 100;
             $status = $purchaseStatus[$product->id] ?? null;
             $alreadyPaid = $status['paid'] ?? false;
             $pendingOrder = $status['pending_order'] ?? null;
+            $commissionPercent = $alreadyPaid ? (float) $product->commission_percent : (float) ($product->commission_percent_non_owner ?? $product->commission_percent);
+            $uplinePercent = $alreadyPaid ? (float) $product->upline_percent : (float) ($product->upline_percent_non_owner ?? $product->upline_percent);
+            $commissionAmount = $product->price * $commissionPercent / 100;
+            $uplineAmount = $product->price * $uplinePercent / 100;
         @endphp
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {{-- Thumbnail --}}
@@ -32,8 +34,13 @@
             <div class="p-4">
                 <h3 class="text-lg font-bold text-gray-900 truncate mb-1">{{ $product->title }}</h3>
                 <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan</p>
-                <p class="text-xs text-purple-500 mb-4">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
+                <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs text-gray-500 font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
+                <p class="text-xs text-purple-500">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
+                @if(!$alreadyPaid && ($product->commission_percent_non_owner ?? $product->commission_percent) != $product->commission_percent)
+                    <p class="text-xs text-amber-600 mt-1 mb-3"><svg class="inline w-3.5 h-3.5 mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Beli produk ini untuk dapat komisi lebih besar ({{ rtrim(rtrim(number_format((float) $product->commission_percent, 2, '.', ''), '0'), '.') }}%)</p>
+                @else
+                    <div class="mb-3"></div>
+                @endif
 
                 {{-- Buttons --}}
                 <div class="space-y-2">

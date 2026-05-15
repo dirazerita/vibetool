@@ -49,7 +49,7 @@
 
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-lg font-bold text-green-600">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                    <span class="text-xs text-gray-500">Komisi: {{ $product->commission_percent }}% / {{ $product->upline_percent }}%</span>
+                    <span class="text-xs text-gray-500" title="Komisi sudah beli / belum beli">Komisi: {{ $product->commission_percent }}%&nbsp;|&nbsp;{{ $product->commission_percent_non_owner ?? $product->commission_percent }}%</span>
                 </div>
 
                 {{-- Action buttons --}}

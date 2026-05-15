@@ -19,7 +19,9 @@ class Product extends Model
         'description',
         'price',
         'commission_percent',
+        'commission_percent_non_owner',
         'upline_percent',
+        'upline_percent_non_owner',
         'product_type',
         'file_path',
         'file_url',
@@ -32,9 +34,51 @@ class Product extends Model
         return [
             'price' => 'decimal:2',
             'commission_percent' => 'decimal:2',
+            'commission_percent_non_owner' => 'decimal:2',
             'upline_percent' => 'decimal:2',
+            'upline_percent_non_owner' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Apakah user yang diberikan sudah pernah membeli (paid) produk ini.
+     */
+    public function isOwnedBy(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return Order::where('user_id', $user->id)
+            ->where('product_id', $this->id)
+            ->where('status', 'paid')
+            ->exists();
+    }
+
+    /**
+     * Tarif komisi direct (%) yang berlaku untuk user.
+     * Sudah pernah beli produk ini -> tarif tinggi; belum -> tarif rendah.
+     */
+    public function commissionPercentFor(?User $user): float
+    {
+        if ($this->isOwnedBy($user)) {
+            return (float) $this->commission_percent;
+        }
+
+        return (float) ($this->commission_percent_non_owner ?? $this->commission_percent);
+    }
+
+    /**
+     * Tarif bonus upline (%) yang berlaku untuk user.
+     */
+    public function uplinePercentFor(?User $user): float
+    {
+        if ($this->isOwnedBy($user)) {
+            return (float) $this->upline_percent;
+        }
+
+        return (float) ($this->upline_percent_non_owner ?? $this->upline_percent);
     }
 
     protected static function booted(): void

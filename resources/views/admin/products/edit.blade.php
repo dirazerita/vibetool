@@ -44,16 +44,42 @@
                     @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="commission_percent" class="block text-sm font-medium text-gray-700 mb-1">Komisi Affiliator (%)</label>
-                        <input type="number" name="commission_percent" id="commission_percent" value="{{ old('commission_percent', $product->commission_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                        @error('commission_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="upline_percent" class="block text-sm font-medium text-gray-700 mb-1">Bonus Upline (%)</label>
-                        <input type="number" name="upline_percent" id="upline_percent" value="{{ old('upline_percent', $product->upline_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                        @error('upline_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Pengaturan Komisi</h3>
+                    <p class="text-xs text-gray-500 mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Komisi Affiliator (penjualan langsung dari user)</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="commission_percent" class="block text-xs font-medium text-gray-600 mb-1">Sudah beli produk (%)</label>
+                                    <input type="number" name="commission_percent" id="commission_percent" value="{{ old('commission_percent', $product->commission_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    @error('commission_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label for="commission_percent_non_owner" class="block text-xs font-medium text-gray-600 mb-1">Belum beli produk (%)</label>
+                                    <input type="number" name="commission_percent_non_owner" id="commission_percent_non_owner" value="{{ old('commission_percent_non_owner', $product->commission_percent_non_owner ?? $product->commission_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    @error('commission_percent_non_owner') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Bonus Upline (penjualan dari downline)</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="upline_percent" class="block text-xs font-medium text-gray-600 mb-1">Sudah beli produk (%)</label>
+                                    <input type="number" name="upline_percent" id="upline_percent" value="{{ old('upline_percent', $product->upline_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    @error('upline_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label for="upline_percent_non_owner" class="block text-xs font-medium text-gray-600 mb-1">Belum beli produk (%)</label>
+                                    <input type="number" name="upline_percent_non_owner" id="upline_percent_non_owner" value="{{ old('upline_percent_non_owner', $product->upline_percent_non_owner ?? $product->upline_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    @error('upline_percent_non_owner') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
