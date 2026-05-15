@@ -34,6 +34,16 @@
                     @error('price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div>
+                    <label for="product_type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Produk</label>
+                    <select name="product_type" id="product_type" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <option value="digital" {{ old('product_type', $product->product_type ?? 'digital') === 'digital' ? 'selected' : '' }}>Produk Digital (file/download)</option>
+                        <option value="software" {{ old('product_type', $product->product_type) === 'software' ? 'selected' : '' }}>Software / Tool (dengan lisensi)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Pilih <strong>Software / Tool</strong> kalau produk ini butuh kunci lisensi yang akan diberikan otomatis ke member setelah membeli.</p>
+                    @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="commission_percent" class="block text-sm font-medium text-gray-700 mb-1">Komisi Affiliator (%)</label>

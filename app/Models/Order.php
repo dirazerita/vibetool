@@ -58,6 +58,11 @@ class Order extends Model
         return $this->hasMany(Commission::class);
     }
 
+    public function license()
+    {
+        return $this->hasOne(License::class);
+    }
+
     public function isPaid(): bool
     {
         return $this->status === 'paid';
