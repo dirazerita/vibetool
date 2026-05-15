@@ -69,12 +69,22 @@ class RegisteredUserController extends Controller
             }
         }
 
+        $intendedProductId = null;
+        $intendedSlug = session('intended_product_slug');
+        if ($intendedSlug) {
+            $intendedProduct = Product::where('slug', $intendedSlug)->first();
+            if ($intendedProduct) {
+                $intendedProductId = $intendedProduct->id;
+            }
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'whatsapp_number' => $normalizedWhatsapp,
             'password' => Hash::make($request->password),
             'upline_id' => $uplineId,
+            'intended_product_id' => $intendedProductId,
             'status' => 'pending',
         ]);
 

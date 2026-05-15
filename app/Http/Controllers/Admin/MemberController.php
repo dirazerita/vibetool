@@ -14,7 +14,7 @@ class MemberController extends Controller
     public function index()
     {
         $members = User::where('role', 'member')
-            ->with('upline')
+            ->with(['upline', 'intendedProduct'])
             ->withCount('downlines')
             ->latest()
             ->paginate(15);

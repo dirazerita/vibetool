@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
         'referral_code',
         'upline_id',
+        'intended_product_id',
         'bank_name',
         'bank_account',
         'balance',
@@ -65,6 +66,11 @@ class User extends Authenticatable
     public function upline(): BelongsTo
     {
         return $this->belongsTo(User::class, 'upline_id');
+    }
+
+    public function intendedProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'intended_product_id');
     }
 
     public function downlines(): HasMany
