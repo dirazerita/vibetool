@@ -12,6 +12,9 @@
             $affiliateLink = url('/p/' . $product->slug . '?ref=' . $user->referral_code);
             $commissionAmount = $product->price * $product->commission_percent / 100;
             $uplineAmount = $product->price * $product->upline_percent / 100;
+            $status = $purchaseStatus[$product->id] ?? null;
+            $alreadyPaid = $status['paid'] ?? false;
+            $pendingOrder = $status['pending_order'] ?? null;
         @endphp
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {{-- Thumbnail --}}
@@ -34,10 +37,26 @@
 
                 {{-- Buttons --}}
                 <div class="space-y-2">
-                    <a href="{{ route('checkout', $product->slug) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        Beli Sekarang
-                    </a>
+                    @if($alreadyPaid)
+                        <div class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Sudah Dibeli
+                        </div>
+                        <a href="{{ route('dashboard.purchases') }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Akses di Pembelian Saya
+                        </a>
+                    @elseif($pendingOrder)
+                        <a href="{{ route('checkout.manual', $pendingOrder->id) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            {{ $pendingOrder->payment_proof ? 'Menunggu Konfirmasi Admin' : 'Lanjutkan Pembayaran' }}
+                        </a>
+                    @else
+                        <a href="{{ route('checkout', $product->slug) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Beli Sekarang
+                        </a>
+                    @endif
                     <a href="{{ $affiliateLink }}" target="_blank" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         Lihat Landing Page
