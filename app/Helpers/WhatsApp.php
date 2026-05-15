@@ -42,4 +42,36 @@ class WhatsApp
     {
         return PhoneNumber::normalize(Setting::get('whatsapp_admin'));
     }
+
+    /**
+     * Membuat URL wa.me untuk menghubungi admin terkait konfirmasi pembayaran manual order.
+     * Mengembalikan null jika nomor admin tidak terkonfigurasi.
+     */
+    public static function manualPaymentLink(\App\Models\Order $order): ?string
+    {
+        $adminNumber = self::adminNumber();
+        if (!$adminNumber) {
+            return null;
+        }
+
+        $user = $order->user;
+        $product = $order->product;
+
+        $message = "Halo Admin PRODIG \xF0\x9F\x91\x8B\nSaya ingin konfirmasi pembayaran manual.\n\n"
+            . "ID Pesanan: #{$order->id}\n"
+            . 'Produk: ' . ($product->title ?? '-') . "\n"
+            . 'Jumlah: Rp ' . number_format((float) $order->amount, 0, ',', '.') . "\n"
+            . 'Tanggal Pesanan: ' . $order->created_at->format('d M Y H:i') . "\n\n"
+            . 'Nama: ' . ($user->name ?? '-') . "\n"
+            . 'Email: ' . ($user->email ?? '-') . "\n"
+            . 'No WA: ' . ($user->whatsapp_number ?? '-') . "\n";
+
+        if ($order->payment_proof) {
+            $message .= "\nBukti transfer sudah saya upload. Mohon dicek di panel admin. Terima kasih!";
+        } else {
+            $message .= "\nSaya akan transfer ke rekening yang tertera. Terima kasih!";
+        }
+
+        return 'https://wa.me/' . $adminNumber . '?text=' . rawurlencode($message);
+    }
 }
