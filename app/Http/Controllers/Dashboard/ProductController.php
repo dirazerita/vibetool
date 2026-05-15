@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,34 @@ class ProductController extends Controller
         $products = Product::with('landingPage')->where('is_active', true)->get();
         $user = $request->user();
         $downlines = $user->downlines()->select('id', 'name')->get();
+
+        $userOrders = Order::where('user_id', $user->id)
+            ->whereIn('status', ['paid', 'pending'])
+            ->where(function ($q) {
+                $q->where('status', 'paid')
+                    ->orWhere(function ($qq) {
+                        $qq->where('status', 'pending')->where('payment_method', 'manual');
+                    });
+            })
+            ->orderByDesc('id')
+            ->get();
+
+        $purchaseStatus = [];
+        foreach ($userOrders as $order) {
+            $pid = $order->product_id;
+            if (!isset($purchaseStatus[$pid])) {
+                $purchaseStatus[$pid] = [
+                    'paid' => $order->status === 'paid',
+                    'pending_order' => $order->status === 'pending' ? $order : null,
+                ];
+            } else {
+                if ($order->status === 'paid') {
+                    $purchaseStatus[$pid]['paid'] = true;
+                } elseif (!$purchaseStatus[$pid]['pending_order'] && $order->status === 'pending') {
+                    $purchaseStatus[$pid]['pending_order'] = $order;
+                }
+            }
+        }
 
         $memberCoupons = $user->coupons()
             ->where('is_active', true)
@@ -40,6 +69,6 @@ class ProductController extends Controller
             }
         }
 
-        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts'));
+        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus'));
     }
 }
