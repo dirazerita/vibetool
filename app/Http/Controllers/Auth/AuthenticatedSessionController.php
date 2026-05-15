@@ -52,6 +52,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('pending');
         }
 
+        if ($user && !$user->isAdmin()) {
+            $request->session()->put('show_welcome_modal', true);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

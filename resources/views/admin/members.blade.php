@@ -18,6 +18,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Konteks Aktivasi</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode Referral</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Upline</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Downline</th>
@@ -37,6 +38,20 @@
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
                     @else
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                    @endif
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    @if($member->intendedProduct)
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-[11px] uppercase tracking-wide text-gray-400">Ingin beli</span>
+                            <a href="{{ route('product.show', $member->intendedProduct->slug) }}" target="_blank" class="font-medium text-indigo-600 hover:underline">{{ $member->intendedProduct->title }}</a>
+                            <span class="text-xs text-gray-500">Rp {{ number_format($member->intendedProduct->price, 0, ',', '.') }}</span>
+                            @if($member->upline)
+                                <span class="text-xs text-gray-500">via afiliasi <span class="font-medium text-gray-700">{{ $member->upline->name }}</span></span>
+                            @endif
+                        </div>
+                    @else
+                        <span class="text-gray-400">-</span>
                     @endif
                 </td>
                 <td class="px-6 py-4 text-sm font-mono text-indigo-600">{{ $member->referral_code }}</td>
@@ -62,7 +77,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="10" class="px-6 py-8 text-center text-gray-500">Belum ada member.</td>
+                <td colspan="11" class="px-6 py-8 text-center text-gray-500">Belum ada member.</td>
             </tr>
             @endforelse
         </tbody>
