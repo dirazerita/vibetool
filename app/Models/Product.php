@@ -20,6 +20,7 @@ class Product extends Model
         'price',
         'commission_percent',
         'upline_percent',
+        'product_type',
         'file_path',
         'file_url',
         'thumbnail',
@@ -48,6 +49,16 @@ class Product extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
+    }
+
+    public function isSoftware(): bool
+    {
+        return $this->product_type === 'software';
     }
 
     public function coupons(): BelongsToMany

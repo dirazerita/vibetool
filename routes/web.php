@@ -19,8 +19,10 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\LandingPageController;
+use App\Http\Controllers\Admin\LicenseController as AdminLicenseController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
+use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -55,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/products', [DashboardProductController::class, 'index'])->name('.products');
         Route::get('/purchases', [DashboardPurchaseController::class, 'index'])->name('.purchases');
+        Route::get('/licenses', [DashboardLicenseController::class, 'index'])->name('.licenses');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
@@ -87,6 +90,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
         Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions');
         Route::get('/commissions/{user}', [AdminCommissionController::class, 'show'])->name('commissions.show');
+        Route::get('/licenses', [AdminLicenseController::class, 'index'])->name('licenses');
+        Route::get('/licenses/{product}', [AdminLicenseController::class, 'show'])->name('licenses.show');
+        Route::post('/licenses/{product}', [AdminLicenseController::class, 'store'])->name('licenses.store');
+        Route::delete('/licenses/{license}', [AdminLicenseController::class, 'destroy'])->name('licenses.destroy');
+        Route::post('/licenses/assign-order/{order}', [AdminLicenseController::class, 'assignOrder'])->name('licenses.assign-order');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');

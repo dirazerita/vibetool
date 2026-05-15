@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Commission;
+use App\Models\License;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderPaymentService
 {
@@ -18,6 +20,7 @@ class OrderPaymentService
         DB::transaction(function () use ($order) {
             $order->update(['status' => 'paid']);
             $this->processCommissions($order);
+            $this->assignLicense($order);
         });
     }
 
@@ -69,5 +72,38 @@ class OrderPaymentService
                 $upline->increment('balance', $uplineCommission);
             }
         }
+    }
+
+    private function assignLicense(Order $order): void
+    {
+        $product = $order->product;
+
+        if (!$product || !$product->isSoftware()) {
+            return;
+        }
+
+        if ($order->license) {
+            return;
+        }
+
+        $license = License::where('product_id', $product->id)
+            ->whereNull('order_id')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+
+        if (!$license) {
+            Log::warning('Stok lisensi habis saat pembayaran order.', [
+                'order_id' => $order->id,
+                'product_id' => $product->id,
+            ]);
+            return;
+        }
+
+        $license->update([
+            'order_id' => $order->id,
+            'user_id' => $order->user_id,
+            'assigned_at' => now(),
+        ]);
     }
 }
