@@ -12,7 +12,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = Product::with('landingPage')->where('is_active', true)->get();
-        $user = $request->user();
+        $user = $request->user()->load('upline');
         $downlines = $user->downlines()->select('id', 'name')->get();
 
         $userOrders = Order::where('user_id', $user->id)
