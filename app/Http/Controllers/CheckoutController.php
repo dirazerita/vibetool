@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WhatsApp;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
@@ -219,7 +220,10 @@ class CheckoutController extends Controller
             'note' => Setting::get('manual_payment_note', ''),
         ];
 
-        return view('checkout-manual', compact('order', 'bankInfo'));
+        $order->loadMissing(['product', 'user']);
+        $adminWhatsappLink = WhatsApp::manualPaymentLink($order);
+
+        return view('checkout-manual', compact('order', 'bankInfo', 'adminWhatsappLink'));
     }
 
     public function uploadProof(Request $request, Order $order)
