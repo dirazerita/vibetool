@@ -42,7 +42,10 @@ class OrderPaymentService
         }
 
         if ($order->affiliate_id) {
-            $directCommission = $order->amount * ($product->commission_percent / 100);
+            $affiliate = User::find($order->affiliate_id);
+            $directPercent = $product->commissionPercentFor($affiliate);
+            $directCommission = $order->amount * ($directPercent / 100);
+
             Commission::create([
                 'user_id' => $order->affiliate_id,
                 'order_id' => $order->id,
@@ -51,14 +54,16 @@ class OrderPaymentService
                 'status' => 'approved',
             ]);
 
-            $affiliate = User::find($order->affiliate_id);
             if ($affiliate) {
                 $affiliate->increment('balance', $directCommission);
             }
         }
 
         if ($order->upline_id) {
-            $uplineCommission = $order->amount * ($product->upline_percent / 100);
+            $upline = User::find($order->upline_id);
+            $uplinePercent = $product->uplinePercentFor($upline);
+            $uplineCommission = $order->amount * ($uplinePercent / 100);
+
             Commission::create([
                 'user_id' => $order->upline_id,
                 'order_id' => $order->id,
@@ -67,7 +72,6 @@ class OrderPaymentService
                 'status' => 'approved',
             ]);
 
-            $upline = User::find($order->upline_id);
             if ($upline) {
                 $upline->increment('balance', $uplineCommission);
             }

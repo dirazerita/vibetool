@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
             'description' => 'Panduan lengkap digital marketing dari nol hingga mahir. Cocok untuk pemula yang ingin memulai bisnis online dan meningkatkan penjualan melalui strategi digital marketing yang terbukti efektif.',
             'price' => 150000,
             'commission_percent' => 30,
+            'commission_percent_non_owner' => 15,
             'upline_percent' => 10,
+            'upline_percent_non_owner' => 5,
             'file_path' => 'products/ebook-digital-marketing.pdf',
             'is_active' => true,
         ]);
@@ -38,7 +40,9 @@ class DatabaseSeeder extends Seeder
             'description' => 'Koleksi 50+ template website premium siap pakai untuk berbagai kebutuhan bisnis. Sudah responsive dan SEO-friendly. Termasuk template landing page, company profile, dan toko online.',
             'price' => 250000,
             'commission_percent' => 30,
+            'commission_percent_non_owner' => 15,
             'upline_percent' => 10,
+            'upline_percent_non_owner' => 5,
             'file_path' => 'products/template-website-premium.zip',
             'is_active' => true,
         ]);
@@ -49,7 +53,9 @@ class DatabaseSeeder extends Seeder
             'description' => 'Kursus video lengkap belajar Laravel dari dasar hingga mahir. Termasuk 100+ video tutorial, source code, dan akses ke grup diskusi eksklusif. Update gratis selamanya.',
             'price' => 500000,
             'commission_percent' => 30,
+            'commission_percent_non_owner' => 15,
             'upline_percent' => 10,
+            'upline_percent_non_owner' => 5,
             'file_path' => 'products/laravel-mastery-course.zip',
             'is_active' => true,
         ]);
