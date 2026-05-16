@@ -88,6 +88,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Member</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dialokasikan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Masa Berlaku</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
             </thead>
@@ -113,6 +114,21 @@
                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $license->order_id ? '#' . $license->order_id : '—' }}</td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">
                         {{ $license->assigned_at ? $license->assigned_at->format('d M Y H:i') : '—' }}
+                    </td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                        @if($license->isAssigned())
+                            @if($license->isLifetime())
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lifetime</span>
+                            @elseif($license->isExpired())
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Kedaluwarsa</span>
+                                <div class="text-xs text-gray-500 mt-0.5">{{ $license->expires_at->format('d M Y H:i') }}</div>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Aktif</span>
+                                <div class="text-xs text-gray-500 mt-0.5">s/d {{ $license->expires_at->format('d M Y H:i') }}</div>
+                            @endif
+                        @else
+                            <span class="text-gray-400">—</span>
+                        @endif
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                         @if(!$license->isAssigned())

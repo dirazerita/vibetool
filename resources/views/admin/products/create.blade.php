@@ -37,6 +37,18 @@
                     @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div id="license-duration-section" style="{{ old('product_type') === 'software' ? '' : 'display:none;' }}">
+                    <label for="license_duration" class="block text-sm font-medium text-gray-700 mb-1">Masa Berlaku Lisensi</label>
+                    <select name="license_duration" id="license_duration" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="1_month" {{ old('license_duration') === '1_month' ? 'selected' : '' }}>1 Bulan</option>
+                        <option value="6_months" {{ old('license_duration') === '6_months' ? 'selected' : '' }}>6 Bulan</option>
+                        <option value="1_year" {{ old('license_duration') === '1_year' ? 'selected' : '' }}>1 Tahun</option>
+                        <option value="lifetime" {{ old('license_duration', 'lifetime') === 'lifetime' ? 'selected' : '' }}>Lifetime</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Masa berlaku lisensi dihitung sejak order ditandai lunas. Pilih <strong>Lifetime</strong> jika lisensi tidak memiliki batas waktu.</p>
+                    @error('license_duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
                     <h3 class="text-sm font-semibold text-gray-900 mb-1">Pengaturan Komisi</h3>
                     <p class="text-xs text-gray-500 mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
@@ -105,4 +117,9 @@
         </form>
     </div>
 </div>
+<script>
+    document.getElementById('product_type').addEventListener('change', function() {
+        document.getElementById('license-duration-section').style.display = this.value === 'software' ? '' : 'none';
+    });
+</script>
 @endsection

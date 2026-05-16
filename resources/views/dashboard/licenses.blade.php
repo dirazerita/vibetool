@@ -59,6 +59,13 @@
                             <p class="text-xs text-gray-500">Didapatkan {{ $license->assigned_at?->format('d M Y H:i') ?? $license->created_at->format('d M Y H:i') }} · Order #{{ $license->order_id }}</p>
                         </div>
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Software / Tool</span>
+                        @if($license->isLifetime())
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Lifetime</span>
+                        @elseif($license->isExpired())
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Kedaluwarsa {{ $license->expires_at->format('d M Y') }}</span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Aktif s/d {{ $license->expires_at->format('d M Y') }}</span>
+                        @endif
                     </div>
 
                     <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Kunci Lisensi</label>
