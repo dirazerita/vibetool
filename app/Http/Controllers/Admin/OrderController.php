@@ -24,6 +24,10 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini tidak dalam status menunggu pembayaran.');
         }
 
+        if ($order->user && $order->user->status !== 'active') {
+            return back()->with('error', 'Member "' . $order->user->name . '" belum diaktifkan. Aktifkan member terlebih dahulu sebelum menandai pesanan sebagai lunas.');
+        }
+
         $paymentService->markAsPaid($order);
 
         return back()->with('success', 'Pesanan #' . $order->id . ' berhasil ditandai lunas. Komisi sudah diproses.');
