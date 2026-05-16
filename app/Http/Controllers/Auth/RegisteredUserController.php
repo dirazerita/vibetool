@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\PhoneNumber;
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -70,6 +73,7 @@ class RegisteredUserController extends Controller
         }
 
         $intendedProductId = null;
+        $intendedProduct = null;
         $intendedSlug = session('intended_product_slug');
         if ($intendedSlug) {
             $intendedProduct = Product::where('slug', $intendedSlug)->first();
@@ -99,6 +103,12 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Auto-create pending manual order kalau user daftar via link affiliate produk —
+        // supaya order tersimpan menunggu pembayaran sejak sebelum admin aktivasi.
+        if ($intendedProduct && $intendedProduct->is_active) {
+            $this->createPendingOrderForRegistrant($user, $intendedProduct);
+        }
+
         // Sistem aktivasi via WhatsApp: akun pending, tidak otomatis login.
         // Simpan data user untuk halaman pending lalu logout & redirect.
         $pendingData = [
@@ -107,14 +117,10 @@ class RegisteredUserController extends Controller
             'whatsapp_number' => $user->whatsapp_number,
         ];
 
-        $intendedSlug = session('intended_product_slug');
-        if ($intendedSlug) {
-            $product = Product::where('slug', $intendedSlug)->first();
-            if ($product) {
-                $pendingData['product_title'] = $product->title;
-                $pendingData['product_slug'] = $product->slug;
-                $pendingData['product_price'] = (float) $product->price;
-            }
+        if ($intendedProduct) {
+            $pendingData['product_title'] = $intendedProduct->title;
+            $pendingData['product_slug'] = $intendedProduct->slug;
+            $pendingData['product_price'] = (float) $intendedProduct->price;
         }
 
         session(['pending_user_data' => $pendingData]);
@@ -122,6 +128,63 @@ class RegisteredUserController extends Controller
         Auth::guard('web')->logout();
 
         return redirect()->route('pending');
+    }
+
+    private function createPendingOrderForRegistrant(User $user, Product $product): void
+    {
+        $affiliateId = $user->upline_id;
+        $upline = $affiliateId ? User::find($affiliateId) : null;
+        $uplineOfAffiliate = $upline?->upline_id;
+
+        $amount = (float) $product->price;
+        $couponCode = null;
+        $discountAmount = 0;
+
+        $autoCouponCode = session('auto_coupon');
+        if ($autoCouponCode) {
+            $coupon = Coupon::where('code', strtoupper($autoCouponCode))->first();
+
+            if ($coupon
+                && $coupon->isAccessibleBy($user, $upline)
+                && $coupon->isValidForProduct($product)
+                && $product->price >= $coupon->min_purchase
+            ) {
+                $discountAmount = $coupon->calculateDiscount($product->price);
+                $amount = max(0, $product->price - $discountAmount);
+                $couponCode = $coupon->code;
+                $coupon->increment('used_count');
+            }
+        }
+
+        try {
+            $order = Order::create([
+                'user_id' => $user->id,
+                'product_id' => $product->id,
+                'affiliate_id' => $affiliateId,
+                'upline_id' => $uplineOfAffiliate,
+                'amount' => $amount,
+                'coupon_code' => $couponCode,
+                'discount_amount' => $discountAmount,
+                'status' => 'pending',
+                'payment_method' => 'manual',
+                'download_token' => Str::uuid()->toString(),
+            ]);
+
+            Log::info('Auto-created pending order on registration', [
+                'order_id' => $order->id,
+                'user_id' => $user->id,
+                'product_id' => $product->id,
+                'affiliate_id' => $affiliateId,
+                'amount' => $amount,
+                'coupon_code' => $couponCode,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to auto-create pending order on registration', [
+                'user_id' => $user->id,
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function resolveRefCode(Request $request): ?string
