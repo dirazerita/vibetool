@@ -94,6 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/licenses/{product}', [AdminLicenseController::class, 'show'])->name('licenses.show');
         Route::post('/licenses/{product}', [AdminLicenseController::class, 'store'])->name('licenses.store');
         Route::delete('/licenses/{license}', [AdminLicenseController::class, 'destroy'])->name('licenses.destroy');
+        Route::put('/licenses/{license}', [AdminLicenseController::class, 'update'])->name('licenses.update');
         Route::post('/licenses/assign-order/{order}', [AdminLicenseController::class, 'assignOrder'])->name('licenses.assign-order');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
