@@ -19,6 +19,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembeli</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Affiliator</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kupon</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Metode</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -33,6 +34,16 @@
                 <td class="px-6 py-4 text-sm text-gray-900">{{ $order->user->name ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ $order->product->title ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ $order->affiliate->name ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm">
+                    @if($order->coupon_code)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">{{ $order->coupon_code }}</span>
+                        @if($order->discount_amount)
+                            <div class="mt-0.5 text-[11px] text-gray-500">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</div>
+                        @endif
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
                 <td class="px-6 py-4 text-sm font-medium text-gray-900">Rp {{ number_format($order->amount, 0, ',', '.') }}</td>
                 <td class="px-6 py-4">
                     @if($order->payment_method === 'manual')
@@ -65,7 +76,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" class="px-6 py-8 text-center text-gray-500">Belum ada pesanan.</td>
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500">Belum ada pesanan.</td>
             </tr>
             @endforelse
         </tbody>

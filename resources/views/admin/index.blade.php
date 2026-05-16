@@ -41,6 +41,8 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembeli</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Affiliator</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kupon</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             </tr>
@@ -51,6 +53,14 @@
                 <td class="px-6 py-4 text-sm text-gray-600">#{{ $order->id }}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">{{ $order->user->name ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ $order->product->title ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ $order->affiliate->name ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm">
+                    @if($order->coupon_code)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">{{ $order->coupon_code }}</span>
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
                 <td class="px-6 py-4 text-sm font-medium text-gray-900">Rp {{ number_format($order->amount, 0, ',', '.') }}</td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -61,7 +71,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="px-6 py-8 text-center text-gray-500">Belum ada pesanan.</td>
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">Belum ada pesanan.</td>
             </tr>
             @endforelse
         </tbody>
