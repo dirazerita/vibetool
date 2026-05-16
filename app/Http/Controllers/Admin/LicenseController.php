@@ -133,6 +133,7 @@ class LicenseController extends Controller
         }
 
         $key = $this->generateUniqueLicenseKey($product->id);
+        $expiresAt = $this->calculateExpiresAt($product->license_duration ?? 'lifetime');
 
         License::create([
             'product_id' => $product->id,
@@ -140,9 +141,20 @@ class LicenseController extends Controller
             'order_id' => $order->id,
             'user_id' => $order->user_id,
             'assigned_at' => now(),
+            'expires_at' => $expiresAt,
         ]);
 
         return back()->with('success', 'Lisensi berhasil di-generate dan dialokasikan ke order #' . $order->id . '.');
+    }
+
+    private function calculateExpiresAt(string $duration): ?\Carbon\Carbon
+    {
+        return match ($duration) {
+            '1_month' => now()->addMonth(),
+            '6_months' => now()->addMonths(6),
+            '1_year' => now()->addYear(),
+            default => null,
+        };
     }
 
     private function generateUniqueLicenseKey(int $productId): string

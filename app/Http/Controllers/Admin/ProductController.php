@@ -31,6 +31,7 @@ class ProductController extends Controller
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software',
+            'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
             'file' => 'nullable|required_without:file_url|file|max:102400',
             'file_url' => 'nullable|required_without:file|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
@@ -49,6 +50,7 @@ class ProductController extends Controller
             'upline_percent' => $request->upline_percent,
             'upline_percent_non_owner' => $request->upline_percent_non_owner,
             'product_type' => $request->product_type,
+            'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'file_url' => $request->input('file_url') ?: null,
         ];
 
@@ -81,6 +83,7 @@ class ProductController extends Controller
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software',
+            'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
             'file' => 'nullable|file|max:102400',
             'file_url' => 'nullable|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
@@ -96,6 +99,7 @@ class ProductController extends Controller
             'upline_percent' => $request->upline_percent,
             'upline_percent_non_owner' => $request->upline_percent_non_owner,
             'product_type' => $request->product_type,
+            'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'is_active' => $request->boolean('is_active'),
             'file_url' => $request->input('file_url') ?: null,
         ];

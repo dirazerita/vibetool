@@ -23,6 +23,7 @@ class Product extends Model
         'upline_percent',
         'upline_percent_non_owner',
         'product_type',
+        'license_duration',
         'file_path',
         'file_url',
         'thumbnail',

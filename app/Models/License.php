@@ -17,13 +17,25 @@ class License extends Model
         'order_id',
         'user_id',
         'assigned_at',
+        'expires_at',
     ];
 
     protected function casts(): array
     {
         return [
             'assigned_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    public function isLifetime(): bool
+    {
+        return $this->expires_at === null;
     }
 
     public function product(): BelongsTo
