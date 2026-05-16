@@ -18,7 +18,7 @@
 @if($pendingOrders->isNotEmpty())
 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6">
     <h2 class="text-sm font-semibold text-yellow-900 mb-2">Lisensi belum tersedia</h2>
-    <p class="text-xs text-yellow-800 mb-3">Pembayaran kamu sudah dikonfirmasi tapi stok lisensi sedang habis. Admin akan segera mengalokasikan ke kamu.</p>
+    <p class="text-xs text-yellow-800 mb-3">Pembayaran kamu sudah dikonfirmasi. Lisensi sedang diproses dan akan segera tersedia.</p>
     <div class="space-y-2">
         @foreach($pendingOrders as $order)
         <div class="flex items-center justify-between bg-white rounded-lg border border-yellow-200 p-3">

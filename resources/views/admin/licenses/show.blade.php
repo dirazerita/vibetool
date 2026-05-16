@@ -34,7 +34,7 @@
 @if($pendingOrders->count() > 0)
 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6">
     <h2 class="text-sm font-semibold text-yellow-900 mb-2">Order paid yang belum mendapat lisensi</h2>
-    <p class="text-xs text-yellow-800 mb-3">Tambah lisensi baru di bawah, lalu klik "Berikan Lisensi" untuk mengalokasikan ke member.</p>
+    <p class="text-xs text-yellow-800 mb-3">Klik "Generate Lisensi" untuk membuat kunci lisensi otomatis dan mengalokasikan ke member.</p>
     <div class="space-y-2">
         @foreach($pendingOrders as $order)
         <div class="flex items-center justify-between bg-white rounded-lg border border-yellow-200 p-3">
@@ -44,8 +44,8 @@
             </div>
             <form method="POST" action="{{ route('admin.licenses.assign-order', $order) }}">
                 @csrf
-                <button type="submit" class="px-3 py-1.5 bg-yellow-500 text-white text-xs font-medium rounded-lg hover:bg-yellow-600 {{ $availableCount === 0 ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $availableCount === 0 ? 'disabled' : '' }}>
-                    Berikan Lisensi
+                <button type="submit" class="px-3 py-1.5 bg-yellow-500 text-white text-xs font-medium rounded-lg hover:bg-yellow-600">
+                    Generate Lisensi
                 </button>
             </form>
         </div>

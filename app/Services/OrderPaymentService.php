@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class OrderPaymentService
 {
@@ -90,24 +91,25 @@ class OrderPaymentService
             return;
         }
 
-        $license = License::where('product_id', $product->id)
-            ->whereNull('order_id')
-            ->orderBy('id')
-            ->lockForUpdate()
-            ->first();
+        $key = $this->generateUniqueLicenseKey($product->id);
 
-        if (!$license) {
-            Log::warning('Stok lisensi habis saat pembayaran order.', [
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-            ]);
-            return;
-        }
-
-        $license->update([
+        License::create([
+            'product_id' => $product->id,
+            'key' => $key,
             'order_id' => $order->id,
             'user_id' => $order->user_id,
             'assigned_at' => now(),
         ]);
+    }
+
+    private function generateUniqueLicenseKey(int $productId): string
+    {
+        do {
+            $key = strtoupper(
+                Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)
+            );
+        } while (License::where('product_id', $productId)->where('key', $key)->exists());
+
+        return $key;
     }
 }
