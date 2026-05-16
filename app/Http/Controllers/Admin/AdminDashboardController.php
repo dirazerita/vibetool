@@ -19,7 +19,7 @@ class AdminDashboardController extends Controller
         $totalRevenue = Order::where('status', 'paid')->sum('amount');
         $totalCommissions = Commission::sum('amount');
         $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
-        $recentOrders = Order::with(['user', 'product'])->latest()->take(5)->get();
+        $recentOrders = Order::with(['user', 'product', 'affiliate'])->latest()->take(5)->get();
 
         return view('admin.index', compact(
             'totalMembers', 'totalProducts', 'totalOrders',
