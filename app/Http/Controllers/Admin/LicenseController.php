@@ -105,16 +105,38 @@ class LicenseController extends Controller
         return back()->with('success', $message);
     }
 
-    public function destroy(License $license)
+    public function update(Request $request, License $license)
     {
-        if ($license->isAssigned()) {
-            return back()->withErrors(['license' => 'Lisensi yang sudah dialokasikan ke member tidak bisa dihapus.']);
+        $request->validate([
+            'expires_at' => 'nullable|date',
+            'duration_preset' => 'nullable|in:1_month,6_months,1_year,lifetime,custom',
+        ]);
+
+        $preset = $request->input('duration_preset');
+
+        if ($preset === 'lifetime') {
+            $license->update(['expires_at' => null]);
+        } elseif ($preset === 'custom') {
+            $license->update(['expires_at' => $request->input('expires_at')]);
+        } elseif ($preset) {
+            $baseDate = $license->assigned_at ?? $license->created_at;
+            $expiresAt = match ($preset) {
+                '1_month' => $baseDate->copy()->addMonth(),
+                '6_months' => $baseDate->copy()->addMonths(6),
+                '1_year' => $baseDate->copy()->addYear(),
+            };
+            $license->update(['expires_at' => $expiresAt]);
         }
 
+        return redirect()->route('admin.licenses.show', $license->product_id)->with('success', 'Masa berlaku lisensi berhasil diperbarui.');
+    }
+
+    public function destroy(License $license)
+    {
         $productId = $license->product_id;
         $license->delete();
 
-        return redirect()->route('admin.licenses.show', $productId)->with('success', 'Lisensi dihapus.');
+        return redirect()->route('admin.licenses.show', $productId)->with('success', 'Lisensi berhasil dihapus.');
     }
 
     public function assignOrder(Order $order, OrderPaymentService $service)

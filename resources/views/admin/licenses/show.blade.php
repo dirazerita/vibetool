@@ -131,14 +131,15 @@
                         @endif
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
-                        @if(!$license->isAssigned())
-                            <form method="POST" action="{{ route('admin.licenses.destroy', $license) }}" onsubmit="return confirm('Hapus lisensi ini?');">
+                        <div class="flex items-center gap-2">
+                            @if($license->isAssigned())
+                                <button type="button" onclick="openEditModal({{ $license->id }}, '{{ $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : '' }}', {{ $license->isLifetime() ? 'true' : 'false' }})" class="text-indigo-600 hover:text-indigo-700 text-xs font-medium">Edit</button>
+                            @endif
+                            <form method="POST" action="{{ route('admin.licenses.destroy', $license) }}" onsubmit="return confirm('Hapus lisensi ini? Tindakan ini tidak bisa dibatalkan.');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-700 text-xs font-medium">Hapus</button>
                             </form>
-                        @else
-                            <span class="text-xs text-gray-400">Tidak bisa dihapus</span>
-                        @endif
+                        </div>
                     </td>
                 </tr>
                 @endforeach
@@ -148,4 +149,69 @@
     <div class="px-6 py-4 border-t border-gray-200">{{ $licenses->links() }}</div>
     @endif
 </div>
+{{-- Modal Edit Masa Berlaku --}}
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Masa Berlaku Lisensi</h3>
+        <form id="edit-form" method="POST">
+            @csrf @method('PUT')
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Durasi</label>
+                <select name="duration_preset" id="edit-preset" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" onchange="toggleCustomDate()">
+                    <option value="1_month">1 Bulan (dari tanggal alokasi)</option>
+                    <option value="6_months">6 Bulan (dari tanggal alokasi)</option>
+                    <option value="1_year">1 Tahun (dari tanggal alokasi)</option>
+                    <option value="lifetime">Lifetime</option>
+                    <option value="custom">Tanggal Custom</option>
+                </select>
+            </div>
+            <div id="custom-date-section" class="mb-4 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kedaluwarsa</label>
+                <input type="datetime-local" name="expires_at" id="edit-expires-at" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(licenseId, expiresAt, isLifetime) {
+        const modal = document.getElementById('edit-modal');
+        const form = document.getElementById('edit-form');
+        const preset = document.getElementById('edit-preset');
+        const expiresInput = document.getElementById('edit-expires-at');
+
+        form.action = '/admin/licenses/' + licenseId;
+
+        if (isLifetime) {
+            preset.value = 'lifetime';
+        } else if (expiresAt) {
+            preset.value = 'custom';
+            expiresInput.value = expiresAt;
+        }
+
+        toggleCustomDate();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('edit-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function toggleCustomDate() {
+        const preset = document.getElementById('edit-preset').value;
+        const section = document.getElementById('custom-date-section');
+        section.classList.toggle('hidden', preset !== 'custom');
+    }
+
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+</script>
 @endsection
