@@ -30,7 +30,7 @@
                 @endif
 
                 {{-- Badge status & landing page --}}
-                <div class="absolute top-2 left-2 flex gap-1.5">
+                <div class="absolute top-2 left-2 flex flex-wrap gap-1.5">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->is_active ? 'bg-green-500 text-white' : 'bg-red-500 text-white' }}">
                         {{ $product->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
@@ -39,6 +39,9 @@
                             {{ $lp->is_published ? 'Published' : 'Draft' }}
                         </span>
                     @endif
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->isSoftware() ? 'bg-purple-500 text-white' : 'bg-amber-500 text-white' }}">
+                        {{ $product->isSoftware() ? 'Software / Lisensi' : 'Produk Digital' }}
+                    </span>
                 </div>
             </div>
 
