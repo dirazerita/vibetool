@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Services\OrderPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class LicenseController extends Controller
 {
@@ -131,26 +132,27 @@ class LicenseController extends Controller
             return back()->withErrors(['order' => 'Produk bukan software.']);
         }
 
-        DB::transaction(function () use ($order) {
-            $license = License::where('product_id', $order->product_id)
-                ->whereNull('order_id')
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->first();
+        $key = $this->generateUniqueLicenseKey($product->id);
 
-            if ($license) {
-                $license->update([
-                    'order_id' => $order->id,
-                    'user_id' => $order->user_id,
-                    'assigned_at' => now(),
-                ]);
-            }
-        });
+        License::create([
+            'product_id' => $product->id,
+            'key' => $key,
+            'order_id' => $order->id,
+            'user_id' => $order->user_id,
+            'assigned_at' => now(),
+        ]);
 
-        if (!$order->fresh()->license) {
-            return back()->withErrors(['order' => 'Stok lisensi habis. Tambah lisensi baru dulu.']);
-        }
+        return back()->with('success', 'Lisensi berhasil di-generate dan dialokasikan ke order #' . $order->id . '.');
+    }
 
-        return back()->with('success', 'Lisensi berhasil dialokasikan ke order #' . $order->id . '.');
+    private function generateUniqueLicenseKey(int $productId): string
+    {
+        do {
+            $key = strtoupper(
+                Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)
+            );
+        } while (License::where('product_id', $productId)->where('key', $key)->exists());
+
+        return $key;
     }
 }
