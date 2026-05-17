@@ -24,12 +24,22 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini tidak dalam status menunggu pembayaran.');
         }
 
+        $activatedMember = false;
+
         if ($order->user && $order->user->status !== 'active') {
-            return back()->with('error', 'Member "' . $order->user->name . '" belum diaktifkan. Aktifkan member terlebih dahulu sebelum menandai pesanan sebagai lunas.');
+            $order->user->update(['status' => 'active']);
+            $order->setRelation('user', $order->user->fresh());
+            $activatedMember = true;
         }
 
         $paymentService->markAsPaid($order);
 
-        return back()->with('success', 'Pesanan #' . $order->id . ' berhasil ditandai lunas. Komisi sudah diproses.');
+        $message = 'Pesanan #' . $order->id . ' berhasil ditandai lunas. Komisi sudah diproses.';
+
+        if ($activatedMember && $order->user) {
+            $message = 'Pesanan #' . $order->id . ' berhasil ditandai lunas dan member "' . $order->user->name . '" otomatis diaktifkan. Komisi sudah diproses.';
+        }
+
+        return back()->with('success', $message);
     }
 }
