@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use App\Models\MemberCommission;
 
 class Product extends Model
 {
@@ -59,10 +60,19 @@ class Product extends Model
 
     /**
      * Tarif komisi direct (%) yang berlaku untuk user.
-     * Sudah pernah beli produk ini -> tarif tinggi; belum -> tarif rendah.
+     * Cek komisi khusus dulu, lalu fallback ke tarif produk.
      */
     public function commissionPercentFor(?User $user): float
     {
+        if ($user) {
+            $custom = MemberCommission::where('user_id', $user->id)
+                ->where('product_id', $this->id)
+                ->first();
+            if ($custom && $custom->commission_percent !== null) {
+                return (float) $custom->commission_percent;
+            }
+        }
+
         if ($this->isOwnedBy($user)) {
             return (float) $this->commission_percent;
         }
@@ -72,9 +82,19 @@ class Product extends Model
 
     /**
      * Tarif bonus upline (%) yang berlaku untuk user.
+     * Cek komisi khusus dulu, lalu fallback ke tarif produk.
      */
     public function uplinePercentFor(?User $user): float
     {
+        if ($user) {
+            $custom = MemberCommission::where('user_id', $user->id)
+                ->where('product_id', $this->id)
+                ->first();
+            if ($custom && $custom->upline_percent !== null) {
+                return (float) $custom->upline_percent;
+            }
+        }
+
         if ($this->isOwnedBy($user)) {
             return (float) $this->upline_percent;
         }
