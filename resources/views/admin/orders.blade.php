@@ -72,20 +72,19 @@
                         <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 mr-3">Lihat Bukti</a>
                     @endif
                     @if($order->status === 'pending' && $order->payment_method === 'manual')
-                        @if($order->user && $order->user->status !== 'active')
-                            <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-300 text-gray-500 rounded-md text-xs font-medium cursor-not-allowed" title="Member belum diaktifkan. Aktifkan member terlebih dahulu.">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                Aktifkan Member Dulu
-                            </span>
-                        @else
-                            <form method="POST" action="{{ route('admin.orders.mark-paid', $order->id) }}" class="inline" onsubmit="return confirm('Tandai pesanan #{{ $order->id }} sebagai lunas? Komisi affiliator & upline akan dicairkan.');">
-                                @csrf
-                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs font-medium">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    Tandai Lunas
-                                </button>
-                            </form>
-                        @endif
+                        @php
+                            $memberInactive = $order->user && $order->user->status !== 'active';
+                            $confirmMessage = $memberInactive
+                                ? 'Tandai pesanan #' . $order->id . ' sebagai lunas? Member "' . $order->user->name . '" sekaligus akan diaktifkan dan komisi affiliator & upline akan dicairkan.'
+                                : 'Tandai pesanan #' . $order->id . ' sebagai lunas? Komisi affiliator & upline akan dicairkan.';
+                        @endphp
+                        <form method="POST" action="{{ route('admin.orders.mark-paid', $order->id) }}" class="inline" onsubmit="return confirm('{{ $confirmMessage }}');">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs font-medium" title="{{ $memberInactive ? 'Member belum aktif — akan diaktifkan otomatis saat ditandai lunas.' : 'Tandai pesanan ini sebagai lunas.' }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                {{ $memberInactive ? 'Aktifkan & Tandai Lunas' : 'Tandai Lunas' }}
+                            </button>
+                        </form>
                     @endif
                 </td>
             </tr>
