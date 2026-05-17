@@ -5,18 +5,18 @@
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Tim / Downline</h1>
 
 {{-- Ringkasan --}}
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs font-medium text-gray-500 uppercase">Total Tim Langsung</div>
-        <div class="mt-1 text-2xl font-bold text-gray-900">{{ $downlines->count() }}</div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
+        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Tim Langsung</div>
+        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #111827;">{{ $downlines->count() }}</div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs font-medium text-gray-500 uppercase">Total Semua Downline</div>
-        <div class="mt-1 text-2xl font-bold text-gray-900">{{ $downlines->count() + $downlines->sum(fn($d) => $d->downlines->count()) }}</div>
+    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
+        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Semua Downline</div>
+        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #111827;">{{ $downlines->count() + $downlines->sum(fn($d) => $d->downlines->count()) }}</div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs font-medium text-gray-500 uppercase">Total Penjualan Tim</div>
-        <div class="mt-1 text-2xl font-bold text-indigo-600">{{ $downlines->sum('total_sales') + $downlines->sum(fn($d) => $d->downlines->sum('total_sales')) }}</div>
+    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
+        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Penjualan Tim</div>
+        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #4f46e5;">{{ $downlines->sum('total_sales') + $downlines->sum(fn($d) => $d->downlines->sum('total_sales')) }}</div>
     </div>
 </div>
 
