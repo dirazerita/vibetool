@@ -88,9 +88,14 @@
                             @endif
                             <form method="POST" action="{{ route('admin.orders.mark-paid', $order->id) }}" onsubmit="return confirm('{{ $confirmMessage }}');">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs font-medium shadow-sm" title="{{ $memberInactive ? 'Member belum aktif — akan diaktifkan otomatis saat ditandai lunas.' : 'Tandai pesanan ini sebagai lunas.' }}">
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium shadow-sm"
+                                        style="background-color:#16a34a; color:#ffffff;"
+                                        onmouseover="this.style.backgroundColor='#15803d'"
+                                        onmouseout="this.style.backgroundColor='#16a34a'"
+                                        title="{{ $memberInactive ? 'Member belum aktif — akan diaktifkan otomatis saat ditandai lunas.' : 'Tandai pesanan ini sebagai lunas.' }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    {{ $memberInactive ? 'Aktifkan & Tandai Lunas' : 'Tandai Lunas' }}
+                                    <span>{{ $memberInactive ? 'Aktifkan & Tandai Lunas' : 'Tandai Lunas' }}</span>
                                 </button>
                             </form>
                         </div>
