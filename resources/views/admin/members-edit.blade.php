@@ -72,7 +72,11 @@
         @if(($user->status ?? 'active') === 'pending')
             <form method="POST" action="{{ route('admin.members.activate', $user) }}" class="mt-4 pt-4 border-t border-gray-200">
                 @csrf @method('PATCH')
-                <button type="submit" class="bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-medium">Aktifkan Member</button>
+                <button type="submit"
+                        class="px-6 py-2.5 rounded-lg font-medium"
+                        style="background-color:#16a34a; color:#ffffff;"
+                        onmouseover="this.style.backgroundColor='#15803d'"
+                        onmouseout="this.style.backgroundColor='#16a34a'">Aktifkan Member</button>
             </form>
         @else
             <form method="POST" action="{{ route('admin.members.deactivate', $user) }}" class="mt-4 pt-4 border-t border-gray-200" onsubmit="return confirm('Set status member ini menjadi pending? Member tidak akan bisa login sampai diaktifkan kembali.')">
