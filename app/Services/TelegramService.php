@@ -24,6 +24,34 @@ class TelegramService
         return "https://api.telegram.org/bot{$token}/{$method}";
     }
 
+    /**
+     * Build a pre-configured HTTP client for Telegram API calls.
+     * Applies workarounds commonly needed on Windows / XAMPP setups:
+     *  - Force IPv4 (avoid IPv6 connect-reset on some ISPs/AVs)
+     *  - Force TLS 1.2 minimum (avoid handshake issues with older OpenSSL bundles)
+     *  - Optional SSL bypass for local dev when TELEGRAM_VERIFY_SSL=false
+     *  - Reasonable timeouts + User-Agent
+     */
+    private function http(int $timeout = 15): \Illuminate\Http\Client\PendingRequest
+    {
+        $client = Http::withOptions([
+            'force_ip_resolve' => 'v4',
+            'verify' => filter_var(env('TELEGRAM_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+            'curl' => [
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_TCP_KEEPALIVE => 1,
+            ],
+            'headers' => [
+                'User-Agent' => 'PRODIG-Telegram-Bot/1.0',
+                'Accept' => 'application/json',
+            ],
+        ])->timeout($timeout);
+
+        return $client;
+    }
+
     public function sendMessage(string $text, array $inlineButtons = []): ?int
     {
         if (!$this->enabled()) {
@@ -42,7 +70,7 @@ class TelegramService
         }
 
         try {
-            $response = Http::asJson()->timeout(15)->post($this->apiUrl('sendMessage'), $payload);
+            $response = $this->http(15)->asJson()->post($this->apiUrl('sendMessage'), $payload);
             $json = $response->json();
             if ($response->successful() && data_get($json, 'ok')) {
                 return (int) data_get($json, 'result.message_id');
@@ -72,7 +100,7 @@ class TelegramService
         }
 
         try {
-            $response = Http::timeout(60)
+            $response = $this->http(60)
                 ->attach('photo', file_get_contents($photoPath), basename($photoPath))
                 ->post($this->apiUrl('sendPhoto'), $payload);
             $json = $response->json();
@@ -99,7 +127,7 @@ class TelegramService
         $payload['reply_markup'] = json_encode(['inline_keyboard' => $inlineButtons]);
 
         try {
-            $response = Http::asJson()->timeout(15)->post($this->apiUrl('editMessageText'), $payload);
+            $response = $this->http(15)->asJson()->post($this->apiUrl('editMessageText'), $payload);
 
             return $response->successful() && (bool) data_get($response->json(), 'ok');
         } catch (\Throwable $e) {
@@ -120,7 +148,7 @@ class TelegramService
         $payload['reply_markup'] = json_encode(['inline_keyboard' => $inlineButtons]);
 
         try {
-            $response = Http::asJson()->timeout(15)->post($this->apiUrl('editMessageCaption'), $payload);
+            $response = $this->http(15)->asJson()->post($this->apiUrl('editMessageCaption'), $payload);
 
             return $response->successful() && (bool) data_get($response->json(), 'ok');
         } catch (\Throwable $e) {
@@ -139,7 +167,7 @@ class TelegramService
         }
 
         try {
-            Http::asJson()->timeout(5)->post($this->apiUrl('answerCallbackQuery'), $payload);
+            $this->http(5)->asJson()->post($this->apiUrl('answerCallbackQuery'), $payload);
 
             return true;
         } catch (\Throwable $e) {
@@ -152,7 +180,7 @@ class TelegramService
     public function setWebhook(string $url): array
     {
         try {
-            $response = Http::asJson()->timeout(15)->post($this->apiUrl('setWebhook'), [
+            $response = $this->http(15)->asJson()->post($this->apiUrl('setWebhook'), [
                 'url' => $url,
                 'allowed_updates' => ['callback_query'],
             ]);
@@ -166,7 +194,7 @@ class TelegramService
     public function getMe(): array
     {
         try {
-            $response = Http::asJson()->timeout(15)->get($this->apiUrl('getMe'));
+            $response = $this->http(15)->asJson()->get($this->apiUrl('getMe'));
 
             return $response->json() ?? ['ok' => false, 'description' => 'no response'];
         } catch (\Throwable $e) {
