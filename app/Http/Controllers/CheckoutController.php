@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\TelegramService;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -163,6 +164,12 @@ class CheckoutController extends Controller
         if ($manualEnabled) {
             session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id', 'intended_product_slug', 'ref_code']);
 
+            try {
+                app(TelegramService::class)->notifyNewOrder($order->fresh()->load(['user', 'product', 'affiliate']));
+            } catch (\Throwable $e) {
+                Log::warning('Telegram notify new order failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            }
+
             return redirect()->route('checkout.manual', $order->id);
         }
 
@@ -254,6 +261,12 @@ class CheckoutController extends Controller
 
         $path = $request->file('proof')->store('payment_proofs/' . $order->id, 'public');
         $order->update(['payment_proof' => $path]);
+
+        try {
+            app(TelegramService::class)->notifyPaymentProof($order->fresh()->load(['user', 'product', 'affiliate']));
+        } catch (\Throwable $e) {
+            Log::warning('Telegram notify payment proof failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+        }
 
         return redirect()->route('checkout.manual', $order->id)
             ->with('success', 'Bukti transfer berhasil diupload. Menunggu konfirmasi admin.');

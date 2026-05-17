@@ -12,6 +12,7 @@ use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalCo
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PendingController;
+use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
@@ -36,6 +37,7 @@ Route::get('/pending', [PendingController::class, 'show'])->name('pending');
 
 // Webhook (no CSRF)
 Route::post('/webhook/xendit', [WebhookController::class, 'xendit'])->name('webhook.xendit');
+Route::post('/webhook/telegram/{secret}', [TelegramWebhookController::class, 'handle'])->name('webhook.telegram');
 
 // Download
 Route::get('/download/{token}', [DownloadController::class, 'download'])->name('download');
@@ -107,6 +109,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings');
         Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/telegram/test', [AdminSettingController::class, 'testTelegram'])->name('settings.telegram.test');
+        Route::post('/settings/telegram/setup-webhook', [AdminSettingController::class, 'setupTelegramWebhook'])->name('settings.telegram.setup-webhook');
     });
 });
 

@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\TelegramService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -107,6 +108,12 @@ class RegisteredUserController extends Controller
         // supaya order tersimpan menunggu pembayaran sejak sebelum admin aktivasi.
         if ($intendedProduct && $intendedProduct->is_active) {
             $this->createPendingOrderForRegistrant($user, $intendedProduct);
+        }
+
+        try {
+            app(TelegramService::class)->notifyNewMember($user->fresh()->load(['upline', 'intendedProduct']));
+        } catch (\Throwable $e) {
+            Log::warning('Telegram notify new member failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
 
         // Sistem aktivasi via WhatsApp: akun pending, tidak otomatis login.
