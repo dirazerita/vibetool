@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Dashboard\CommissionController;
+use App\Http\Controllers\Dashboard\CouponController as DashboardCouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
@@ -60,6 +61,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchases', [DashboardPurchaseController::class, 'index'])->name('.purchases');
         Route::get('/licenses', [DashboardLicenseController::class, 'index'])->name('.licenses');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
+        Route::get('/coupons', [DashboardCouponController::class, 'index'])->name('.coupons');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
