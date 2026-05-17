@@ -69,23 +69,33 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">{{ $order->created_at->format('d M Y H:i') }}</td>
                 <td class="px-6 py-4 text-sm">
-                    @if($order->payment_method === 'manual' && $order->payment_proof)
-                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 mr-3">Lihat Bukti</a>
-                    @endif
                     @if($order->status === 'pending' && $order->payment_method === 'manual')
                         @php
                             $memberInactive = $order->user && $order->user->status !== 'active';
+                            $hasProof = !empty($order->payment_proof);
                             $confirmMessage = $memberInactive
                                 ? 'Tandai pesanan #' . $order->id . ' sebagai lunas? Member "' . $order->user->name . '" sekaligus akan diaktifkan dan komisi affiliator & upline akan dicairkan.'
                                 : 'Tandai pesanan #' . $order->id . ' sebagai lunas? Komisi affiliator & upline akan dicairkan.';
                         @endphp
+                        @if($hasProof)
+                            <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Lihat Bukti</a>
+                            <br>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 mb-1">
+                                <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Belum upload bukti
+                            </span>
+                            <br>
+                        @endif
                         <form method="POST" action="{{ route('admin.orders.mark-paid', $order->id) }}" class="inline" onsubmit="return confirm('{{ $confirmMessage }}');">
                             @csrf
-                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs font-medium" title="{{ $memberInactive ? 'Member belum aktif — akan diaktifkan otomatis saat ditandai lunas.' : 'Tandai pesanan ini sebagai lunas.' }}">
+                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs font-medium mt-1" title="{{ $memberInactive ? 'Member belum aktif — akan diaktifkan otomatis saat ditandai lunas.' : 'Tandai pesanan ini sebagai lunas.' }}">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 {{ $memberInactive ? 'Aktifkan & Tandai Lunas' : 'Tandai Lunas' }}
                             </button>
                         </form>
+                    @elseif($order->status === 'paid' && $order->payment_method === 'manual' && $order->payment_proof)
+                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Lihat Bukti</a>
                     @endif
                 </td>
             </tr>
