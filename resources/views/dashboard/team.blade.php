@@ -21,46 +21,44 @@
 </div>
 
 {{-- Diagram Pohon --}}
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" style="overflow-x: auto;">
 
     {{-- Level 1: Root User --}}
-    <div class="flex justify-center">
-        <div class="bg-indigo-600 text-white rounded-lg shadow-md px-5 py-3 text-center">
-            <div class="font-bold text-sm">{{ $user->name }}</div>
-            <div class="text-indigo-200 text-[10px]">{{ $user->email }}</div>
-            <div class="flex justify-center gap-2 mt-1 text-[10px]">
-                <span class="bg-indigo-500/60 rounded-full px-1.5 py-0.5">{{ $userTotalSales }} penj.</span>
-                <span class="bg-indigo-500/60 rounded-full px-1.5 py-0.5">Rp {{ number_format($userTotalRevenue, 0, ',', '.') }}</span>
+    <div style="text-align: center;">
+        <div style="display: inline-block; background: #4f46e5; color: #fff; border-radius: 8px; padding: 10px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <div style="font-weight: 700; font-size: 14px;">{{ $user->name }}</div>
+            <div style="color: #a5b4fc; font-size: 10px;">{{ $user->email }}</div>
+            <div style="margin-top: 4px; font-size: 10px;">
+                <span style="background: rgba(99,102,241,0.5); border-radius: 9999px; padding: 2px 6px;">{{ $userTotalSales }} penj.</span>
+                <span style="background: rgba(99,102,241,0.5); border-radius: 9999px; padding: 2px 6px; margin-left: 4px;">Rp {{ number_format($userTotalRevenue, 0, ',', '.') }}</span>
             </div>
         </div>
     </div>
 
     @if($downlines->count() > 0)
-    {{-- Connector root to level 2 --}}
-    <div class="flex justify-center"><div class="w-0.5 h-5 bg-gray-300"></div></div>
+    {{-- Vertical line from root --}}
+    <div style="text-align: center;"><div style="display: inline-block; width: 2px; height: 20px; background: #d1d5db;"></div></div>
 
-    {{-- Level 2 header --}}
-    <div class="flex items-center gap-2 mb-2">
-        <div class="h-0.5 flex-1 bg-emerald-200"></div>
-        <span class="text-[10px] text-emerald-600 font-semibold whitespace-nowrap">TIM LANGSUNG ({{ $downlines->count() }})</span>
-        <div class="h-0.5 flex-1 bg-emerald-200"></div>
-    </div>
+    {{-- Horizontal bar --}}
+    <div style="border-top: 2px solid #6ee7b7; margin: 0 20px;"></div>
 
-    {{-- Level 2: Tim Langsung grid --}}
-    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+    {{-- Level 2: Tim Langsung --}}
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 0 4px;">
         @foreach($downlines as $i => $member)
-        <div class="relative pt-3">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-gray-300"></div>
-            <div class="bg-white border-2 border-emerald-400 rounded-lg px-2 py-1.5 text-center h-full">
-                <div class="font-semibold text-[10px] text-gray-900 truncate">{{ $member->name }}</div>
-                <div class="text-gray-400 text-[7px] truncate">{{ $member->email }}</div>
-                <div class="text-gray-400 text-[7px]">{{ $member->created_at->format('d/m/Y') }}</div>
-                <div class="flex justify-center gap-0.5 mt-0.5 text-[7px]">
-                    <span class="bg-emerald-50 text-emerald-700 rounded-full px-1 py-0.5">{{ $member->total_sales }} penj.</span>
-                    <span class="bg-emerald-50 text-emerald-700 rounded-full px-1 py-0.5">Rp {{ number_format($member->total_revenue ?? 0, 0, ',', '.') }}</span>
+        <div style="text-align: center; flex: 0 0 auto;">
+            {{-- Vertical stub --}}
+            <div style="margin: 0 auto; width: 2px; height: 12px; background: #d1d5db;"></div>
+            {{-- Node --}}
+            <div style="border: 2px solid #34d399; border-radius: 8px; padding: 6px 8px; min-width: 100px; max-width: 120px; background: #fff;">
+                <div style="font-weight: 600; font-size: 10px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $member->name }}</div>
+                <div style="font-size: 7px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $member->email }}</div>
+                <div style="font-size: 7px; color: #9ca3af;">{{ $member->created_at->format('d/m/Y') }}</div>
+                <div style="font-size: 7px; margin-top: 2px;">
+                    <span style="background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 1px 4px;">{{ $member->total_sales }} penj.</span>
+                    <span style="background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 1px 4px;">Rp {{ number_format($member->total_revenue ?? 0, 0, ',', '.') }}</span>
                 </div>
                 @if($member->downlines->count() > 0)
-                <div class="text-[7px] text-gray-400 mt-0.5">{{ $member->downlines->count() }} downline</div>
+                <div style="font-size: 7px; color: #9ca3af; margin-top: 2px;">{{ $member->downlines->count() }} downline</div>
                 @endif
             </div>
         </div>
@@ -70,30 +68,26 @@
     {{-- Level 3: Downline dari tim --}}
     @php $hasLevel3 = $downlines->contains(fn($m) => $m->downlines->count() > 0); @endphp
     @if($hasLevel3)
-    <div class="mt-5">
-        {{-- Level 3 header --}}
-        <div class="flex items-center gap-2 mb-3">
-            <div class="h-0.5 flex-1 bg-amber-200"></div>
-            <span class="text-[10px] text-amber-600 font-semibold whitespace-nowrap">DOWNLINE TIM</span>
-            <div class="h-0.5 flex-1 bg-amber-200"></div>
-        </div>
+    <div style="margin-top: 16px;">
+        {{-- Horizontal bar level 3 --}}
+        <div style="border-top: 2px solid #fcd34d; margin: 0 20px;"></div>
 
         @foreach($downlines as $i => $member)
             @if($member->downlines->count() > 0)
-            <div class="mb-3 ml-2 pl-3 border-l-2 border-amber-300">
-                <div class="text-[10px] text-gray-500 mb-1.5">
-                    Dari <span class="font-semibold text-gray-700">{{ $member->name }}</span>
-                    <span class="text-gray-400">({{ $member->downlines->count() }} orang)</span>
+            <div style="margin: 10px 0 10px 10px; padding-left: 12px; border-left: 2px solid #fcd34d;">
+                <div style="font-size: 10px; color: #6b7280; margin-bottom: 6px;">
+                    Dari <span style="font-weight: 600; color: #374151;">{{ $member->name }}</span>
+                    <span style="color: #9ca3af;">({{ $member->downlines->count() }} orang)</span>
                 </div>
-                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                     @foreach($member->downlines as $j => $sub)
-                    <div class="bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-center">
-                        <div class="font-medium text-[9px] text-gray-900 truncate">{{ $sub->name }}</div>
-                        <div class="text-gray-400 text-[7px] truncate">{{ $sub->email }}</div>
-                        <div class="text-gray-400 text-[7px]">{{ $sub->created_at->format('d/m/Y') }}</div>
-                        <div class="flex justify-center gap-0.5 mt-0.5 text-[7px]">
-                            <span class="bg-amber-50 text-amber-700 rounded-full px-1 py-0.5">{{ $sub->total_sales }} penj.</span>
-                            <span class="bg-amber-50 text-amber-700 rounded-full px-1 py-0.5">Rp {{ number_format($sub->total_revenue ?? 0, 0, ',', '.') }}</span>
+                    <div style="border: 1px solid #fcd34d; border-radius: 8px; padding: 5px 8px; min-width: 95px; max-width: 115px; background: #fff; text-align: center;">
+                        <div style="font-weight: 500; font-size: 9px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $sub->name }}</div>
+                        <div style="font-size: 7px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $sub->email }}</div>
+                        <div style="font-size: 7px; color: #9ca3af;">{{ $sub->created_at->format('d/m/Y') }}</div>
+                        <div style="font-size: 7px; margin-top: 2px;">
+                            <span style="background: #fffbeb; color: #b45309; border-radius: 9999px; padding: 1px 4px;">{{ $sub->total_sales }} penj.</span>
+                            <span style="background: #fffbeb; color: #b45309; border-radius: 9999px; padding: 1px 4px;">Rp {{ number_format($sub->total_revenue ?? 0, 0, ',', '.') }}</span>
                         </div>
                     </div>
                     @endforeach
@@ -105,7 +99,7 @@
     @endif
 
     @else
-    <div class="mt-8 text-center text-gray-500 py-8">
+    <div style="margin-top: 32px; text-align: center; color: #6b7280; padding: 32px 0;">
         Belum ada downline. Bagikan link referral Anda untuk merekrut member baru!
     </div>
     @endif
@@ -114,19 +108,19 @@
 
 {{-- Legend --}}
 <div class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-    <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Keterangan Warna</h3>
-    <div class="flex flex-wrap gap-6 text-sm">
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-indigo-600"></div>
-            <span class="text-gray-700">Level 1 — Anda</span>
+    <div style="font-size: 10px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 8px;">Keterangan Warna</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #4f46e5;"></div>
+            <span style="color: #374151;">Level 1 — Anda</span>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded border-2 border-emerald-400 bg-white"></div>
-            <span class="text-gray-700">Level 2 — Tim Langsung</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; border: 2px solid #34d399; background: #fff;"></div>
+            <span style="color: #374151;">Level 2 — Tim Langsung</span>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded border border-amber-300 bg-white"></div>
-            <span class="text-gray-700">Level 3 — Downline Tim</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid #fcd34d; background: #fff;"></div>
+            <span style="color: #374151;">Level 3 — Downline Tim</span>
         </div>
     </div>
 </div>
