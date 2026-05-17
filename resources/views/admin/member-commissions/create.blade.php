@@ -25,47 +25,32 @@
                 </div>
 
                 <div>
-                    <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Produk</label>
-                    <select name="product_id" id="product_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                        <option value="">-- Pilih Produk --</option>
-                        @foreach($products as $product)
-                            <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}
-                                data-commission="{{ $product->commission_percent }}"
-                                data-commission-non="{{ $product->commission_percent_non_owner ?? $product->commission_percent }}"
-                                data-upline="{{ $product->upline_percent }}"
-                                data-upline-non="{{ $product->upline_percent_non_owner ?? $product->upline_percent }}">
-                                {{ $product->title }} — Rp {{ number_format($product->price, 0, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('product_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div id="default-rates" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Tarif Default Produk</h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-500">Affiliator (sudah beli):</span>
-                            <span id="def-commission" class="font-medium text-gray-900"></span>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Affiliator (belum beli):</span>
-                            <span id="def-commission-non" class="font-medium text-gray-900"></span>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Upline (sudah beli):</span>
-                            <span id="def-upline" class="font-medium text-gray-900"></span>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Upline (belum beli):</span>
-                            <span id="def-upline-non" class="font-medium text-gray-900"></span>
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Produk</label>
+                    <p class="text-xs text-gray-500 mb-3">Centang satu atau beberapa produk yang ingin di-set komisi khususnya.</p>
+                    <div class="flex items-center gap-4 mb-3">
+                        <button type="button" onclick="toggleAllProducts(true)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Pilih Semua</button>
+                        <button type="button" onclick="toggleAllProducts(false)" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Hapus Semua</button>
                     </div>
+                    <div class="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                        @foreach($products as $product)
+                        <label class="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
+                                {{ is_array(old('product_ids')) && in_array($product->id, old('product_ids')) ? 'checked' : '' }}
+                                class="product-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                            <div class="ml-3 flex-1">
+                                <div class="text-sm font-medium text-gray-900">{{ $product->title }}</div>
+                                <div class="text-xs text-gray-500">Rp {{ number_format($product->price, 0, ',', '.') }} — Affiliator: {{ $product->commission_percent }}% / {{ $product->commission_percent_non_owner ?? $product->commission_percent }}% — Upline: {{ $product->upline_percent }}% / {{ $product->upline_percent_non_owner ?? $product->upline_percent }}%</div>
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+                    @error('product_ids') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    @error('product_ids.*') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="border border-indigo-200 rounded-lg p-4 bg-indigo-50">
                     <h3 class="text-sm font-semibold text-indigo-900 mb-1">Komisi Khusus</h3>
-                    <p class="text-xs text-indigo-600 mb-4">Tarif ini akan menggantikan tarif default produk untuk member yang dipilih. Kosongkan jika ingin tetap menggunakan tarif default.</p>
+                    <p class="text-xs text-indigo-600 mb-4">Tarif ini akan menggantikan tarif default produk untuk member yang dipilih. Tarif yang sama akan diterapkan ke semua produk yang dicentang. Kosongkan jika ingin tetap menggunakan tarif default.</p>
 
                     <div class="space-y-4">
                         <div>
@@ -93,18 +78,8 @@
     </div>
 </div>
 <script>
-    document.getElementById('product_id').addEventListener('change', function() {
-        const selected = this.options[this.selectedIndex];
-        const section = document.getElementById('default-rates');
-        if (this.value) {
-            document.getElementById('def-commission').textContent = selected.dataset.commission + '%';
-            document.getElementById('def-commission-non').textContent = selected.dataset.commissionNon + '%';
-            document.getElementById('def-upline').textContent = selected.dataset.upline + '%';
-            document.getElementById('def-upline-non').textContent = selected.dataset.uplineNon + '%';
-            section.classList.remove('hidden');
-        } else {
-            section.classList.add('hidden');
-        }
-    });
+    function toggleAllProducts(checked) {
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = checked);
+    }
 </script>
 @endsection

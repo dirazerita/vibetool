@@ -37,27 +37,41 @@ class MemberCommissionController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'exists:products,id',
             'commission_percent' => 'nullable|numeric|min:0|max:100',
             'upline_percent' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $exists = MemberCommission::where('user_id', $request->user_id)
-            ->where('product_id', $request->product_id)
-            ->exists();
+        $skipped = [];
+        $created = 0;
 
-        if ($exists) {
-            return redirect()->back()->withInput()->with('error', 'Komisi khusus untuk member dan produk ini sudah ada. Silakan edit yang sudah ada.');
+        foreach ($request->product_ids as $productId) {
+            $exists = MemberCommission::where('user_id', $request->user_id)
+                ->where('product_id', $productId)
+                ->exists();
+
+            if ($exists) {
+                $product = Product::find($productId);
+                $skipped[] = $product ? $product->title : $productId;
+                continue;
+            }
+
+            MemberCommission::create([
+                'user_id' => $request->user_id,
+                'product_id' => $productId,
+                'commission_percent' => $request->commission_percent,
+                'upline_percent' => $request->upline_percent,
+            ]);
+            $created++;
         }
 
-        MemberCommission::create([
-            'user_id' => $request->user_id,
-            'product_id' => $request->product_id,
-            'commission_percent' => $request->commission_percent,
-            'upline_percent' => $request->upline_percent,
-        ]);
+        $message = "Komisi khusus berhasil ditambahkan untuk {$created} produk.";
+        if (count($skipped) > 0) {
+            $message .= ' Dilewati karena sudah ada: ' . implode(', ', $skipped) . '.';
+        }
 
-        return redirect()->route('admin.member-commissions.index')->with('success', 'Komisi khusus berhasil ditambahkan.');
+        return redirect()->route('admin.member-commissions.index')->with('success', $message);
     }
 
     public function edit(MemberCommission $memberCommission)
