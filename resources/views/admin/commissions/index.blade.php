@@ -4,7 +4,7 @@
 @section('content')
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Komisi Member</h1>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 max-w-6xl">
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between gap-4">
         <div class="min-w-0">
             <div class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Member ber-komisi</div>
