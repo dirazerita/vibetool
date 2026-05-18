@@ -5,21 +5,41 @@
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Komisi Member</h1>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="text-sm text-gray-500 mb-1">Member Ber-komisi</div>
-        <div class="text-3xl font-bold text-gray-900">{{ number_format($summary['total_members']) }}</div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="text-sm text-gray-500 mb-1">Member Ber-komisi</div>
+            <div class="text-3xl font-bold text-gray-900">{{ number_format($summary['total_members']) }}</div>
+        </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="text-sm text-gray-500 mb-1">Total Komisi</div>
-        <div class="text-2xl font-bold text-indigo-600">Rp {{ number_format($summary['total_commission'], 0, ',', '.') }}</div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="text-sm text-gray-500 mb-1">Total Komisi</div>
+            <div class="text-2xl font-bold text-indigo-600">Rp {{ number_format($summary['total_commission'], 0, ',', '.') }}</div>
+        </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="text-sm text-gray-500 mb-1">Komisi Direct</div>
-        <div class="text-2xl font-bold text-emerald-600">Rp {{ number_format($summary['total_direct'], 0, ',', '.') }}</div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="text-sm text-gray-500 mb-1">Komisi Direct</div>
+            <div class="text-2xl font-bold text-emerald-600">Rp {{ number_format($summary['total_direct'], 0, ',', '.') }}</div>
+        </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="text-sm text-gray-500 mb-1">Bonus Upline</div>
-        <div class="text-2xl font-bold text-purple-600">Rp {{ number_format($summary['total_upline'], 0, ',', '.') }}</div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="text-sm text-gray-500 mb-1">Bonus Upline</div>
+            <div class="text-2xl font-bold text-purple-600">Rp {{ number_format($summary['total_upline'], 0, ',', '.') }}</div>
+        </div>
     </div>
 </div>
 
