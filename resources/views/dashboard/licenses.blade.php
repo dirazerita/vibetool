@@ -34,58 +34,85 @@
 @endif
 
 @if($licenses->isNotEmpty())
-<div class="space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     @foreach($licenses as $license)
         @php
             $product = $license->product;
             $lp = $product?->landingPage;
-            $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
+            $cardImage = null;
+            if ($product && $product->thumbnail) {
+                $cardImage = asset('storage/' . $product->thumbnail);
+            } elseif ($lp && $lp->hero_image) {
+                $cardImage = asset('storage/' . $lp->hero_image);
+            }
         @endphp
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="flex flex-col md:flex-row">
-                <div class="md:w-48 h-40 md:h-auto bg-gray-100 flex-shrink-0">
-                    @if($heroImage)
-                        <img src="{{ $heroImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col">
+            {{-- Thumbnail 1:1 --}}
+            <div class="bg-gray-100 relative" style="aspect-ratio: 1 / 1;">
+                @if($cardImage)
+                    <img src="{{ $cardImage }}" alt="{{ $product->title ?? 'Produk' }}" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex items-center justify-center p-4">
+                        <span class="text-white text-base font-bold text-center leading-snug drop-shadow-md">{{ $product->title ?? 'Produk telah dihapus' }}</span>
+                    </div>
+                @endif
+
+                {{-- Badge status di pojok kiri atas --}}
+                <div class="absolute top-2 left-2 flex flex-wrap gap-1.5">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm bg-purple-500 text-white">
+                        Software / Tool
+                    </span>
+                    @if($license->isLifetime())
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm bg-green-500 text-white">Lifetime</span>
+                    @elseif($license->isExpired())
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm bg-red-500 text-white">Kedaluwarsa</span>
                     @else
-                        <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                            <svg class="w-12 h-12 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm bg-blue-500 text-white">Aktif</span>
                     @endif
                 </div>
-                <div class="p-5 flex-1 min-w-0">
-                    <div class="flex items-start justify-between flex-wrap gap-2 mb-3">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
-                            <p class="text-xs text-gray-500">Didapatkan {{ $license->assigned_at?->format('d M Y H:i') ?? $license->created_at->format('d M Y H:i') }} · Order #{{ $license->order_id }}</p>
-                        </div>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Software / Tool</span>
-                        @if($license->isLifetime())
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Lifetime</span>
-                        @elseif($license->isExpired())
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Kedaluwarsa {{ $license->expires_at->format('d M Y') }}</span>
+            </div>
+
+            {{-- Content --}}
+            <div class="p-4 flex flex-col flex-1">
+                <h3 class="text-lg font-bold text-gray-900 truncate">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
+                <p class="text-xs text-gray-400 mb-3">Order #{{ $license->order_id }} · {{ $license->assigned_at?->format('d M Y H:i') ?? $license->created_at->format('d M Y H:i') }}</p>
+
+                @if(!$license->isLifetime() && $license->expires_at)
+                    <p class="text-xs text-gray-500 mb-3">
+                        @if($license->isExpired())
+                            Kedaluwarsa: <span class="font-medium text-red-600">{{ $license->expires_at->format('d M Y') }}</span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Aktif s/d {{ $license->expires_at->format('d M Y') }}</span>
+                            Aktif s/d: <span class="font-medium text-gray-700">{{ $license->expires_at->format('d M Y') }}</span>
                         @endif
+                    </p>
+                @endif
+
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Kunci Lisensi</label>
+                <div class="flex items-stretch gap-2 mb-3">
+                    <input type="text" readonly value="{{ $license->key }}" id="license-{{ $license->id }}" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-xs font-mono bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="button" onclick="copyLicense('license-{{ $license->id }}', this)" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-medium whitespace-nowrap">Salin</button>
+                </div>
+
+                @if($license->extra_info)
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+                        <div class="text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Instruksi Aktivasi</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-line">{{ $license->extra_info }}</div>
                     </div>
+                @endif
 
-                    <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Kunci Lisensi</label>
-                    <div class="flex items-stretch gap-2 mb-3">
-                        <input type="text" readonly value="{{ $license->key }}" id="license-{{ $license->id }}" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="button" onclick="copyLicense('license-{{ $license->id }}', this)" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium whitespace-nowrap">Salin</button>
-                    </div>
-
-                    @if($license->extra_info)
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
-                            <div class="text-xs font-semibold text-gray-700 mb-1">Instruksi Aktivasi:</div>
-                            <div class="text-sm text-gray-700 whitespace-pre-line">{{ $license->extra_info }}</div>
-                        </div>
-                    @endif
-
+                {{-- Action buttons di footer kartu --}}
+                <div class="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 mt-auto">
                     @if($product && ($product->file_url || $product->file_path) && $license->order && $license->order->download_token)
                         @php $isExternal = (bool) $product->file_url; @endphp
-                        <a href="{{ route('download', $license->order->download_token) }}" {{ $isExternal ? 'target=_blank rel=noopener' : '' }} class="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            {{ $isExternal ? 'Buka Link Produk' : 'Download Produk' }}
+                        <a href="{{ route('download', $license->order->download_token) }}" {{ $isExternal ? 'target=_blank rel=noopener' : '' }} class="inline-flex items-center gap-1 px-2.5 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded text-xs font-medium transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            {{ $isExternal ? 'Buka Link Produk' : 'Download' }}
+                        </a>
+                    @endif
+                    @if($product)
+                        <a href="{{ route('product.show', $product->slug) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-gray-500 hover:bg-gray-50 rounded text-xs font-medium transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            Detail Produk
                         </a>
                     @endif
                 </div>
