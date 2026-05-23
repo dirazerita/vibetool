@@ -15,7 +15,7 @@
         <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
             <div class="p-6">
                 <a href="{{ route('home') }}" class="block">
-                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto" style="height: 40px; width: auto; max-width: 200px; object-fit: contain;">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-16 w-auto" style="height: 64px; width: auto; max-width: 200px; object-fit: contain;">
                 </a>
             </div>
             <nav class="px-4 space-y-1">
