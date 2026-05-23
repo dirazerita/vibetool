@@ -14,7 +14,9 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
             <div class="p-6">
-                <a href="{{ route('home') }}" class="text-2xl font-bold text-indigo-600">PRODIG</a>
+                <a href="{{ route('home') }}" class="block">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto">
+                </a>
             </div>
             <nav class="px-4 space-y-1">
                 <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') && !request()->is('dashboard/*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">

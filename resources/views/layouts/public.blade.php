@@ -15,7 +15,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-indigo-600">PRODIG</a>
+                    <a href="{{ route('home') }}" class="block">
+                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto">
+                    </a>
                 </div>
                 <div class="flex items-center space-x-4">
                     @auth
