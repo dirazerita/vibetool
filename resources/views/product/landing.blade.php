@@ -22,10 +22,10 @@
     {{-- Navigation --}}
     <nav class="bg-white border-b border-gray-100 relative z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex justify-between h-20">
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="block py-2">
-                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-12 w-auto" style="height: 48px; width: auto; max-width: 200px; object-fit: contain;">
+                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-16 w-auto" style="height: 64px; width: auto; max-width: 220px; object-fit: contain;">
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
