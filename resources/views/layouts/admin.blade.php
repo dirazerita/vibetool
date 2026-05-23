@@ -13,7 +13,10 @@
     <div class="min-h-screen flex">
         <aside class="w-64 bg-gray-900 text-white flex-shrink-0">
             <div class="p-6">
-                <a href="{{ route('admin.index') }}" class="text-2xl font-bold text-white">PRODIG <span class="text-xs bg-red-500 px-2 py-0.5 rounded-full ml-1">Admin</span></a>
+                <a href="{{ route('admin.index') }}" class="flex items-center gap-2">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto">
+                    <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">Admin</span>
+                </a>
             </div>
             <nav class="px-4 space-y-1">
                 <a href="{{ route('admin.index') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('admin.index') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800' }}">

@@ -20,7 +20,7 @@
         @endphp
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
             {{-- Thumbnail --}}
-            <div class="h-44 bg-gray-100 relative">
+            <div class="bg-gray-100 relative" style="aspect-ratio: 1 / 1;">
                 @if($cardImage)
                     <img src="{{ $cardImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
                 @else
