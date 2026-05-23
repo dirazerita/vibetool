@@ -14,7 +14,7 @@
         <aside class="w-64 bg-gray-900 text-white flex-shrink-0">
             <div class="p-6">
                 <a href="{{ route('admin.index') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto" style="height: 40px; width: auto; max-width: 160px; object-fit: contain;">
                     <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">Admin</span>
                 </a>
             </div>

@@ -36,7 +36,7 @@ class CheckoutController extends Controller
             'all_session' => session()->all(),
         ]);
 
-        $this->ensureAutoCouponSession($product, $referrer);
+        $this->ensureAutoCouponSession($product, $user, $referrer);
 
         $autoCouponData = $this->buildAutoCouponData($product, $user, $referrer);
 
@@ -358,9 +358,40 @@ class CheckoutController extends Controller
         return $coupon->isAccessibleBy($user, $referrer);
     }
 
-    private function ensureAutoCouponSession(Product $product, ?User $referrer): void
+    private function ensureAutoCouponSession(Product $product, ?User $user, ?User $referrer): void
     {
-        if (session('auto_coupon') || !$referrer) {
+        if (session('auto_coupon')) {
+            return;
+        }
+
+        if ($user) {
+            $ownedCoupon = $user->coupons()
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('max_uses')->orWhereColumn('used_count', '<', 'max_uses');
+                })
+                ->get()
+                ->filter(fn ($c) => $c->isValidForProduct($product) && $product->price >= $c->min_purchase)
+                ->sortByDesc(fn ($c) => $c->calculateDiscount($product->price))
+                ->first();
+
+            if ($ownedCoupon) {
+                session([
+                    'auto_coupon' => $ownedCoupon->code,
+                    'auto_coupon_member_name' => null,
+                ]);
+                Log::info('Checkout auto_coupon recovered from buyer-owned coupon', [
+                    'user_id' => $user->id,
+                    'coupon_code' => $ownedCoupon->code,
+                ]);
+                return;
+            }
+        }
+
+        if (!$referrer) {
             return;
         }
 

@@ -25,7 +25,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="block">
-                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto">
+                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-10 w-auto" style="height: 40px; width: auto; max-width: 160px; object-fit: contain;">
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
