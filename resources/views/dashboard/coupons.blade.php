@@ -2,12 +2,12 @@
 @section('title', 'Kuponku')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Kuponku</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Kuponku</h1>
 
 {{-- Kupon yang di-assign ke member --}}
 @if($assignedCoupons->count() > 0)
 <div style="margin-bottom: 32px;">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Kupon Khusus Saya</h2>
+    <h2 class="text-lg font-semibold dk-heading mb-4">Kupon Khusus Saya</h2>
     <div style="display: flex; flex-direction: column; gap: 16px;">
         @foreach($assignedCoupons as $coupon)
         <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; overflow: hidden; display: flex; flex-direction: row;">
@@ -83,7 +83,7 @@
 {{-- Kupon global (untuk semua member) --}}
 @if($globalCoupons->count() > 0)
 <div style="margin-bottom: 32px;">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Kupon Umum</h2>
+    <h2 class="text-lg font-semibold dk-heading mb-4">Kupon Umum</h2>
     <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">Kupon ini tersedia untuk semua member.</p>
     <div style="display: flex; flex-direction: column; gap: 16px;">
         @foreach($globalCoupons as $coupon)

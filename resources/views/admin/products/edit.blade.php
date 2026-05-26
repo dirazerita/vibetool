@@ -2,92 +2,92 @@
 @section('title', 'Edit Produk')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Produk: {{ $product->title }}</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Edit Produk: {{ $product->title }}</h1>
 
-<div class="mb-6 border-b border-gray-200">
+<div class="mb-6 " style="border-bottom:1px solid #1e2b3d">
     <nav class="flex space-x-8">
-        <a href="{{ route('admin.products.edit', $product) }}" class="border-b-2 border-indigo-500 text-indigo-600 px-1 pb-3 text-sm font-medium">Produk</a>
-        <a href="{{ route('admin.products.landing-page', $product) }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-3 text-sm font-medium">Landing Page</a>
+        <a href="{{ route('admin.products.edit', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid #6366f1;color:#a5b4fc">Produk</a>
+        <a href="{{ route('admin.products.landing-page', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid transparent;color:#64748b">Landing Page</a>
     </nav>
 </div>
 
 <div class="max-w-2xl">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="dk-card" style="padding:24px;">
         <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
             @csrf @method('PUT')
             <div class="space-y-6">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Judul Produk</label>
-                    <input type="text" name="title" id="title" value="{{ old('title', $product->title) }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    <label for="title" class="dk-label">Judul Produk</label>
+                    <input type="text" name="title" id="title" value="{{ old('title', $product->title) }}" class="w-full dk-input" required>
                     @error('title') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                    <textarea name="description" id="description" rows="4" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('description', $product->description) }}</textarea>
+                    <label for="description" class="dk-label">Deskripsi</label>
+                    <textarea name="description" id="description" rows="4" class="w-full dk-input">{{ old('description', $product->description) }}</textarea>
                     @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                    <input type="number" name="price" id="price" value="{{ old('price', $product->price) }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    <label for="price" class="dk-label">Harga (Rp)</label>
+                    <input type="number" name="price" id="price" value="{{ old('price', $product->price) }}" class="w-full dk-input" required>
                     @error('price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label for="product_type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Produk</label>
-                    <select name="product_type" id="product_type" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    <label for="product_type" class="dk-label">Tipe Produk</label>
+                    <select name="product_type" id="product_type" class="w-full dk-input" required>
                         <option value="digital" {{ old('product_type', $product->product_type ?? 'digital') === 'digital' ? 'selected' : '' }}>Produk Digital (file/download)</option>
                         <option value="software" {{ old('product_type', $product->product_type) === 'software' ? 'selected' : '' }}>Software / Tool (dengan lisensi)</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Pilih <strong>Software / Tool</strong> kalau produk ini butuh kunci lisensi yang akan diberikan otomatis ke member setelah membeli.</p>
+                    <p class="text-xs mt-1 dk-text-muted">Pilih <strong>Software / Tool</strong> kalau produk ini butuh kunci lisensi yang akan diberikan otomatis ke member setelah membeli.</p>
                     @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div id="license-duration-section" style="{{ old('product_type', $product->product_type) === 'software' ? '' : 'display:none;' }}">
-                    <label for="license_duration" class="block text-sm font-medium text-gray-700 mb-1">Masa Berlaku Lisensi</label>
-                    <select name="license_duration" id="license_duration" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label for="license_duration" class="dk-label">Masa Berlaku Lisensi</label>
+                    <select name="license_duration" id="license_duration" class="w-full dk-input">
                         <option value="1_month" {{ old('license_duration', $product->license_duration) === '1_month' ? 'selected' : '' }}>1 Bulan</option>
                         <option value="6_months" {{ old('license_duration', $product->license_duration) === '6_months' ? 'selected' : '' }}>6 Bulan</option>
                         <option value="1_year" {{ old('license_duration', $product->license_duration) === '1_year' ? 'selected' : '' }}>1 Tahun</option>
                         <option value="lifetime" {{ old('license_duration', $product->license_duration ?? 'lifetime') === 'lifetime' ? 'selected' : '' }}>Lifetime</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Masa berlaku lisensi dihitung sejak order ditandai lunas. Pilih <strong>Lifetime</strong> jika lisensi tidak memiliki batas waktu.</p>
+                    <p class="text-xs mt-1 dk-text-muted">Masa berlaku lisensi dihitung sejak order ditandai lunas. Pilih <strong>Lifetime</strong> jika lisensi tidak memiliki batas waktu.</p>
                     @error('license_duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Pengaturan Komisi</h3>
-                    <p class="text-xs text-gray-500 mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
+                <div class="dk-card" style="padding:16px">
+                    <h3 class="text-sm font-semibold dk-heading mb-1">Pengaturan Komisi</h3>
+                    <p class="text-xs dk-text-muted mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
 
                     <div class="space-y-4">
                         <div>
-                            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Komisi Affiliator (penjualan langsung dari user)</p>
-                            <div class="grid grid-cols-2 gap-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Komisi Affiliator (penjualan langsung dari user)</p>
+                            <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                                 <div>
-                                    <label for="commission_percent" class="block text-xs font-medium text-gray-600 mb-1">Sudah beli produk (%)</label>
-                                    <input type="number" name="commission_percent" id="commission_percent" value="{{ old('commission_percent', $product->commission_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    <label for="commission_percent" class="dk-label" style="font-size:12px">Sudah beli produk (%)</label>
+                                    <input type="number" name="commission_percent" id="commission_percent" value="{{ old('commission_percent', $product->commission_percent) }}" step="0.01" class="w-full dk-input" required>
                                     @error('commission_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="commission_percent_non_owner" class="block text-xs font-medium text-gray-600 mb-1">Belum beli produk (%)</label>
-                                    <input type="number" name="commission_percent_non_owner" id="commission_percent_non_owner" value="{{ old('commission_percent_non_owner', $product->commission_percent_non_owner ?? $product->commission_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    <label for="commission_percent_non_owner" class="dk-label" style="font-size:12px">Belum beli produk (%)</label>
+                                    <input type="number" name="commission_percent_non_owner" id="commission_percent_non_owner" value="{{ old('commission_percent_non_owner', $product->commission_percent_non_owner ?? $product->commission_percent) }}" step="0.01" class="w-full dk-input" required>
                                     @error('commission_percent_non_owner') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Bonus Upline (penjualan dari downline)</p>
-                            <div class="grid grid-cols-2 gap-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Bonus Upline (penjualan dari downline)</p>
+                            <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                                 <div>
-                                    <label for="upline_percent" class="block text-xs font-medium text-gray-600 mb-1">Sudah beli produk (%)</label>
-                                    <input type="number" name="upline_percent" id="upline_percent" value="{{ old('upline_percent', $product->upline_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    <label for="upline_percent" class="dk-label" style="font-size:12px">Sudah beli produk (%)</label>
+                                    <input type="number" name="upline_percent" id="upline_percent" value="{{ old('upline_percent', $product->upline_percent) }}" step="0.01" class="w-full dk-input" required>
                                     @error('upline_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label for="upline_percent_non_owner" class="block text-xs font-medium text-gray-600 mb-1">Belum beli produk (%)</label>
-                                    <input type="number" name="upline_percent_non_owner" id="upline_percent_non_owner" value="{{ old('upline_percent_non_owner', $product->upline_percent_non_owner ?? $product->upline_percent) }}" step="0.01" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                    <label for="upline_percent_non_owner" class="dk-label" style="font-size:12px">Belum beli produk (%)</label>
+                                    <input type="number" name="upline_percent_non_owner" id="upline_percent_non_owner" value="{{ old('upline_percent_non_owner', $product->upline_percent_non_owner ?? $product->upline_percent) }}" step="0.01" class="w-full dk-input" required>
                                     @error('upline_percent_non_owner') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                             </div>
@@ -97,27 +97,27 @@
 
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', $product->is_active) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                        <span class="ml-2 text-sm text-gray-700">Produk Aktif</span>
+                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', $product->is_active) ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                        <span class="ml-2 text-sm dk-text">Produk Aktif</span>
                     </label>
                 </div>
 
                 <div>
-                    <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-1">Thumbnail Produk</label>
+                    <label for="thumbnail" class="dk-label">Thumbnail Produk</label>
                     @if($product->thumbnail)
                         <div class="mb-2">
                             <img src="{{ asset('storage/' . $product->thumbnail) }}" alt="Thumbnail" class="rounded-lg object-cover" style="width: 120px; height: 120px;">
                         </div>
                     @endif
-                    <input type="file" name="thumbnail" id="thumbnail" accept="image/*" class="w-full border-gray-300 rounded-lg shadow-sm">
-                    <p class="text-xs text-gray-500 mt-1">Maks 5MB. Kosongkan jika tidak ingin mengubah.</p>
+                    <input type="file" name="thumbnail" id="thumbnail" accept="image/*" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Maks 5MB. Kosongkan jika tidak ingin mengubah.</p>
                     @error('thumbnail') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Produk (kosongkan jika tidak ingin mengubah)</label>
-                    <input type="file" name="file" id="file" class="w-full border-gray-300 rounded-lg shadow-sm">
-                    <p class="text-xs text-gray-500 mt-1">
+                    <label for="file" class="dk-label">File Produk (kosongkan jika tidak ingin mengubah)</label>
+                    <input type="file" name="file" id="file" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">
                         @if($product->file_path)
                             File saat ini: {{ $product->file_path }}
                         @else
@@ -128,16 +128,16 @@
                 </div>
 
                 <div>
-                    <label for="file_url" class="block text-sm font-medium text-gray-700 mb-1">Link Eksternal (URL)</label>
-                    <input type="url" name="file_url" id="file_url" value="{{ old('file_url', $product->file_url) }}" placeholder="https://drive.google.com/..." class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <p class="text-xs text-gray-500 mt-1">Misal: Google Drive, Dropbox, dsb. Jika diisi, member akan diarahkan ke link ini saat klik tombol download. Kosongkan untuk tetap pakai file yang di-upload.</p>
+                    <label for="file_url" class="dk-label">Link Eksternal (URL)</label>
+                    <input type="url" name="file_url" id="file_url" value="{{ old('file_url', $product->file_url) }}" placeholder="https://drive.google.com/..." class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Misal: Google Drive, Dropbox, dsb. Jika diisi, member akan diarahkan ke link ini saat klik tombol download. Kosongkan untuk tetap pakai file yang di-upload.</p>
                     @error('file_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
             <div class="mt-6 flex gap-4">
-                <button type="submit" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium">Update Produk</button>
-                <a href="{{ route('admin.products.index') }}" class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Batal</a>
+                <button type="submit" class="dk-btn dk-btn-primary">Update Produk</button>
+                <a href="{{ route('admin.products.index') }}" class="dk-btn dk-btn-outline">Batal</a>
             </div>
         </form>
     </div>

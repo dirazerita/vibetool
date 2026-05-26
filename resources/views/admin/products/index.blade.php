@@ -3,11 +3,11 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Kelola Produk</h1>
-    <a href="{{ route('admin.products.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium">Tambah Produk</a>
+    <h1 class="text-2xl font-bold dk-heading">Kelola Produk</h1>
+    <a href="{{ route('admin.products.create') }}" class="dk-btn dk-btn-primary">Tambah Produk</a>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
     @foreach($products as $product)
         @php
             $lp = $product->landingPage;
@@ -18,9 +18,9 @@
                 $cardImage = asset('storage/' . $lp->hero_image);
             }
         @endphp
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <div class="dk-table hover:shadow-lg transition-shadow duration-200">
             {{-- Thumbnail --}}
-            <div class="bg-gray-100 relative" style="aspect-ratio: 1 / 1;">
+            <div style="background:#151e2d; position:relative;aspect-ratio: 1 / 1;">
                 @if($cardImage)
                     <img src="{{ $cardImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
                 @else
@@ -31,15 +31,15 @@
 
                 {{-- Badge status & landing page --}}
                 <div class="absolute top-2 left-2 flex flex-wrap gap-1.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->is_active ? 'bg-green-500 text-white' : 'bg-red-500 text-white' }}">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->is_active ? '" style="background:#059669;color:#fff"' : '" style="background:#dc2626;color:#fff"' }}">
                         {{ $product->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
                     @if($lp)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $lp->is_published ? 'bg-blue-500 text-white' : 'bg-gray-400 text-white' }}">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $lp->is_published ? '" style="background:#3b82f6;color:#fff"' : '" style="background:#6b7280;color:#fff"' }}">
                             {{ $lp->is_published ? 'Published' : 'Draft' }}
                         </span>
                     @endif
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->isSoftware() ? 'bg-purple-500 text-white' : 'bg-amber-500 text-white' }}">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->isSoftware() ? '" style="background:#8b5cf6;color:#fff"' : '" style="background:#f59e0b;color:#fff"' }}">
                         {{ $product->isSoftware() ? 'Software / Lisensi' : 'Produk Digital' }}
                     </span>
                 </div>
@@ -47,31 +47,31 @@
 
             {{-- Content --}}
             <div class="p-4">
-                <h3 class="text-lg font-bold text-gray-900 truncate">{{ $product->title }}</h3>
-                <p class="text-xs text-gray-400 mb-3">{{ $product->slug }}</p>
+                <h3 class="dk-heading" style="font-size:1.125rem; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ $product->title }}</h3>
+                <p class="text-xs mb-" style="color:#64748b3">{{ $product->slug }}</p>
 
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-lg font-bold text-green-600">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                    <span class="text-xs text-gray-500" title="Komisi sudah beli / belum beli">Komisi: {{ $product->commission_percent }}%&nbsp;|&nbsp;{{ $product->commission_percent_non_owner ?? $product->commission_percent }}%</span>
+                    <span style="font-size:1.125rem;font-weight:700;color:#6ee7b7">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span class="text-xs" style="color:#64748b" title="Komisi sudah beli / belum beli">Komisi: {{ $product->commission_percent }}%&nbsp;|&nbsp;{{ $product->commission_percent_non_owner ?? $product->commission_percent }}%</span>
                 </div>
 
                 {{-- Action buttons --}}
-                <div class="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
-                    <a href="{{ route('admin.products.edit', $product) }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded text-xs font-medium transition-colors">
+                <div class="flex flex-wrap gap-1.5 pt-2 dk-divider">
+                    <a href="{{ route('admin.products.edit', $product) }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors" style="color:#818cf8">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit
                     </a>
-                    <a href="{{ route('admin.products.landing-page', $product) }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-green-600 hover:bg-green-50 rounded text-xs font-medium transition-colors">
+                    <a href="{{ route('admin.products.landing-page', $product) }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors" style="color:#6ee7b7">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         Landing
                     </a>
-                    <a href="{{ route('product.show', $product->slug) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-gray-500 hover:bg-gray-50 rounded text-xs font-medium transition-colors">
+                    <a href="{{ route('product.show', $product->slug) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors" style="color:#94a3b8">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         Preview
                     </a>
                     <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Hapus produk ini?')" class="inline">
                         @csrf @method('DELETE')
-                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-red-600 hover:bg-red-50 rounded text-xs font-medium transition-colors">
+                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors" style="color:#fca5a5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             Hapus
                         </button>

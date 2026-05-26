@@ -2,21 +2,21 @@
 @section('title', 'Penarikan Saldo')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Penarikan Saldo</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Penarikan Saldo</h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Ajukan Penarikan</h2>
+        <div class="dk-card" style="padding:24px;">
+            <h2 class="text-lg font-semibold dk-heading mb-4">Ajukan Penarikan</h2>
             <div class="mb-4">
-                <div class="text-sm text-gray-500">Saldo Tersedia</div>
-                <div class="text-2xl font-bold text-indigo-600">Rp {{ number_format($balance, 0, ',', '.') }}</div>
+                <div class="dk-text-muted" style="font-size:14px">Saldo Tersedia</div>
+                <div class="text-2xl font-bold" style="color:#818cf8">Rp {{ number_format($balance, 0, ',', '.') }}</div>
             </div>
             <form method="POST" action="{{ route('dashboard.withdrawals.store') }}">
                 @csrf
                 <div class="mb-4">
-                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Penarikan</label>
-                    <input type="number" name="amount" id="amount" min="50000" step="1000" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Min. Rp 50.000" required>
+                    <label for="amount" class="dk-label">Jumlah Penarikan</label>
+                    <input type="number" name="amount" id="amount" min="50000" step="1000" class="w-full dk-input" placeholder="Min. Rp 50.000" required>
                     @error('amount')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -27,38 +27,38 @@
     </div>
 
     <div class="lg:col-span-2">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Riwayat Penarikan</h2>
+        <div class="dk-table">
+            <div class="px-6 py-4 " style="border-bottom:1px solid #1e2b3d">
+                <h2 class="text-lg font-semibold dk-heading">Riwayat Penarikan</h2>
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="min-w-full">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Tanggal</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Jumlah</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Bank</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody>
                     @forelse($withdrawals as $withdrawal)
                     <tr>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ $withdrawal->created_at->format('d M Y') }}</td>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">Rp {{ number_format($withdrawal->amount, 0, ',', '.') }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ $withdrawal->bank_name }} - {{ $withdrawal->bank_account }}</td>
+                        <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $withdrawal->created_at->format('d M Y') }}</td>
+                        <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">Rp {{ number_format($withdrawal->amount, 0, ',', '.') }}</td>
+                        <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $withdrawal->bank_name }} - {{ $withdrawal->bank_account }}</td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                {{ $withdrawal->status === 'approved' ? 'bg-green-100 text-green-800' : ($withdrawal->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                {{ $withdrawal->status === 'approved' ? 'dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7"' : ($withdrawal->status === 'pending' ? 'dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047"' : 'dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5"') }}">
                                 {{ ucfirst($withdrawal->status) }}
                             </span>
                             @if($withdrawal->note)
-                                <p class="text-xs text-gray-500 mt-1">{{ $withdrawal->note }}</p>
+                                <p class="text-xs mt-1 dk-text-muted">{{ $withdrawal->note }}</p>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">Belum ada riwayat penarikan.</td>
+                        <td colspan="4" class="px-6 py-8 text-center" style="color:#64748b">Belum ada riwayat penarikan.</td>
                     </tr>
                     @endforelse
                 </tbody>
