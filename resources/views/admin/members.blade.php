@@ -2,7 +2,22 @@
 @section('title', 'Semua Member')
 
 @section('content')
-<h1 class="text-2xl font-bold dk-heading mb-6">Semua Member</h1>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <h1 class="text-2xl font-bold dk-heading">Semua Member</h1>
+    <form method="GET" action="{{ route('admin.members') }}" style="display:flex; gap:8px; align-items:center;">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, WhatsApp, kode referral..." style="width:320px; padding:8px 14px; font-size:14px; border-radius:8px; border:1px solid #2d3a4a; background:#151e2d; color:#e2e8f0; outline:none;">
+        <button type="submit" style="padding:8px 16px; font-size:14px; font-weight:600; border-radius:8px; border:none; background:#6366f1; color:#fff; cursor:pointer;">Cari</button>
+        @if(request('search'))
+            <a href="{{ route('admin.members') }}" style="padding:8px 16px; font-size:14px; font-weight:600; border-radius:8px; border:1px solid #2d3a4a; background:transparent; color:#94a3b8; text-decoration:none;">Reset</a>
+        @endif
+    </form>
+</div>
+
+@if(request('search'))
+    <div style="margin-bottom:16px; padding:10px 16px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:8px; color:#a5b4fc; font-size:14px;">
+        Hasil pencarian untuk "<strong>{{ request('search') }}</strong>" — {{ $members->total() }} member ditemukan
+    </div>
+@endif
 
 @if(session('success'))
     <div class="dk-alert-success">

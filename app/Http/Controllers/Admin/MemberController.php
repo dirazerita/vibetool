@@ -11,13 +11,22 @@ use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $members = User::where('role', 'member')
+        $query = User::where('role', 'member')
             ->with(['upline', 'intendedProduct'])
-            ->withCount('downlines')
-            ->latest()
-            ->paginate(15);
+            ->withCount('downlines');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('whatsapp_number', 'like', "%{$search}%")
+                  ->orWhere('referral_code', 'like', "%{$search}%");
+            });
+        }
+
+        $members = $query->latest()->paginate(15)->withQueryString();
 
         return view('admin.members', compact('members'));
     }
