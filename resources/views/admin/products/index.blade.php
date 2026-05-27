@@ -39,8 +39,15 @@
                             {{ $lp->is_published ? 'Published' : 'Draft' }}
                         </span>
                     @endif
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm {{ $product->isSoftware() ? '" style="background:#8b5cf6;color:#fff"' : '" style="background:#f59e0b;color:#fff"' }}">
-                        {{ $product->isSoftware() ? 'Software / Lisensi' : 'Produk Digital' }}
+                    @php
+                        $typeBadge = match($product->product_type) {
+                            'software' => ['Software / Lisensi', '#8b5cf6'],
+                            'free' => ['Produk Gratis', '#10b981'],
+                            default => ['Produk Digital', '#f59e0b'],
+                        };
+                    @endphp
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm" style="background:{{ $typeBadge[1] }};color:#fff">
+                        {{ $typeBadge[0] }}
                     </span>
                 </div>
             </div>
@@ -51,7 +58,11 @@
                 <p class="text-xs mb-" style="color:#64748b3">{{ $product->slug }}</p>
 
                 <div class="flex items-center justify-between mb-3">
-                    <span style="font-size:1.125rem;font-weight:700;color:#6ee7b7">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    @if($product->isFree())
+                        <span style="font-size:1.125rem;font-weight:700;color:#10b981">GRATIS</span>
+                    @else
+                        <span style="font-size:1.125rem;font-weight:700;color:#6ee7b7">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    @endif
                     <span class="text-xs" style="color:#64748b" title="Komisi sudah beli / belum beli">Komisi: {{ $product->commission_percent }}%&nbsp;|&nbsp;{{ $product->commission_percent_non_owner ?? $product->commission_percent }}%</span>
                 </div>
 

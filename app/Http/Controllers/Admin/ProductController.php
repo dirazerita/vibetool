@@ -22,6 +22,11 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $isFree = $request->input('product_type') === 'free';
+        if ($isFree) {
+            $request->merge(['price' => 0]);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -30,10 +35,10 @@ class ProductController extends Controller
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
-            'product_type' => 'required|in:digital,software',
+            'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
-            'file' => 'nullable|required_without:file_url|file|max:102400',
-            'file_url' => 'nullable|required_without:file|url|max:2048',
+            'file' => $isFree ? 'nullable|file|max:102400' : 'nullable|required_without:file_url|file|max:102400',
+            'file_url' => $isFree ? 'nullable|url|max:2048' : 'nullable|required_without:file|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
         ], [
             'file.required_without' => 'Upload file produk atau isi link eksternal.',
@@ -44,7 +49,7 @@ class ProductController extends Controller
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'description' => $request->description,
-            'price' => $request->price,
+            'price' => $isFree ? 0 : $request->price,
             'commission_percent' => $request->commission_percent,
             'commission_percent_non_owner' => $request->commission_percent_non_owner,
             'upline_percent' => $request->upline_percent,
@@ -74,6 +79,11 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $isFree = $request->input('product_type') === 'free';
+        if ($isFree) {
+            $request->merge(['price' => 0]);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -82,7 +92,7 @@ class ProductController extends Controller
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
-            'product_type' => 'required|in:digital,software',
+            'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
             'file' => 'nullable|file|max:102400',
             'file_url' => 'nullable|url|max:2048',
@@ -93,7 +103,7 @@ class ProductController extends Controller
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'description' => $request->description,
-            'price' => $request->price,
+            'price' => $isFree ? 0 : $request->price,
             'commission_percent' => $request->commission_percent,
             'commission_percent_non_owner' => $request->commission_percent_non_owner,
             'upline_percent' => $request->upline_percent,

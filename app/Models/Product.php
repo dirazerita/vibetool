@@ -126,6 +126,16 @@ class Product extends Model
         return $this->product_type === 'software';
     }
 
+    public function isFree(): bool
+    {
+        return $this->product_type === 'free';
+    }
+
+    public function requiresPayment(): bool
+    {
+        return !$this->isFree();
+    }
+
     public function coupons(): BelongsToMany
     {
         return $this->belongsToMany(Coupon::class, 'coupon_products')->withPivot('created_at');

@@ -20,14 +20,20 @@
             @php
                 $product = $order->product;
                 $lp = $product?->landingPage;
-                $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
+                $cardImage = null;
+                if ($product && $product->thumbnail) {
+                    $cardImage = asset('storage/' . $product->thumbnail);
+                } elseif ($lp && $lp->hero_image) {
+                    $cardImage = asset('storage/' . $lp->hero_image);
+                }
                 $hasFile = $product && ($product->file_path || $product->file_url);
                 $isPendingManual = $order->status === 'pending' && $order->payment_method === 'manual';
+                $isFreeProduct = $product && $product->isFree();
             @endphp
             <div class="dk-table flex flex-col">
                 <div class="h-40 " style="background:#151e2d; position:relative">
-                    @if($heroImage)
-                        <img src="{{ $heroImage }}" alt="{{ $product->title ?? 'Produk' }}" class="w-full h-full object-cover">
+                    @if($cardImage)
+                        <img src="{{ $cardImage }}" alt="{{ $product->title ?? 'Produk' }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                             <svg class="w-12 h-12 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -42,8 +48,23 @@
 
                 <div class="p-4 flex-1 flex flex-col">
                     <h3 class="text-lg font-bold dk-heading truncate mb-1">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
-                    <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
-                    <p class="text-xs dk-text-muted mb-4">{{ $isPendingManual ? 'Dipesan' : 'Dibeli' }} {{ $order->created_at->format('d M Y H:i') }}</p>
+                    @if($isFreeProduct)
+                        <p class="text-lg font-bold mb-1" style="color:#10b981">GRATIS</p>
+                    @else
+                        <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
+                    @endif
+                    <p class="text-xs dk-text-muted mb-4">{{ $isPendingManual ? 'Dipesan' : ($isFreeProduct ? 'Diklaim' : 'Dibeli') }} {{ $order->created_at->format('d M Y H:i') }}</p>
+
+                    @if($isFreeProduct && $order->status === 'paid')
+                        <div class="mb-4" style="padding:12px; border-radius:8px; background:#064e3b; border:1px solid #10b981;">
+                            <p class="text-xs font-semibold mb-1" style="color:#6ee7b7">Cara Akses Software:</p>
+                            <p class="text-xs" style="color:#d1fae5;line-height:1.5">
+                                Login ke software ini menggunakan:<br>
+                                <span style="color:#fff;font-weight:600">Email:</span> {{ auth()->user()->email }}<br>
+                                <span style="color:#fff;font-weight:600">Password:</span> password akun PRODIG kamu
+                            </p>
+                        </div>
+                    @endif
 
                     <div class="mt-auto space-y-2">
                         @if($isPendingManual)
@@ -69,7 +90,7 @@
                                     Download Produk
                                 @endif
                             </a>
-                        @else
+                        @elseif(!$isFreeProduct)
                             <button disabled class="flex items-center justify-center gap-2 w-full px-4 py-2 " style="background:#151e2d text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
                                 File belum tersedia
                             </button>

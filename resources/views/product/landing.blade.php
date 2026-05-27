@@ -20,6 +20,10 @@
         if (session('ref_code')) {
             $registerUrl .= '?ref=' . urlencode(session('ref_code'));
         }
+        $isFree = $product->isFree();
+        $ctaLabel = $isFree ? 'Dapatkan Gratis' : ('Beli Sekarang — Rp ' . number_format($product->price, 0, ',', '.'));
+        $ctaCheckoutUrl = $isFree ? null : route('checkout', $product->slug);
+        $freeClaimUrl = $isFree ? route('free.claim', $product->slug) : null;
     @endphp
 
     {{-- Navigation --}}
@@ -57,13 +61,15 @@
                         @endif
                         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
                             @auth
-                                <a href="{{ route('checkout', $product->slug) }}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                                    Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                                </a>
+                                @if($isFree)
+                                    <form method="POST" action="{{ $freeClaimUrl }}">@csrf
+                                        <button type="submit" style="background: #10b981; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(16,185,129,0.4); border: 0; cursor: pointer;">{{ $ctaLabel }}</button>
+                                    </form>
+                                @else
+                                    <a href="{{ $ctaCheckoutUrl }}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
+                                @endif
                             @else
-                                <a href="{{ $registerUrl }}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                                    Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                                </a>
+                                <a href="{{ $registerUrl }}" style="background: {{ $isFree ? '#10b981' : 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
                             @endauth
                         </div>
                     </div>
@@ -77,13 +83,15 @@
                         <p  style="font-family: '{{ $landingPage->hero_subtitle_font ?? 'Poppins' }}', sans-serif; color: {{ $landingPage->hero_subtitle_color ?? '#e2e8f0' }};">{{ $landingPage->hero_subtitle }}</p>
                     @endif
                     @auth
-                        <a href="{{ route('checkout', $product->slug) }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                            Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                        </a>
+                        @if($isFree)
+                            <form method="POST" action="{{ $freeClaimUrl }}" style="display: inline-block;">@csrf
+                                <button type="submit" style="background: #10b981; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(16,185,129,0.4); border: 0; cursor: pointer;">{{ $ctaLabel }}</button>
+                            </form>
+                        @else
+                            <a href="{{ $ctaCheckoutUrl }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
+                        @endif
                     @else
-                        <a href="{{ $registerUrl }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                            Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                        </a>
+                        <a href="{{ $registerUrl }}" style="display: inline-block; background: {{ $isFree ? '#10b981' : 'linear-gradient(135deg, #6366f1, #a78bfa)' }}; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
                     @endauth
                 </div>
             </div>
@@ -185,13 +193,15 @@
             <h2 style="font-size: 2.25rem; font-weight: 700; color: #ffffff; margin-bottom: 16px;">Siap untuk Memulai?</h2>
             <p style="color: #c7d2fe; font-size: 1.125rem; margin-bottom: 32px; max-width: 42rem; margin-left: auto; margin-right: auto;">Dapatkan {{ $product->title }} sekarang dan mulai perjalanan Anda.</p>
             @auth
-                <a href="{{ route('checkout', $product->slug) }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                    Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                </a>
+                @if($isFree)
+                    <form method="POST" action="{{ $freeClaimUrl }}" style="display: inline-block;">@csrf
+                        <button type="submit" style="background: #10b981; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(16,185,129,0.4); border: 0; cursor: pointer;">{{ $ctaLabel }}</button>
+                    </form>
+                @else
+                    <a href="{{ $ctaCheckoutUrl }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
+                @endif
             @else
-                <a href="{{ $registerUrl }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">
-                    Beli Sekarang — Rp {{ number_format($product->price, 0, ',', '.') }}
-                </a>
+                <a href="{{ $registerUrl }}" style="display: inline-block; background: {{ $isFree ? '#10b981' : 'linear-gradient(135deg, #6366f1, #a78bfa)' }}; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none;">{{ $ctaLabel }}</a>
             @endauth
         </div>
     </section>
