@@ -155,4 +155,9 @@ class Product extends Model
     {
         return $this->hasMany(LandingPageTestimonial::class)->orderBy('sort_order');
     }
+
+    public function videoTutorials(): HasMany
+    {
+        return $this->hasMany(VideoTutorial::class)->orderBy('sort_order');
+    }
 }
