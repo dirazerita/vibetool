@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :logo-height="288" :logo-max-width="720">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
