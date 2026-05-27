@@ -13,16 +13,26 @@
 
 @php $lp = $product->landingPage; @endphp
 
+<div class="max-w-3xl mb-6">
+    <div class="dk-card" style="padding:14px 18px;border-left:4px solid #6366f1;background:rgba(99,102,241,0.08)">
+        <p class="text-sm dk-text" style="line-height:1.6">
+            <strong style="color:#a5b4fc">Catatan:</strong> Halaman ini punya 3 section yang disimpan terpisah —
+            <strong>Konten Utama</strong> (hero/video/about/publish), <strong>Galeri Gambar</strong>, dan <strong>Testimonial</strong>.
+            Setiap section punya tombol simpannya sendiri. Setelah upload gambar atau tambah testimonial, item akan muncul di list section masing-masing.
+        </p>
+    </div>
+</div>
+
 {{-- Hero & Video & About Section --}}
 <div class="max-w-3xl mb-8">
     <div class="dk-card" style="padding:24px;">
-        <h2 class="text-lg font-semibold dk-heading mb-4">Konten Landing Page</h2>
+        <h2 class="text-lg font-semibold dk-heading mb-4">Konten Utama Landing Page</h2>
         <form method="POST" action="{{ route('admin.products.landing-page.update', $product) }}" enctype="multipart/form-data">
             @csrf @method('PUT')
             <div class="space-y-6">
                 {{-- Hero Section --}}
                 <div style="border-bottom:1px solid #1e2b3d pb-6">
-                    <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4">Hero Section</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-4 dk-text">Hero Section</h3>
                     <div class="space-y-4">
                         <div>
                             <label for="hero_title" class="dk-label">Judul Utama</label>
@@ -86,7 +96,7 @@
 
                 {{-- Video Section --}}
                 <div style="border-bottom:1px solid #1e2b3d pb-6">
-                    <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4">Video Section</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-4 dk-text">Video Section</h3>
                     <div>
                         <label for="video_url" class="dk-label">URL Video (YouTube/Vimeo)</label>
                         <input type="url" name="video_url" id="video_url" value="{{ old('video_url', $lp->video_url ?? '') }}" placeholder="https://www.youtube.com/watch?v=..." class="w-full dk-input">
@@ -104,7 +114,7 @@
 
                 {{-- About Content --}}
                 <div style="border-bottom:1px solid #1e2b3d pb-6">
-                    <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4">Deskripsi Detail</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-4 dk-text">Deskripsi Detail</h3>
                     <div class="space-y-4">
                         <div>
                             <label for="about_content" class="dk-label">Konten tentang produk</label>
@@ -135,7 +145,7 @@
 
                 {{-- Testimonial Styling --}}
                 <div style="border-bottom:1px solid #1e2b3d pb-6">
-                    <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4">Tampilan Testimonial</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-4 dk-text">Tampilan Testimonial</h3>
                     <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                         <div>
                             <label for="testimonial_title_color" class="block text-xs font-medium dk-text mb-1">Warna Judul Section</label>
@@ -150,8 +160,8 @@
 
                 {{-- Status --}}
                 <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" name="is_published" value="1" {{ old('is_published', $lp->is_published ?? false) ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                    <label class="flex items-center" style="cursor:pointer">
+                        <input type="checkbox" name="is_published" id="is_published" value="1" {{ old('is_published', $lp->is_published ?? false) ? 'checked' : '' }} style="width:18px;height:18px;accent-color:#6366f1;cursor:pointer">
                         <span class="ml-2 text-sm dk-text">Publish Landing Page</span>
                     </label>
                     <p class="text-xs mt-1 dk-text-muted">Jika tidak dipublish, halaman produk default akan ditampilkan.</p>
@@ -159,7 +169,8 @@
             </div>
 
             <div class="mt-6">
-                <button type="submit" class="dk-btn dk-btn-primary">Simpan Landing Page</button>
+                <button type="submit" class="dk-btn dk-btn-primary">Simpan Konten Utama</button>
+                <p class="text-xs mt-2 dk-text-muted">Tombol ini hanya menyimpan konten utama di atas. Galeri Gambar &amp; Testimonial punya tombol simpan sendiri di bawah.</p>
             </div>
         </form>
     </div>
@@ -201,7 +212,8 @@
                     @error('images') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     @error('images.*') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
-                <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 font-medium text-sm">Upload Gambar</button>
+                <button type="submit" class="dk-btn dk-btn-primary">Upload Gambar Sekarang</button>
+                <p class="text-xs dk-text-muted">Klik tombol ini untuk menyimpan gambar ke galeri. Tidak ikut tersimpan dari tombol "Simpan Konten Utama" di atas.</p>
             </div>
         </form>
     </div>
@@ -278,8 +290,8 @@
                                     <input type="file" name="avatar" accept="image/*" class="w-full text-sm dk-input rounded-lg shadow-sm">
                                 </div>
                                 <div>
-                                    <label class="flex items-center">
-                                        <input type="checkbox" name="is_active" value="1" {{ $testimonial->is_active ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                                    <label class="flex items-center" style="cursor:pointer">
+                                        <input type="checkbox" name="is_active" value="1" {{ $testimonial->is_active ? 'checked' : '' }} style="width:18px;height:18px;accent-color:#6366f1;cursor:pointer">
                                         <span class="ml-2 text-xs dk-text">Aktif</span>
                                     </label>
                                 </div>
@@ -295,7 +307,7 @@
 
         {{-- Add Testimonial Form --}}
         <div class="dk-divider pt-4">
-            <h3 class="text-sm font-semibold text-gray-800 mb-3">Tambah Testimonial Baru</h3>
+            <h3 class="text-sm font-semibold dk-heading mb-3">Tambah Testimonial Baru</h3>
             <form method="POST" action="{{ route('admin.products.landing-page.testimonials.store', $product) }}" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
@@ -325,7 +337,8 @@
                         <input type="file" name="avatar" id="testi_avatar" accept="image/*" class="w-full dk-input">
                         @error('avatar') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 font-medium text-sm">Tambah Testimonial</button>
+                    <button type="submit" class="dk-btn dk-btn-primary">Tambah Testimonial Sekarang</button>
+                    <p class="text-xs dk-text-muted">Klik tombol ini untuk menyimpan testimonial. Tidak ikut tersimpan dari tombol "Simpan Konten Utama" di atas.</p>
                 </div>
             </form>
         </div>
