@@ -30,7 +30,7 @@
                     </select>
                     <p class="text-xs mt-1 dk-text-muted">
                         <strong>Software / Tool:</strong> kunci lisensi unik dikirim otomatis ke member.<br>
-                        <strong>Produk Gratis:</strong> harga otomatis 0, member klaim langsung tanpa checkout. Software ini divalidasi pakai email + password akun PRODIG member.
+                        <strong>Produk Gratis:</strong> harga otomatis 0, member klaim langsung tanpa checkout. Software ini divalidasi pakai email + password akun VibeTool.Id member.
                     </p>
                     @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>

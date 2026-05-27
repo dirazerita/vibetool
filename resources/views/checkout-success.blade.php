@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', 'Pembayaran Berhasil - PRODIG')
+@section('title', 'Pembayaran Berhasil - VibeTool.Id')
 
 @section('content')
 <div style="max-width: 42rem; margin: 0 auto; padding: 48px 1rem;">

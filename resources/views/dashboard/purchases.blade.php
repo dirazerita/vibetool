@@ -61,7 +61,7 @@
                             <p class="text-xs" style="color:#d1fae5;line-height:1.5">
                                 Login ke software ini menggunakan:<br>
                                 <span style="color:#fff;font-weight:600">Email:</span> {{ auth()->user()->email }}<br>
-                                <span style="color:#fff;font-weight:600">Password:</span> password akun PRODIG kamu
+                                <span style="color:#fff;font-weight:600">Password:</span> password akun VibeTool.Id kamu
                             </p>
                         </div>
                     @endif

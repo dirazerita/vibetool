@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', 'PRODIG - Marketplace Produk Digital')
+@section('title', 'VibeTool.Id - Marketplace Produk Digital')
 
 @section('content')
 <div style="background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95); padding: 64px 0;">
