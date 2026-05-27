@@ -50,13 +50,42 @@
                     @error('upline_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" name="can_upload_product" value="1" {{ old('can_upload_product', $user->can_upload_product) ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
-                        <span class="ml-2 text-sm dk-text">Izinkan Upload Produk</span>
-                    </label>
-                    <p class="text-xs dk-text-muted mt-1">Jika dicentang, member ini bisa mengupload produk dari dashboard. Produk tetap harus di-approve admin.</p>
+                <div class="dk-card" style="padding:16px; border-left:4px solid #6366f1;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <label style="position:relative; display:inline-block; width:48px; height:26px; cursor:pointer;">
+                            <input type="hidden" name="can_upload_product" value="0">
+                            <input type="checkbox" name="can_upload_product" value="1" id="can_upload_product" {{ old('can_upload_product', $user->can_upload_product) ? 'checked' : '' }} style="opacity:0; width:0; height:0; position:absolute;">
+                            <span id="toggle-track" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; border-radius:26px; transition:0.3s; {{ old('can_upload_product', $user->can_upload_product) ? 'background:#6366f1;' : 'background:#2d3a4a;' }}"></span>
+                            <span id="toggle-dot" style="position:absolute; height:20px; width:20px; bottom:3px; border-radius:50%; transition:0.3s; background:white; {{ old('can_upload_product', $user->can_upload_product) ? 'left:25px;' : 'left:3px;' }}"></span>
+                        </label>
+                        <div>
+                            <span class="text-sm font-medium dk-heading">Izinkan Upload Produk</span>
+                            <p class="text-xs dk-text-muted" style="margin-top:2px;">Jika aktif, member ini bisa mengupload produk dari dashboard. Produk tetap harus di-approve admin.</p>
+                        </div>
+                    </div>
                 </div>
+                <script>
+                    (function(){
+                        var cb = document.getElementById('can_upload_product');
+                        var track = document.getElementById('toggle-track');
+                        var dot = document.getElementById('toggle-dot');
+                        cb.parentElement.addEventListener('click', function(e){
+                            if(e.target === cb) return;
+                            cb.checked = !cb.checked;
+                            updateToggle();
+                        });
+                        cb.addEventListener('change', updateToggle);
+                        function updateToggle(){
+                            if(cb.checked){
+                                track.style.background = '#6366f1';
+                                dot.style.left = '25px';
+                            } else {
+                                track.style.background = '#2d3a4a';
+                                dot.style.left = '3px';
+                            }
+                        }
+                    })();
+                </script>
 
                 <div class="dk-card" style="padding:16px">
                     <p class="dk-text" style="font-size:14px">Status:
