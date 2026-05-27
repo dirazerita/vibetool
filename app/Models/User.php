@@ -28,6 +28,7 @@ class User extends Authenticatable
         'balance',
         'role',
         'status',
+        'can_upload_product',
     ];
 
     protected $hidden = [
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'balance' => 'decimal:2',
+            'can_upload_product' => 'boolean',
         ];
     }
 
@@ -101,5 +103,15 @@ class User extends Authenticatable
     public function coupons(): BelongsToMany
     {
         return $this->belongsToMany(Coupon::class, 'coupon_members')->withPivot('created_at');
+    }
+
+    public function canUploadProduct(): bool
+    {
+        return (bool) $this->can_upload_product;
+    }
+
+    public function createdProducts(): HasMany
+    {
+        return $this->hasMany(Product::class, 'created_by');
     }
 }

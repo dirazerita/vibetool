@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -29,6 +30,9 @@ class Product extends Model
         'file_url',
         'thumbnail',
         'is_active',
+        'created_by',
+        'approval_status',
+        'rejection_reason',
     ];
 
     protected function casts(): array
@@ -159,5 +163,30 @@ class Product extends Model
     public function videoTutorials(): HasMany
     {
         return $this->hasMany(VideoTutorial::class)->orderBy('sort_order');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->approval_status === 'pending';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->approval_status === 'rejected';
+    }
+
+    public function isMemberSubmitted(): bool
+    {
+        return $this->created_by !== null;
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\ProductController as DashboardProductControll
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
+use App\Http\Controllers\Dashboard\MemberProductController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
@@ -73,6 +74,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
         Route::get('/video-tutorials', [DashboardVideoTutorialController::class, 'index'])->name('.video-tutorials');
         Route::get('/video-tutorials/{product}', [DashboardVideoTutorialController::class, 'show'])->name('.video-tutorials.show');
+        Route::get('/member-products', [MemberProductController::class, 'index'])->name('.member-products');
+        Route::get('/member-products/create', [MemberProductController::class, 'create'])->name('.member-products.create');
+        Route::post('/member-products', [MemberProductController::class, 'store'])->name('.member-products.store');
+        Route::get('/member-products/{product}/edit', [MemberProductController::class, 'edit'])->name('.member-products.edit');
+        Route::put('/member-products/{product}', [MemberProductController::class, 'update'])->name('.member-products.update');
+        Route::delete('/member-products/{product}', [MemberProductController::class, 'destroy'])->name('.member-products.destroy');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
         Route::get('/settings', [SettingController::class, 'index'])->name('.settings');
@@ -84,6 +91,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
         Route::resource('products', AdminProductController::class)->except(['show']);
+        Route::get('/products-pending', [AdminProductController::class, 'pendingProducts'])->name('products.pending');
+        Route::post('/products/{product}/approve', [AdminProductController::class, 'approve'])->name('products.approve');
+        Route::post('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
         Route::get('/products/{product}/landing-page', [LandingPageController::class, 'edit'])->name('products.landing-page');
         Route::put('/products/{product}/landing-page', [LandingPageController::class, 'update'])->name('products.landing-page.update');
         Route::post('/products/{product}/landing-page/images', [LandingPageController::class, 'uploadImage'])->name('products.landing-page.images.upload');

@@ -50,6 +50,14 @@
                     @error('upline_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="can_upload_product" value="1" {{ old('can_upload_product', $user->can_upload_product) ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                        <span class="ml-2 text-sm dk-text">Izinkan Upload Produk</span>
+                    </label>
+                    <p class="text-xs dk-text-muted mt-1">Jika dicentang, member ini bisa mengupload produk dari dashboard. Produk tetap harus di-approve admin.</p>
+                </div>
+
                 <div class="dk-card" style="padding:16px">
                     <p class="dk-text" style="font-size:14px">Status:
                         @if(($user->status ?? 'active') === 'active')
