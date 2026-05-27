@@ -62,6 +62,7 @@ class MemberController extends Controller
             'whatsapp_number' => $normalizedWhatsapp,
             'referral_code' => strtoupper($request->referral_code),
             'upline_id' => $request->upline_id,
+            'can_upload_product' => $request->boolean('can_upload_product'),
         ];
 
         if ($request->filled('password')) {

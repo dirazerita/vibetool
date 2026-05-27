@@ -11,8 +11,44 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('landingPage')->latest()->paginate(15);
+        $products = Product::with(['landingPage', 'creator'])->latest()->paginate(15);
         return view('admin.products.index', compact('products'));
+    }
+
+    public function pendingProducts()
+    {
+        $products = Product::with('creator')
+            ->where('approval_status', 'pending')
+            ->whereNotNull('created_by')
+            ->latest()
+            ->paginate(15);
+        return view('admin.products.pending', compact('products'));
+    }
+
+    public function approve(Request $request, Product $product)
+    {
+        $product->update([
+            'approval_status' => 'approved',
+            'is_active' => true,
+            'rejection_reason' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Produk "' . $product->title . '" berhasil disetujui.');
+    }
+
+    public function reject(Request $request, Product $product)
+    {
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:1000',
+        ]);
+
+        $product->update([
+            'approval_status' => 'rejected',
+            'is_active' => false,
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
+
+        return redirect()->back()->with('success', 'Produk "' . $product->title . '" ditolak.');
     }
 
     public function create()
@@ -73,6 +109,8 @@ class ProductController extends Controller
         if ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
         }
+
+        $data['approval_status'] = 'approved';
 
         Product::create($data);
 

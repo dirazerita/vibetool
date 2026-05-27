@@ -4,7 +4,16 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold dk-heading">Kelola Produk</h1>
-    <a href="{{ route('admin.products.create') }}" class="dk-btn dk-btn-primary">Tambah Produk</a>
+    <div class="flex gap-3">
+        @php $pendingCount = \App\Models\Product::where('approval_status', 'pending')->whereNotNull('created_by')->count(); @endphp
+        @if($pendingCount > 0)
+            <a href="{{ route('admin.products.pending') }}" class="dk-btn dk-btn-warning">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Menunggu Persetujuan ({{ $pendingCount }})
+            </a>
+        @endif
+        <a href="{{ route('admin.products.create') }}" class="dk-btn dk-btn-primary">Tambah Produk</a>
+    </div>
 </div>
 
 <div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
@@ -49,6 +58,19 @@
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm" style="background:{{ $typeBadge[1] }};color:#fff">
                         {{ $typeBadge[0] }}
                     </span>
+                    @if($product->isMemberSubmitted())
+                        @php
+                            $approvalBadge = match($product->approval_status) {
+                                'pending' => ['Pending', '#f59e0b'],
+                                'rejected' => ['Ditolak', '#ef4444'],
+                                default => ['', ''],
+                            };
+                        @endphp
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm" style="background:#6366f1;color:#fff">Member</span>
+                        @if($approvalBadge[0])
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm" style="background:{{ $approvalBadge[1] }};color:#fff">{{ $approvalBadge[0] }}</span>
+                        @endif
+                    @endif
                 </div>
             </div>
 

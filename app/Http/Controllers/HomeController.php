@@ -11,13 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $products = Product::with('landingPage')->where('is_active', true)->latest()->get();
+        $products = Product::with('landingPage')->where('is_active', true)->where('approval_status', 'approved')->latest()->get();
         return view('home', compact('products'));
     }
 
     public function show(Request $request, string $slug)
     {
-        $product = Product::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $product = Product::where('slug', $slug)->where('is_active', true)->where('approval_status', 'approved')->firstOrFail();
 
         $refCode = $request->query('ref');
         if ($refCode) {
