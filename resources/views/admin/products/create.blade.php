@@ -22,19 +22,30 @@
                 </div>
 
                 <div>
-                    <label for="price" class="dk-label">Harga (Rp)</label>
-                    <input type="number" name="price" id="price" value="{{ old('price') }}" class="w-full dk-input" required>
-                    @error('price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
                     <label for="product_type" class="dk-label">Tipe Produk</label>
                     <select name="product_type" id="product_type" class="w-full dk-input" required>
                         <option value="digital" {{ old('product_type', 'digital') === 'digital' ? 'selected' : '' }}>Produk Digital (file/download)</option>
                         <option value="software" {{ old('product_type') === 'software' ? 'selected' : '' }}>Software / Tool (dengan lisensi)</option>
+                        <option value="free" {{ old('product_type') === 'free' ? 'selected' : '' }}>Produk Gratis (Software via login akun)</option>
                     </select>
-                    <p class="text-xs mt-1 dk-text-muted">Pilih <strong>Software / Tool</strong> kalau produk ini butuh kunci lisensi yang akan diberikan otomatis ke member setelah membeli.</p>
+                    <p class="text-xs mt-1 dk-text-muted">
+                        <strong>Software / Tool:</strong> kunci lisensi unik dikirim otomatis ke member.<br>
+                        <strong>Produk Gratis:</strong> harga otomatis 0, member klaim langsung tanpa checkout. Software ini divalidasi pakai email + password akun PRODIG member.
+                    </p>
                     @error('product_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div id="price-section" style="{{ old('product_type') === 'free' ? 'display:none;' : '' }}">
+                    <label for="price" class="dk-label">Harga (Rp)</label>
+                    <input type="number" name="price" id="price" value="{{ old('price') }}" class="w-full dk-input">
+                    @error('price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div id="price-free-notice" style="{{ old('product_type') === 'free' ? '' : 'display:none;' }}">
+                    <div class="dk-card" style="padding:12px; border-left:4px solid #10b981;">
+                        <p class="text-sm font-semibold" style="color:#10b981;">Harga: GRATIS</p>
+                        <p class="text-xs dk-text-muted mt-1">Member tidak perlu bayar. Tombol "Beli Sekarang" akan otomatis berubah jadi "Dapatkan Gratis".</p>
+                    </div>
                 </div>
 
                 <div id="license-duration-section" style="{{ old('product_type') === 'software' ? '' : 'display:none;' }}">
@@ -118,8 +129,27 @@
     </div>
 </div>
 <script>
-    document.getElementById('product_type').addEventListener('change', function() {
-        document.getElementById('license-duration-section').style.display = this.value === 'software' ? '' : 'none';
-    });
+    function toggleProductTypeUI() {
+        var type = document.getElementById('product_type').value;
+        var priceSection = document.getElementById('price-section');
+        var priceFreeNotice = document.getElementById('price-free-notice');
+        var licenseSection = document.getElementById('license-duration-section');
+        var priceInput = document.getElementById('price');
+
+        if (type === 'free') {
+            priceSection.style.display = 'none';
+            priceFreeNotice.style.display = '';
+            priceInput.removeAttribute('required');
+            priceInput.value = '0';
+        } else {
+            priceSection.style.display = '';
+            priceFreeNotice.style.display = 'none';
+            priceInput.setAttribute('required', 'required');
+        }
+
+        licenseSection.style.display = type === 'software' ? '' : 'none';
+    }
+    document.getElementById('product_type').addEventListener('change', toggleProductTypeUI);
+    toggleProductTypeUI();
 </script>
 @endsection

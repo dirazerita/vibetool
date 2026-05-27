@@ -10,6 +10,7 @@ use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\FreeProductController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TelegramWebhookController;
@@ -54,6 +55,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout/manual/{order}', [CheckoutController::class, 'manual'])->name('checkout.manual');
         Route::post('/checkout/manual/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('checkout.manual.proof');
         Route::post('/checkout/manual/{order}/cancel', [CheckoutController::class, 'cancel'])->name('checkout.manual.cancel');
+
+        // Klaim produk gratis (tanpa pembayaran)
+        Route::post('/free/{slug}/claim', [FreeProductController::class, 'claim'])->name('free.claim');
     });
 
     // Dashboard (member only, butuh akun aktif)

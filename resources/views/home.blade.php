@@ -38,7 +38,11 @@
                 <h3 style="font-size: 1.125rem; font-weight: 600; color: #e2e8f0; margin-bottom: 8px;">{{ $product->title }}</h3>
                 <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 16px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ $product->description }}</p>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    @if($product->isFree())
+                        <span style="font-size: 1.5rem; font-weight: 700; color: #10b981;">GRATIS</span>
+                    @else
+                        <span style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    @endif
                     <a href="{{ route('product.show', $product->slug) }}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-decoration: none;">Detail</a>
                 </div>
             </div>

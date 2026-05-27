@@ -279,6 +279,31 @@ class TelegramService
         $this->sendMessage(implode("\n", $lines), $buttons);
     }
 
+    public function notifyFreeClaim(Order $order): void
+    {
+        if (!$this->enabled()) {
+            return;
+        }
+
+        $order->loadMissing(['user', 'product', 'affiliate']);
+
+        $lines = [
+            '<b>🎁 Klaim Produk Gratis #' . $order->id . '</b>',
+            '',
+            '<b>Produk:</b> ' . e($order->product->title ?? '-'),
+            '<b>Member:</b> ' . e($order->user->name ?? '-'),
+            '<b>Email:</b> ' . e($order->user->email ?? '-'),
+            '<b>WhatsApp:</b> ' . e($order->user->whatsapp_number ?? '-'),
+        ];
+        if ($order->affiliate) {
+            $lines[] = '<b>Afiliator:</b> ' . e($order->affiliate->name);
+        }
+        $lines[] = '';
+        $lines[] = '✅ <i>Akses otomatis diberikan (login via akun member)</i>';
+
+        $this->sendMessage(implode("\n", $lines));
+    }
+
     public function notifyPaymentProof(Order $order): void
     {
         if (!$this->enabled()) {

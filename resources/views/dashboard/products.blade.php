@@ -38,13 +38,18 @@
             {{-- Content --}}
             <div class="p-4">
                 <h3 class="text-lg font-bold dk-heading truncate mb-1">{{ $product->title }}</h3>
-                <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs dk-text-muted font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
-                <p class="text-xs text-purple-500">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
-                @if(!$alreadyPaid && ($product->commission_percent_non_owner ?? $product->commission_percent) != $product->commission_percent)
-                    <p class="text-xs text-amber-600 mt-1 mb-3"><svg class="inline w-3.5 h-3.5 mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Beli produk ini untuk dapat komisi lebih besar ({{ rtrim(rtrim(number_format((float) $product->commission_percent, 2, '.', ''), '0'), '.') }}%)</p>
+                @if($product->isFree())
+                    <p class="text-lg font-bold mb-1" style="color:#10b981">GRATIS</p>
+                    <p class="text-xs dk-text-muted mb-3">Klaim langsung — login software pakai email + password akun PRODIG kamu.</p>
                 @else
-                    <div class="mb-3"></div>
+                    <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                    <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs dk-text-muted font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
+                    <p class="text-xs text-purple-500">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
+                    @if(!$alreadyPaid && ($product->commission_percent_non_owner ?? $product->commission_percent) != $product->commission_percent)
+                        <p class="text-xs text-amber-600 mt-1 mb-3"><svg class="inline w-3.5 h-3.5 mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Beli produk ini untuk dapat komisi lebih besar ({{ rtrim(rtrim(number_format((float) $product->commission_percent, 2, '.', ''), '0'), '.') }}%)</p>
+                    @else
+                        <div class="mb-3"></div>
+                    @endif
                 @endif
 
                 {{-- Buttons --}}
@@ -53,7 +58,7 @@
                         <div class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium"
                              style="background-color:#ecfdf5; border:1px solid #a7f3d0; color:#047857;">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Sudah Dibeli
+                            {{ $product->isFree() ? 'Sudah Diklaim' : 'Sudah Dibeli' }}
                         </div>
                         <a href="{{ route('dashboard.purchases') }}"
                            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -72,6 +77,18 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                             {{ $pendingOrder->payment_proof ? 'Menunggu Konfirmasi Admin' : 'Lanjutkan Pembayaran' }}
                         </a>
+                    @elseif($product->isFree())
+                        <form method="POST" action="{{ route('free.claim', $product->slug) }}">
+                            @csrf
+                            <button type="submit"
+                                    class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                                    style="background-color:#10b981; color:#ffffff;"
+                                    onmouseover="this.style.backgroundColor='#059669'"
+                                    onmouseout="this.style.backgroundColor='#10b981'">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Dapatkan Gratis
+                            </button>
+                        </form>
                     @else
                         <a href="{{ route('checkout', $product->slug) }}"
                            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
