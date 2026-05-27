@@ -8,85 +8,122 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        body { background: #0b1120 !important; color: #e2e8f0 !important; }
+        .dk-sidebar-link { display:flex; align-items:center; padding:10px 16px; font-size:14px; font-weight:500; border-radius:10px; color:#94a3b8; transition:all 0.2s; text-decoration:none; }
+        .dk-sidebar-link:hover { background:rgba(99,102,241,0.1); color:#c7d2fe; }
+        .dk-sidebar-link.active { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(99,102,241,0.3); }
+        .dk-sidebar-link svg { width:20px; height:20px; margin-right:12px; flex-shrink:0; }
+        .dk-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; }
+        .dk-table { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; overflow:hidden; }
+        .dk-table thead { background:#151e2d; }
+        .dk-table th { color:#94a3b8 !important; border-bottom:1px solid #2d3a4a; padding:12px 24px; text-align:left; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+        .dk-table td { color:#cbd5e1 !important; border-bottom:1px solid #1e2b3d; padding:16px 24px; font-size:14px; }
+        .dk-table tbody tr:hover { background:#1e2b3d; }
+        .dk-table tbody tr:last-child td { border-bottom:none; }
+        .dk-input { background:#151e2d !important; color:#e2e8f0 !important; border:1px solid #2d3a4a !important; border-radius:8px; padding:8px 12px; font-size:14px; transition:border-color 0.2s; }
+        .dk-input:focus { border-color:#6366f1 !important; outline:none; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+        .dk-input::placeholder { color:#64748b !important; }
+        .dk-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 20px; border-radius:10px; font-weight:600; font-size:14px; border:none; cursor:pointer; transition:all 0.2s; text-decoration:none; }
+        .dk-btn-primary { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; box-shadow:0 2px 8px rgba(99,102,241,0.25); }
+        .dk-btn-primary:hover { box-shadow:0 4px 16px rgba(99,102,241,0.4); transform:translateY(-1px); color:#fff; }
+        .dk-btn-success { background:linear-gradient(135deg,#059669,#10b981); color:#fff; box-shadow:0 2px 8px rgba(16,185,129,0.25); }
+        .dk-btn-success:hover { box-shadow:0 4px 16px rgba(16,185,129,0.4); transform:translateY(-1px); color:#fff; }
+        .dk-btn-danger { background:linear-gradient(135deg,#dc2626,#e11d48); color:#fff; box-shadow:0 2px 8px rgba(239,68,68,0.25); }
+        .dk-btn-danger:hover { box-shadow:0 4px 16px rgba(239,68,68,0.4); transform:translateY(-1px); color:#fff; }
+        .dk-btn-warning { background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; box-shadow:0 2px 8px rgba(245,158,11,0.25); }
+        .dk-btn-outline { background:transparent; color:#94a3b8; border:1px solid #2d3a4a; }
+        .dk-btn-outline:hover { background:#1e2b3d; color:#e2e8f0; }
+        .dk-badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:600; }
+        .dk-alert-success { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; padding:12px 16px; border-radius:10px; margin-bottom:24px; font-size:14px; }
+        .dk-alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:12px 16px; border-radius:10px; margin-bottom:24px; font-size:14px; }
+        .dk-label { color:#94a3b8; font-size:14px; font-weight:500; margin-bottom:6px; display:block; }
+        .dk-heading { color:#f1f5f9; }
+        .dk-text-muted { color:#64748b; }
+        .dk-text { color:#cbd5e1; }
+        .dk-divider { border-top:1px solid #1e2b3d; margin:12px 0; }
+        .dk-stat-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:14px; padding:24px; display:flex; align-items:center; gap:16px; }
+        .dk-stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        select.dk-input { appearance:auto; }
+        textarea.dk-input { resize:vertical; }
+    </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-            <div class="p-6">
-                <a href="{{ route('home') }}" class="block">
-                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="h-24 w-auto" style="height: 96px; width: auto; max-width: 200px; object-fit: contain;">
+<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;">
+    <div style="min-height:100vh; display:flex;">
+        <aside style="width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column;">
+            <div style="padding:24px 20px;">
+                <a href="{{ route('home') }}" style="display:block; text-decoration:none;">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:56px; width:auto; max-width:160px; object-fit:contain;">
                 </a>
             </div>
-            <nav class="px-4 space-y-1">
-                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') && !request()->is('dashboard/*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <nav style="padding:0 12px; flex:1; display:flex; flex-direction:column; gap:4px;">
+                <a href="{{ route('dashboard') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard') && !request()->is('dashboard/*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     Overview
                 </a>
-                <a href="{{ route('dashboard.products') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.products') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <a href="{{ route('dashboard.products') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.products') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     Produk
                 </a>
-                <a href="{{ route('dashboard.purchases') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.purchases') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <a href="{{ route('dashboard.purchases') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.purchases') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Pembelian Saya
                 </a>
-                <a href="{{ route('dashboard.licenses') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.licenses') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                <a href="{{ route('dashboard.licenses') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.licenses') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                     Lisensi Saya
                 </a>
-                <a href="{{ route('dashboard.commissions') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.commissions') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <a href="{{ route('dashboard.commissions') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.commissions') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Komisi
                 </a>
-                <a href="{{ route('dashboard.coupons') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.coupons') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                <a href="{{ route('dashboard.coupons') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.coupons') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                     Kuponku
                 </a>
-                <a href="{{ route('dashboard.team') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.team') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <a href="{{ route('dashboard.team') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.team') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     Tim / Downline
                 </a>
-                <a href="{{ route('dashboard.withdrawals') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.withdrawals') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                <a href="{{ route('dashboard.withdrawals') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.withdrawals') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     Penarikan
                 </a>
-                <a href="{{ route('dashboard.settings') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard.settings') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <a href="{{ route('dashboard.settings') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard.settings') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Pengaturan
                 </a>
                 @if(auth()->user()->isAdmin())
-                <div class="border-t border-gray-200 my-4"></div>
-                <a href="{{ route('admin.index') }}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <div class="dk-divider"></div>
+                <a href="{{ route('admin.index') }}" class="dk-sidebar-link" style="color:#f87171;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     Admin Panel
                 </a>
                 @endif
             </nav>
-            <div class="absolute bottom-0 w-64 p-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm">
-                        <div class="font-medium text-gray-900">{{ auth()->user()->name }}</div>
-                        <div class="text-gray-500">{{ auth()->user()->email }}</div>
+            <div style="padding:16px; border-top:1px solid #1e2b3d;">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-size:14px; font-weight:600; color:#e2e8f0;">{{ auth()->user()->name }}</div>
+                        <div style="font-size:12px; color:#64748b;">{{ auth()->user()->email }}</div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-gray-400 hover:text-red-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <button type="submit" style="background:none; border:none; cursor:pointer; color:#64748b; padding:4px;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#64748b'">
+                            <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
                     </form>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <div class="p-8">
+        <div style="flex:1; overflow:auto;">
+            <div style="padding:32px;">
                 @if(session('error'))
-                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">{{ session('error') }}</div>
+                    <div class="dk-alert-error">{{ session('error') }}</div>
                 @endif
                 @if(session('success'))
-                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">{{ session('success') }}</div>
+                    <div class="dk-alert-success">{{ session('success') }}</div>
                 @endif
                 @yield('content')
             </div>

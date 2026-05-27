@@ -4,7 +4,7 @@
 @section('content')
 <div class="mb-6">
     <a href="{{ route('admin.licenses') }}" class="text-sm text-indigo-600 hover:text-indigo-700">← Kembali ke daftar produk</a>
-    <h1 class="text-2xl font-bold text-gray-900 mt-2">Lisensi: {{ $product->title }}</h1>
+    <h1 class="text-2xl font-bold dk-heading mt-2">Lisensi: {{ $product->title }}</h1>
 </div>
 
 @if(session('success'))
@@ -17,17 +17,17 @@
 @endif
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs text-gray-500 uppercase">Total Lisensi</div>
-        <div class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($licenses->total()) }}</div>
+    <div class="dk-card p-5">
+        <div class="text-xs dk-text-muted uppercase">Total Lisensi</div>
+        <div class="text-2xl font-bold dk-heading mt-1">{{ number_format($licenses->total()) }}</div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs text-gray-500 uppercase">Tersedia</div>
+    <div class="dk-card p-5">
+        <div class="text-xs dk-text-muted uppercase">Tersedia</div>
         <div class="text-2xl font-bold {{ $availableCount > 0 ? 'text-emerald-600' : 'text-red-600' }} mt-1">{{ number_format($availableCount) }}</div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div class="text-xs text-gray-500 uppercase">Order Belum Dapat Lisensi</div>
-        <div class="text-2xl font-bold {{ $pendingOrders->count() > 0 ? 'text-yellow-600' : 'text-gray-900' }} mt-1">{{ number_format($pendingOrders->count()) }}</div>
+    <div class="dk-card p-5">
+        <div class="text-xs dk-text-muted uppercase">Order Belum Dapat Lisensi</div>
+        <div class="text-2xl font-bold {{ $pendingOrders->count() > 0 ? 'text-yellow-600' : 'dk-heading' }} mt-1">{{ number_format($pendingOrders->count()) }}</div>
     </div>
 </div>
 
@@ -37,10 +37,10 @@
     <p class="text-xs text-yellow-800 mb-3">Klik "Generate Lisensi" untuk membuat kunci lisensi otomatis dan mengalokasikan ke member.</p>
     <div class="space-y-2">
         @foreach($pendingOrders as $order)
-        <div class="flex items-center justify-between bg-white rounded-lg border border-yellow-200 p-3">
+        <div class="flex items-center justify-between dk-card rounded-lg border border-yellow-200 p-3">
             <div class="text-sm">
-                <div class="font-medium text-gray-900">Order #{{ $order->id }}</div>
-                <div class="text-xs text-gray-600">{{ $order->user?->name ?? '—' }} · {{ $order->user?->email ?? '—' }} · {{ $order->created_at->format('d M Y H:i') }}</div>
+                <div class="font-medium dk-heading">Order #{{ $order->id }}</div>
+                <div class="text-xs dk-text">{{ $order->user?->name ?? '—' }} · {{ $order->user?->email ?? '—' }} · {{ $order->created_at->format('d M Y H:i') }}</div>
             </div>
             <form method="POST" action="{{ route('admin.licenses.assign-order', $order) }}">
                 @csrf
@@ -54,48 +54,48 @@
 </div>
 @endif
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tambah Lisensi</h2>
+<div class="dk-card" style="padding:24px mb-6">
+    <h2 class="text-lg font-semibold dk-heading mb-4">Tambah Lisensi</h2>
     <form method="POST" action="{{ route('admin.licenses.store', $product) }}">
         @csrf
         <div class="mb-4">
-            <label for="keys" class="block text-sm font-medium text-gray-700 mb-1">Kunci Lisensi (1 per baris, paste bulk)</label>
-            <textarea name="keys" id="keys" rows="6" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm" placeholder="LICENSE-XXXX-YYYY-ZZZZ&#10;LICENSE-AAAA-BBBB-CCCC&#10;...">{{ old('keys') }}</textarea>
-            <p class="text-xs text-gray-500 mt-1">Setiap baris akan dianggap satu kunci lisensi. Duplikat dilewati otomatis.</p>
+            <label for="keys" class="dk-label">Kunci Lisensi (1 per baris, paste bulk)</label>
+            <textarea name="keys" id="keys" rows="6" class="w-full dk-input font-mono text-sm" placeholder="LICENSE-XXXX-YYYY-ZZZZ&#10;LICENSE-AAAA-BBBB-CCCC&#10;...">{{ old('keys') }}</textarea>
+            <p class="text-xs mt-1 dk-text-muted">Setiap baris akan dianggap satu kunci lisensi. Duplikat dilewati otomatis.</p>
         </div>
         <div class="mb-4">
-            <label for="extra_info" class="block text-sm font-medium text-gray-700 mb-1">Catatan / Instruksi Aktivasi (opsional)</label>
-            <textarea name="extra_info" id="extra_info" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="Misal: Untuk aktivasi, buka www.example.com/activate dan masukkan kunci di atas.">{{ old('extra_info') }}</textarea>
-            <p class="text-xs text-gray-500 mt-1">Catatan ini akan ditampilkan ke member bersama dengan kunci lisensi. Sama untuk semua lisensi yang ditambah di batch ini.</p>
+            <label for="extra_info" class="dk-label">Catatan / Instruksi Aktivasi (opsional)</label>
+            <textarea name="extra_info" id="extra_info" rows="3" class="w-full dk-input text-sm" placeholder="Misal: Untuk aktivasi, buka www.example.com/activate dan masukkan kunci di atas.">{{ old('extra_info') }}</textarea>
+            <p class="text-xs mt-1 dk-text-muted">Catatan ini akan ditampilkan ke member bersama dengan kunci lisensi. Sama untuk semua lisensi yang ditambah di batch ini.</p>
         </div>
         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium">Tambah Lisensi</button>
     </form>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">Daftar Lisensi</h2>
+<div class="dk-table">
+    <div class="px-6 py-4 " style="border-bottom:1px solid #1e2b3d">
+        <h2 class="text-lg font-semibold dk-heading">Daftar Lisensi</h2>
     </div>
     @if($licenses->total() === 0)
-        <div class="p-10 text-center text-gray-500 text-sm">Belum ada lisensi untuk produk ini.</div>
+        <div class="p-10 text-center dk-text-muted text-sm">Belum ada lisensi untuk produk ini.</div>
     @else
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <table class="min-w-full">
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kunci</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Member</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dialokasikan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Masa Berlaku</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Kunci</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Member</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Order</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Dialokasikan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Masa Berlaku</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="dk-card ">
                 @foreach($licenses as $license)
                 <tr>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm font-mono text-gray-900">{{ $license->key }}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm font-mono dk-heading">{{ $license->key }}</td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                         @if($license->isAssigned())
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Terpakai</span>
@@ -103,31 +103,31 @@
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Tersedia</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">
+                    <td class="px-6 py-3 whitespace-nowrap text-sm dk-text">
                         @if($license->user)
                             <div class="font-medium">{{ $license->user->name }}</div>
-                            <div class="text-xs text-gray-500">{{ $license->user->email }}</div>
+                            <div class="dk-text-muted" style="font-size:12px">{{ $license->user->email }}</div>
                         @else
-                            <span class="text-gray-400">—</span>
+                            <span style="color:#4a5568">—</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $license->order_id ? '#' . $license->order_id : '—' }}</td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">
+                    <td class="px-6 py-3 whitespace-nowrap text-sm dk-text">{{ $license->order_id ? '#' . $license->order_id : '—' }}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm dk-text">
                         {{ $license->assigned_at ? $license->assigned_at->format('d M Y H:i') : '—' }}
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                         @if($license->isAssigned())
                             @if($license->isLifetime())
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lifetime</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7">Lifetime</span>
                             @elseif($license->isExpired())
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Kedaluwarsa</span>
-                                <div class="text-xs text-gray-500 mt-0.5">{{ $license->expires_at->format('d M Y H:i') }}</div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5">Kedaluwarsa</span>
+                                <div class="text-xs dk-text-muted mt-0.5">{{ $license->expires_at->format('d M Y H:i') }}</div>
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Aktif</span>
-                                <div class="text-xs text-gray-500 mt-0.5">s/d {{ $license->expires_at->format('d M Y H:i') }}</div>
+                                <div class="text-xs dk-text-muted mt-0.5">s/d {{ $license->expires_at->format('d M Y H:i') }}</div>
                             @endif
                         @else
-                            <span class="text-gray-400">—</span>
+                            <span style="color:#4a5568">—</span>
                         @endif
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
@@ -146,18 +146,18 @@
             </tbody>
         </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200">{{ $licenses->links() }}</div>
+    <div class="px-6 py-4 dk-divider">{{ $licenses->links() }}</div>
     @endif
 </div>
 {{-- Modal Edit Masa Berlaku --}}
 <div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Masa Berlaku Lisensi</h3>
+    <div class="dk-card rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-semibold dk-heading mb-4">Edit Masa Berlaku Lisensi</h3>
         <form id="edit-form" method="POST">
             @csrf @method('PUT')
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Durasi</label>
-                <select name="duration_preset" id="edit-preset" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" onchange="toggleCustomDate()">
+                <label class="dk-label mb-2">Pilih Durasi</label>
+                <select name="duration_preset" id="edit-preset" class="w-full dk-input" onchange="toggleCustomDate()">
                     <option value="1_month">1 Bulan (dari tanggal alokasi)</option>
                     <option value="6_months">6 Bulan (dari tanggal alokasi)</option>
                     <option value="1_year">1 Tahun (dari tanggal alokasi)</option>
@@ -166,11 +166,11 @@
                 </select>
             </div>
             <div id="custom-date-section" class="mb-4 hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kedaluwarsa</label>
-                <input type="datetime-local" name="expires_at" id="edit-expires-at" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <label class="dk-label">Tanggal Kedaluwarsa</label>
+                <input type="datetime-local" name="expires_at" id="edit-expires-at" class="w-full dk-input">
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">Batal</button>
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 border dk-input rounded-lg dk-text hover:" style="background:#151e2d text-sm font-medium">Batal</button>
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium">Simpan</button>
             </div>
         </form>

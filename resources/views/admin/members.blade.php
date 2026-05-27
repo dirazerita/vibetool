@@ -2,82 +2,82 @@
 @section('title', 'Semua Member')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Semua Member</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Semua Member</h1>
 
 @if(session('success'))
-    <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+    <div class="dk-alert-success">
         {{ session('success') }}
     </div>
 @endif
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+<div class="dk-table">
+    <table class="min-w-full">
+        <thead>
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Konteks Aktivasi</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode Referral</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Upline</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Downline</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Saldo</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bergabung</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Email</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">WhatsApp</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Konteks Aktivasi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Kode Referral</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Upline</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Downline</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Saldo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Bergabung</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Aksi</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
+        <tbody>
             @forelse($members as $member)
             <tr>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $member->name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $member->email }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $member->whatsapp_number ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">{{ $member->name }}</td>
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->email }}</td>
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->whatsapp_number ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm">
                     @if(($member->status ?? 'active') === 'active')
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7">Active</span>
                     @else
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047">Pending</span>
                     @endif
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-700">
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">
                     @if($member->intendedProduct)
                         <div class="flex flex-col gap-0.5">
-                            <span class="text-[11px] uppercase tracking-wide text-gray-400">Ingin beli</span>
-                            <a href="{{ route('product.show', $member->intendedProduct->slug) }}" target="_blank" class="font-medium text-indigo-600 hover:underline">{{ $member->intendedProduct->title }}</a>
-                            <span class="text-xs text-gray-500">Rp {{ number_format($member->intendedProduct->price, 0, ',', '.') }}</span>
+                            <span class="text-[11px] uppercase tracking-wide " style="color:#4a5568">Ingin beli</span>
+                            <a href="{{ route('product.show', $member->intendedProduct->slug) }}" target="_blank" class="font-medium" style="color:#818cf8">{{ $member->intendedProduct->title }}</a>
+                            <span class="dk-text-muted" style="font-size:12px">Rp {{ number_format($member->intendedProduct->price, 0, ',', '.') }}</span>
                             @if($member->upline)
-                                <span class="text-xs text-gray-500">via afiliasi <span class="font-medium text-gray-700">{{ $member->upline->name }}</span></span>
+                                <span class="dk-text-muted" style="font-size:12px">via afiliasi <span class="font-medium dk-text">{{ $member->upline->name }}</span></span>
                             @endif
                         </div>
                     @else
-                        <span class="text-gray-400">-</span>
+                        <span style="color:#4a5568">-</span>
                     @endif
                 </td>
-                <td class="px-6 py-4 text-sm font-mono text-indigo-600">{{ $member->referral_code }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $member->upline->name ?? '-' }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $member->downlines_count }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">Rp {{ number_format($member->balance, 0, ',', '.') }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $member->created_at->format('d M Y') }}</td>
+                <td class="px-6 py-4 text-sm font-mono" style="color:#818cf8">{{ $member->referral_code }}</td>
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->upline->name ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->downlines_count }}</td>
+                <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">Rp {{ number_format($member->balance, 0, ',', '.') }}</td>
+                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->created_at->format('d M Y') }}</td>
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         @if(($member->status ?? 'active') === 'pending')
                             <form method="POST" action="{{ route('admin.members.activate', $member) }}">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-medium">Aktifkan</button>
+                                <button type="submit" class="text-sm font-medium" style="color:#6ee7b7">Aktifkan</button>
                             </form>
                         @endif
-                        <a href="{{ route('admin.members.edit', $member) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</a>
+                        <a href="{{ route('admin.members.edit', $member) }}" class="text-sm font-medium" style="color:#818cf8">Edit</a>
                         <form method="POST" action="{{ route('admin.members.destroy', $member) }}" onsubmit="return confirm('Hapus member {{ $member->name }}? Data komisi dan order terkait tidak akan dihapus.')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
+                            <button type="submit" class="text-sm font-medium" style="color:#fca5a5">Hapus</button>
                         </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="11" class="px-6 py-8 text-center text-gray-500">Belum ada member.</td>
+                <td colspan="11" class="px-6 py-8 text-center" style="color:#64748b">Belum ada member.</td>
             </tr>
             @endforelse
         </tbody>

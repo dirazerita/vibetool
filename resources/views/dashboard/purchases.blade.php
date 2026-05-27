@@ -2,20 +2,20 @@
 @section('title', 'Pembelian Saya')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Pembelian Saya</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Pembelian Saya</h1>
 
 @if($purchases->total() === 0)
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
+    <div class="dk-card p-10 text-center">
         <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
-        <p class="text-gray-500 mb-4">Kamu belum pernah membeli produk apa pun.</p>
+        <p class="dk-text-muted mb-4">Kamu belum pernah membeli produk apa pun.</p>
         <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
             Lihat Produk
         </a>
     </div>
 @else
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
         @foreach($purchases as $order)
             @php
                 $product = $order->product;
@@ -24,8 +24,8 @@
                 $hasFile = $product && ($product->file_path || $product->file_url);
                 $isPendingManual = $order->status === 'pending' && $order->payment_method === 'manual';
             @endphp
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                <div class="h-40 bg-gray-100 relative">
+            <div class="dk-table flex flex-col">
+                <div class="h-40 " style="background:#151e2d; position:relative">
                     @if($heroImage)
                         <img src="{{ $heroImage }}" alt="{{ $product->title ?? 'Produk' }}" class="w-full h-full object-cover">
                     @else
@@ -34,16 +34,16 @@
                         </div>
                     @endif
                     @if($isPendingManual)
-                        <span class="absolute top-2 left-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                        <span class="absolute top-2 left-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047 border border-yellow-200">
                             {{ $order->payment_proof ? 'Menunggu Konfirmasi' : 'Menunggu Pembayaran' }}
                         </span>
                     @endif
                 </div>
 
                 <div class="p-4 flex-1 flex flex-col">
-                    <h3 class="text-lg font-bold text-gray-900 truncate mb-1">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
+                    <h3 class="text-lg font-bold dk-heading truncate mb-1">{{ $product->title ?? 'Produk telah dihapus' }}</h3>
                     <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($order->amount, 0, ',', '.') }}</p>
-                    <p class="text-xs text-gray-500 mb-4">{{ $isPendingManual ? 'Dipesan' : 'Dibeli' }} {{ $order->created_at->format('d M Y H:i') }}</p>
+                    <p class="text-xs dk-text-muted mb-4">{{ $isPendingManual ? 'Dipesan' : 'Dibeli' }} {{ $order->created_at->format('d M Y H:i') }}</p>
 
                     <div class="mt-auto space-y-2">
                         @if($isPendingManual)
@@ -70,7 +70,7 @@
                                 @endif
                             </a>
                         @else
-                            <button disabled class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
+                            <button disabled class="flex items-center justify-center gap-2 w-full px-4 py-2 " style="background:#151e2d text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
                                 File belum tersedia
                             </button>
                         @endif
@@ -83,7 +83,7 @@
                         @endif
 
                         @if($product)
-                            <a href="{{ route('product.show', $product->slug) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
+                            <a href="{{ route('product.show', $product->slug) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 " style="background:#151e2d dk-text rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 Lihat Detail Produk
                             </a>

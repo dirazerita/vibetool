@@ -2,7 +2,7 @@
 @section('title', 'Tim / Downline')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-900 mb-6">Tim / Downline</h1>
+<h1 class="text-2xl font-bold dk-heading mb-6">Tim / Downline</h1>
 
 {{-- Ringkasan --}}
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
@@ -21,7 +21,7 @@
 </div>
 
 {{-- Diagram Pohon --}}
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" style="overflow-x: auto;">
+<div class="dk-card" style="padding:24px;;overflow-x: auto;">
 
     {{-- Level 1: Root User --}}
     <div style="text-align: center;">
@@ -107,7 +107,7 @@
 </div>
 
 {{-- Legend --}}
-<div class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+<div class="mt-4 dk-card p-4">
     <div style="font-size: 10px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 8px;">Keterangan Warna</div>
     <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px;">
         <div style="display: flex; align-items: center; gap: 6px;">
