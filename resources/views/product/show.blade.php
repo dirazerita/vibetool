@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', $product->title . ' - PRODIG')
+@section('title', $product->title . ' - VibeTool.Id')
 
 @section('content')
 <div style="max-width: 56rem; margin: 0 auto; padding: 48px 1rem;">
@@ -15,7 +15,7 @@
                 <div style="font-size: 0.875rem; color: #94a3b8;">Harga</div>
                 @if($product->isFree())
                     <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">GRATIS</div>
-                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Klaim langsung — login pakai akun PRODIG kamu</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Klaim langsung — login pakai akun VibeTool.Id kamu</div>
                 @else
                     <div style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
                 @endif

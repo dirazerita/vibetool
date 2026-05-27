@@ -40,7 +40,7 @@
                 <h3 class="text-lg font-bold dk-heading truncate mb-1">{{ $product->title }}</h3>
                 @if($product->isFree())
                     <p class="text-lg font-bold mb-1" style="color:#10b981">GRATIS</p>
-                    <p class="text-xs dk-text-muted mb-3">Klaim langsung — login software pakai email + password akun PRODIG kamu.</p>
+                    <p class="text-xs dk-text-muted mb-3">Klaim langsung — login software pakai email + password akun VibeTool.Id kamu.</p>
                 @else
                     <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                     <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs dk-text-muted font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
