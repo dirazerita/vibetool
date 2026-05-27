@@ -63,6 +63,7 @@ class ProductController extends Controller
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'file_url' => $request->input('file_url') ?: null,
+            'file_path' => null,
         ];
 
         if ($request->hasFile('file')) {
