@@ -50,42 +50,15 @@
                     @error('upline_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="dk-card" style="padding:16px; border-left:4px solid #6366f1;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <label style="position:relative; display:inline-block; width:48px; height:26px; cursor:pointer;">
-                            <input type="hidden" name="can_upload_product" value="0">
-                            <input type="checkbox" name="can_upload_product" value="1" id="can_upload_product" {{ old('can_upload_product', $user->can_upload_product) ? 'checked' : '' }} style="opacity:0; width:0; height:0; position:absolute;">
-                            <span id="toggle-track" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; border-radius:26px; transition:0.3s; {{ old('can_upload_product', $user->can_upload_product) ? 'background:#6366f1;' : 'background:#2d3a4a;' }}"></span>
-                            <span id="toggle-dot" style="position:absolute; height:20px; width:20px; bottom:3px; border-radius:50%; transition:0.3s; background:white; {{ old('can_upload_product', $user->can_upload_product) ? 'left:25px;' : 'left:3px;' }}"></span>
-                        </label>
-                        <div>
-                            <span class="text-sm font-medium dk-heading">Izinkan Upload Produk</span>
-                            <p class="text-xs dk-text-muted" style="margin-top:2px;">Jika aktif, member ini bisa mengupload produk dari dashboard. Produk tetap harus di-approve admin.</p>
-                        </div>
+                <div>
+                    <span style="display:block; font-size:14px; font-weight:600; color:#e2e8f0; margin-bottom:8px;">Izinkan Upload Produk</span>
+                    <input type="hidden" name="can_upload_product" id="can_upload_product_val" value="{{ old('can_upload_product', $user->can_upload_product) ? '1' : '0' }}">
+                    <div style="display:inline-flex; border-radius:8px; overflow:hidden; border:1px solid #2d3a4a;">
+                        <button type="button" id="btn_upload_off" onclick="document.getElementById('can_upload_product_val').value='0';this.style.background='#ef4444';this.style.color='#fff';document.getElementById('btn_upload_on').style.background='transparent';document.getElementById('btn_upload_on').style.color='#94a3b8';" style="padding:8px 20px; font-size:13px; font-weight:600; border:none; cursor:pointer; {{ old('can_upload_product', $user->can_upload_product) ? 'background:transparent; color:#94a3b8;' : 'background:#ef4444; color:#fff;' }}">NONAKTIF</button>
+                        <button type="button" id="btn_upload_on" onclick="document.getElementById('can_upload_product_val').value='1';this.style.background='#6366f1';this.style.color='#fff';document.getElementById('btn_upload_off').style.background='transparent';document.getElementById('btn_upload_off').style.color='#94a3b8';" style="padding:8px 20px; font-size:13px; font-weight:600; border:none; cursor:pointer; {{ old('can_upload_product', $user->can_upload_product) ? 'background:#6366f1; color:#fff;' : 'background:transparent; color:#94a3b8;' }}">AKTIF</button>
                     </div>
+                    <p style="font-size:12px; color:#64748b; margin-top:6px;">Jika aktif, member ini bisa mengupload produk dari dashboard. Produk tetap harus di-approve admin.</p>
                 </div>
-                <script>
-                    (function(){
-                        var cb = document.getElementById('can_upload_product');
-                        var track = document.getElementById('toggle-track');
-                        var dot = document.getElementById('toggle-dot');
-                        cb.parentElement.addEventListener('click', function(e){
-                            if(e.target === cb) return;
-                            cb.checked = !cb.checked;
-                            updateToggle();
-                        });
-                        cb.addEventListener('change', updateToggle);
-                        function updateToggle(){
-                            if(cb.checked){
-                                track.style.background = '#6366f1';
-                                dot.style.left = '25px';
-                            } else {
-                                track.style.background = '#2d3a4a';
-                                dot.style.left = '3px';
-                            }
-                        }
-                    })();
-                </script>
 
                 <div class="dk-card" style="padding:16px">
                     <p class="dk-text" style="font-size:14px">Status:
