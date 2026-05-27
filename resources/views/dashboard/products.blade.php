@@ -20,7 +20,7 @@
         @endphp
         <div class="dk-table">
             {{-- Thumbnail --}}
-            <div class="h-40 " style="background:#151e2d">
+            <div style="background:#151e2d; position:relative; aspect-ratio: 1 / 1;">
                 @if($heroImage)
                     <img src="{{ $heroImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
                 @else
