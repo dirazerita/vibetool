@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\ProductController as DashboardProductControll
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
+use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FreeProductController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\LandingPageController;
+use App\Http\Controllers\Admin\VideoTutorialController;
 use App\Http\Controllers\Admin\LicenseController as AdminLicenseController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
@@ -69,6 +71,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/coupons', [DashboardCouponController::class, 'index'])->name('.coupons');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
+        Route::get('/video-tutorials', [DashboardVideoTutorialController::class, 'index'])->name('.video-tutorials');
+        Route::get('/video-tutorials/{product}', [DashboardVideoTutorialController::class, 'show'])->name('.video-tutorials.show');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
         Route::get('/settings', [SettingController::class, 'index'])->name('.settings');
@@ -89,6 +93,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/products/{product}/landing-page/testimonials/{testimonial}', [LandingPageController::class, 'updateTestimonial'])->name('products.landing-page.testimonials.update');
         Route::delete('/products/{product}/landing-page/testimonials/{testimonial}', [LandingPageController::class, 'deleteTestimonial'])->name('products.landing-page.testimonials.delete');
         Route::post('/products/{product}/landing-page/testimonials/{testimonial}/toggle', [LandingPageController::class, 'toggleTestimonial'])->name('products.landing-page.testimonials.toggle');
+        Route::get('/products/{product}/video-tutorials', [VideoTutorialController::class, 'index'])->name('products.video-tutorials');
+        Route::post('/products/{product}/video-tutorials', [VideoTutorialController::class, 'store'])->name('products.video-tutorials.store');
+        Route::put('/products/{product}/video-tutorials/{tutorial}', [VideoTutorialController::class, 'update'])->name('products.video-tutorials.update');
+        Route::delete('/products/{product}/video-tutorials/{tutorial}', [VideoTutorialController::class, 'destroy'])->name('products.video-tutorials.destroy');
+        Route::post('/products/{product}/video-tutorials/{tutorial}/toggle', [VideoTutorialController::class, 'toggle'])->name('products.video-tutorials.toggle');
+        Route::post('/products/{product}/video-tutorials/reorder', [VideoTutorialController::class, 'reorder'])->name('products.video-tutorials.reorder');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::post('/orders/{order}/mark-paid', [OrderController::class, 'markPaid'])->name('orders.mark-paid');
         Route::get('/members', [MemberController::class, 'index'])->name('members');
