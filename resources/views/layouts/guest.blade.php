@@ -1,3 +1,4 @@
+@props(['logoHeight' => 144, 'logoMaxWidth' => 360])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -21,7 +22,7 @@
         <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 40px; background-color: #0b1120;">
             <div>
                 <a href="/">
-                    <img src="{{ asset('logo.png') }}" alt="Logo" style="height: 144px; width: auto; max-width: 360px; object-fit: contain;">
+                    <img src="{{ asset('logo.png') }}" alt="Logo" style="height: {{ $logoHeight }}px; width: auto; max-width: {{ $logoMaxWidth }}px; object-fit: contain;">
                 </a>
             </div>
 
