@@ -24,7 +24,13 @@ class ProductController extends Controller
     {
         $isFree = $request->input('product_type') === 'free';
         if ($isFree) {
-            $request->merge(['price' => 0]);
+            $request->merge([
+                'price' => 0,
+                'commission_percent' => 0,
+                'commission_percent_non_owner' => 0,
+                'upline_percent' => 0,
+                'upline_percent_non_owner' => 0,
+            ]);
         }
 
         $request->validate([
@@ -50,10 +56,10 @@ class ProductController extends Controller
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
-            'commission_percent' => $request->commission_percent,
-            'commission_percent_non_owner' => $request->commission_percent_non_owner,
-            'upline_percent' => $request->upline_percent,
-            'upline_percent_non_owner' => $request->upline_percent_non_owner,
+            'commission_percent' => $isFree ? 0 : $request->commission_percent,
+            'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
+            'upline_percent' => $isFree ? 0 : $request->upline_percent,
+            'upline_percent_non_owner' => $isFree ? 0 : $request->upline_percent_non_owner,
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'file_url' => $request->input('file_url') ?: null,
@@ -81,7 +87,13 @@ class ProductController extends Controller
     {
         $isFree = $request->input('product_type') === 'free';
         if ($isFree) {
-            $request->merge(['price' => 0]);
+            $request->merge([
+                'price' => 0,
+                'commission_percent' => 0,
+                'commission_percent_non_owner' => 0,
+                'upline_percent' => 0,
+                'upline_percent_non_owner' => 0,
+            ]);
         }
 
         $request->validate([
@@ -104,10 +116,10 @@ class ProductController extends Controller
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
-            'commission_percent' => $request->commission_percent,
-            'commission_percent_non_owner' => $request->commission_percent_non_owner,
-            'upline_percent' => $request->upline_percent,
-            'upline_percent_non_owner' => $request->upline_percent_non_owner,
+            'commission_percent' => $isFree ? 0 : $request->commission_percent,
+            'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
+            'upline_percent' => $isFree ? 0 : $request->upline_percent,
+            'upline_percent_non_owner' => $isFree ? 0 : $request->upline_percent_non_owner,
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'is_active' => $request->boolean('is_active'),
