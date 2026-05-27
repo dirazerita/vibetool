@@ -8,7 +8,12 @@
     @foreach($products as $product)
         @php
             $lp = $product->landingPage;
-            $heroImage = $lp && $lp->hero_image ? asset('storage/' . $lp->hero_image) : null;
+            $cardImage = null;
+            if ($product->thumbnail) {
+                $cardImage = asset('storage/' . $product->thumbnail);
+            } elseif ($lp && $lp->hero_image) {
+                $cardImage = asset('storage/' . $lp->hero_image);
+            }
             $affiliateLink = url('/p/' . $product->slug . '?ref=' . $user->referral_code);
             $status = $purchaseStatus[$product->id] ?? null;
             $alreadyPaid = $status['paid'] ?? false;
@@ -21,8 +26,8 @@
         <div class="dk-table">
             {{-- Thumbnail --}}
             <div style="background:#151e2d; position:relative; aspect-ratio: 1 / 1;">
-                @if($heroImage)
-                    <img src="{{ $heroImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
+                @if($cardImage)
+                    <img src="{{ $cardImage }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         <svg class="w-12 h-12 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
