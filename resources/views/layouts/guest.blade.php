@@ -18,10 +18,10 @@
         </style>
     </head>
     <body style="background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased;">
-        <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 48px; background-color: #0b1120;">
+        <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 40px; background-color: #0b1120;">
             <div>
                 <a href="/">
-                    <img src="{{ asset('logo.png') }}" alt="Logo" style="height: 64px; width: auto; max-width: 220px; object-fit: contain;">
+                    <img src="{{ asset('logo.png') }}" alt="Logo" style="height: 144px; width: auto; max-width: 360px; object-fit: contain;">
                 </a>
             </div>
 
