@@ -2,19 +2,19 @@
 @section('title', 'PRODIG - Marketplace Produk Digital')
 
 @section('content')
-<div class="bg-indigo-600 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl font-bold mb-4">Marketplace Produk Digital</h1>
-        <p class="text-xl text-indigo-100 mb-8">Temukan produk digital berkualitas dan dapatkan komisi sebagai affiliator!</p>
+<div style="background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95); padding: 64px 0;">
+    <div style="max-width: 80rem; margin: 0 auto; padding: 0 1rem; text-align: center;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 16px;">Marketplace Produk Digital</h1>
+        <p style="font-size: 1.25rem; color: #c7d2fe; margin-bottom: 32px;">Temukan produk digital berkualitas dan dapatkan komisi sebagai affiliator!</p>
         @guest
-            <a href="{{ route('register') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-indigo-50 inline-block">Daftar Sekarang</a>
+            <a href="{{ route('register') }}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #ffffff; padding: 12px 32px; border-radius: 10px; font-weight: 700; font-size: 1.125rem; text-decoration: none; box-shadow: 0 4px 15px rgba(99,102,241,0.4);">Daftar Sekarang</a>
         @endguest
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-8">Produk Digital</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div style="max-width: 80rem; margin: 0 auto; padding: 48px 1rem;">
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 32px;">Produk Digital</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
         @foreach($products as $product)
         @php
             $thumbUrl = null;
@@ -24,22 +24,22 @@
                 $thumbUrl = asset('storage/' . $product->landingPage->hero_image);
             }
         @endphp
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-            <div class="h-48 relative">
+        <div style="background-color: #1a2332; border: 1px solid #2d3a4a; border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s;">
+            <div style="height: 192px; position: relative;">
                 @if($thumbUrl)
-                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" class="w-full h-full object-cover">
+                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                 @else
-                    <div class="w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex items-center justify-center p-4">
-                        <span class="text-white text-lg font-bold text-center leading-snug drop-shadow-md">{{ $product->title }}</span>
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed, #4338ca); display: flex; align-items: center; justify-content: center; padding: 16px;">
+                        <span style="color: #ffffff; font-size: 1.125rem; font-weight: 700; text-align: center; line-height: 1.4;">{{ $product->title }}</span>
                     </div>
                 @endif
             </div>
-            <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $product->title }}</h3>
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $product->description }}</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-indigo-600">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                    <a href="{{ route('product.show', $product->slug) }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm font-medium">Detail</a>
+            <div style="padding: 24px;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; color: #e2e8f0; margin-bottom: 8px;">{{ $product->title }}</h3>
+                <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 16px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ $product->description }}</p>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <a href="{{ route('product.show', $product->slug) }}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-decoration: none;">Detail</a>
                 </div>
             </div>
         </div>

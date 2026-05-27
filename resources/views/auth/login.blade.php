@@ -13,7 +13,7 @@
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
+        <div style="margin-top: 16px;">
             <x-input-label for="password" :value="__('Password')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
@@ -25,16 +25,16 @@
         </div>
 
         <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div style="margin-top: 16px;">
+            <label for="remember_me" style="display: inline-flex; align-items: center;">
+                <input id="remember_me" type="checkbox" style="border-radius: 4px; border: 1px solid #2d3a4a; background-color: #151e2d; color: #818cf8;" name="remember">
+                <span style="margin-left: 8px; font-size: 0.875rem; color: #94a3b8;">{{ __('Remember me') }}</span>
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 16px;">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                <a style="text-decoration: underline; font-size: 0.875rem; color: #94a3b8;" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}
                 </a>
             @endif

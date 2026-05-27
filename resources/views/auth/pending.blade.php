@@ -1,37 +1,36 @@
 <x-guest-layout>
-    <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background-color: #1a3b2a; border-radius: 50%; margin-bottom: 16px;">
+            <svg style="width: 32px; height: 32px; color: #86efac;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">Registrasi Berhasil!</h1>
-        <p class="text-gray-600 mt-2 text-sm">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">Registrasi Berhasil!</h1>
+        <p style="color: #94a3b8; margin-top: 8px; font-size: 0.875rem;">
             Akun Anda sedang menunggu aktivasi oleh admin. Klik tombol di bawah untuk
             menghubungi admin via WhatsApp dan minta aktivasi akun Anda.
         </p>
     </div>
 
     @if(session('warning'))
-        <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+        <div style="margin-bottom: 16px; padding: 12px; background-color: #3b351a; border: 1px solid #854d0e; border-radius: 8px; font-size: 0.875rem; color: #fde68a;">
             {{ session('warning') }}
         </div>
     @endif
 
-    <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm space-y-1">
-        <p class="text-gray-700"><span class="text-gray-500">Nama:</span> <strong>{{ $name }}</strong></p>
-        <p class="text-gray-700"><span class="text-gray-500">Email:</span> <strong>{{ $email }}</strong></p>
-        <p class="text-gray-700"><span class="text-gray-500">No WA:</span> <strong>{{ $whatsappNumber ?: '-' }}</strong></p>
+    <div style="background-color: #151e2d; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 0.875rem;">
+        <p style="color: #cbd5e1; margin-bottom: 4px;"><span style="color: #94a3b8;">Nama:</span> <strong>{{ $name }}</strong></p>
+        <p style="color: #cbd5e1; margin-bottom: 4px;"><span style="color: #94a3b8;">Email:</span> <strong>{{ $email }}</strong></p>
+        <p style="color: #cbd5e1; margin-bottom: 4px;"><span style="color: #94a3b8;">No WA:</span> <strong>{{ $whatsappNumber ?: '-' }}</strong></p>
         @if(!empty($product) && !empty($product['title']))
-            <p class="text-gray-700"><span class="text-gray-500">Produk:</span> <strong>{{ $product['title'] }}</strong></p>
+            <p style="color: #cbd5e1; margin-bottom: 4px;"><span style="color: #94a3b8;">Produk:</span> <strong>{{ $product['title'] }}</strong></p>
             @if(!empty($product['price']))
-                <p class="text-gray-700"><span class="text-gray-500">Harga:</span> <strong>Rp {{ number_format((float) $product['price'], 0, ',', '.') }}</strong></p>
+                <p style="color: #cbd5e1;"><span style="color: #94a3b8;">Harga:</span> <strong>Rp {{ number_format((float) $product['price'], 0, ',', '.') }}</strong></p>
             @endif
         @endif
     </div>
 
     @if($activationLink)
-        {{-- Inline style dipakai sebagai fallback jika CSS Tailwind belum di-rebuild di server target. --}}
         <a href="{{ $activationLink }}" target="_blank" rel="noopener"
            style="display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;background-color:#16a34a;color:#ffffff;font-weight:700;padding:0.85rem 1rem;border-radius:0.5rem;box-shadow:0 4px 10px rgba(22,163,74,0.25);text-decoration:none;font-size:1rem;line-height:1.25rem;"
            onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='#16a34a'">
@@ -41,17 +40,17 @@
             <span style="color:#ffffff;">Hubungi Admin via WhatsApp</span>
         </a>
     @else
-        <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+        <div style="padding: 16px; background-color: #3b1a1a; border: 1px solid #7f1d1d; border-radius: 8px; font-size: 0.875rem; color: #fca5a5;">
             Nomor WhatsApp admin belum dikonfigurasi. Silakan hubungi admin melalui kanal lain.
         </div>
     @endif
 
-    <p class="text-xs text-gray-500 mt-4 text-center">
+    <p style="font-size: 0.75rem; color: #64748b; margin-top: 16px; text-align: center;">
         Setelah admin mengaktifkan akun Anda, Anda dapat login dan mulai berbelanja.
     </p>
 
-    <div class="mt-6 text-center text-sm text-gray-600">
+    <div style="margin-top: 24px; text-align: center; font-size: 0.875rem; color: #94a3b8;">
         Sudah diaktifkan?
-        <a href="{{ route('login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">Login di sini</a>
+        <a href="{{ route('login') }}" style="font-weight: 500; color: #818cf8; text-decoration: none;">Login di sini</a>
     </div>
 </x-guest-layout>

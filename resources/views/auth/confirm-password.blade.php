@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
+    <div style="margin-bottom: 16px; font-size: 0.875rem; color: #94a3b8;">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>
 
@@ -18,7 +18,7 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-4">
+        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
             <x-primary-button>
                 {{ __('Confirm') }}
             </x-primary-button>

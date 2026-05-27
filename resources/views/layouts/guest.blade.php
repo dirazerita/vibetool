@@ -13,16 +13,19 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>
+            body { background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased; }
+        </style>
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+    <body style="background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased;">
+        <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 48px; background-color: #0b1120;">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <img src="{{ asset('logo.png') }}" alt="Logo" style="height: 64px; width: auto; max-width: 220px; object-fit: contain;">
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div style="width: 100%; max-width: 28rem; margin-top: 24px; padding: 24px; background-color: #1a2332; border: 1px solid #2d3a4a; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
                 {{ $slot }}
             </div>
         </div>

@@ -5,29 +5,29 @@
 @php
     $showDuplicateWarning = ($alreadyPurchased ?? false) || isset($pendingOrder);
 @endphp
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ showWarning: {{ $showDuplicateWarning ? 'true' : 'false' }} }">
+<div style="max-width: 42rem; margin: 0 auto; padding: 48px 1rem;" x-data="{ showWarning: {{ $showDuplicateWarning ? 'true' : 'false' }} }">
 
     @if($showDuplicateWarning)
     <div
         x-show="showWarning"
         x-cloak
         x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+        style="position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5); padding: 0 16px;"
     >
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" @click.outside="showWarning = false">
-            <div class="flex items-start gap-3 mb-4">
-                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.19 16a2 2 0 001.74 3z"></path></svg>
+        <div style="background-color: #1a2332; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-width: 28rem; width: 100%; padding: 24px; border: 1px solid #2d3a4a;" @click.outside="showWarning = false">
+            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background-color: #3b351a; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 20px; height: 20px; color: #fde68a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.19 16a2 2 0 001.74 3z"></path></svg>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-900">
+                <div style="flex: 1;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: #e2e8f0;">
                         @if($alreadyPurchased ?? false)
                             Anda sudah pernah membeli produk ini
                         @else
                             Pesanan masih menunggu pembayaran
                         @endif
                     </h3>
-                    <div class="text-sm text-gray-600 mt-2 space-y-2">
+                    <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">
                         @if($alreadyPurchased ?? false)
                             <p>Produk <strong>{{ $product->title }}</strong> sudah ada di akun Anda. Apakah Anda yakin ingin membelinya lagi?</p>
                         @endif
@@ -37,19 +37,19 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-2">
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
                 <a href="{{ route('product.show', $product->slug) }}"
-                   class="flex-1 text-center px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium text-sm">
+                   style="flex: 1; text-align: center; padding: 10px 16px; border-radius: 8px; border: 1px solid #2d3a4a; color: #cbd5e1; font-weight: 500; font-size: 0.875rem; text-decoration: none;">
                     Batal
                 </a>
                 @if(isset($pendingOrder))
                     <a href="{{ route('checkout.manual', $pendingOrder->id) }}"
-                       class="flex-1 text-center px-4 py-2.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 font-medium text-sm">
+                       style="flex: 1; text-align: center; padding: 10px 16px; border-radius: 8px; background-color: #854d0e; color: #ffffff; font-weight: 500; font-size: 0.875rem; text-decoration: none;">
                         Lihat Pesanan Pending
                     </a>
                 @endif
                 <button type="button" @click="showWarning = false"
-                        class="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-medium text-sm">
+                        style="flex: 1; padding: 10px 16px; border-radius: 8px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; font-weight: 500; font-size: 0.875rem; border: none; cursor: pointer;">
                     Ya, saya mengerti, lanjutkan
                 </button>
             </div>
@@ -57,11 +57,11 @@
     </div>
     @endif
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+    <div style="background-color: #1a2332; border-radius: 12px; border: 1px solid #2d3a4a; padding: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 24px;">Checkout</h1>
 
-        <div class="border border-gray-200 rounded-lg p-6 mb-6">
-            <div class="flex gap-4 items-start">
+        <div style="border: 1px solid #2d3a4a; border-radius: 8px; padding: 24px; margin-bottom: 24px; background-color: #151e2d;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
                 @php
                     $thumbUrl = null;
                     if ($product->thumbnail) {
@@ -70,22 +70,22 @@
                         $thumbUrl = asset('storage/' . $product->landingPage->hero_image);
                     }
                 @endphp
-                <div class="flex-shrink-0">
+                <div style="flex-shrink: 0;">
                     @if($thumbUrl)
-                        <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" class="rounded-lg object-cover" style="width: 80px; height: 80px;">
+                        <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" style="border-radius: 8px; object-fit: cover; width: 80px; height: 80px;">
                     @else
-                        <div class="rounded-lg bg-gray-100 flex items-center justify-center" style="width: 80px; height: 80px;">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <div style="border-radius: 8px; background-color: #151e2d; display: flex; align-items: center; justify-content: center; width: 80px; height: 80px;">
+                            <svg style="width: 32px; height: 32px; color: #475569;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
                     @endif
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ $product->title }}</h2>
-                    <p class="text-gray-600 text-sm mt-1">{{ Str::limit($product->description, 100) }}</p>
+                <div style="flex: 1; min-width: 0;">
+                    <h2 style="font-size: 1.125rem; font-weight: 600; color: #e2e8f0;">{{ $product->title }}</h2>
+                    <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">{{ Str::limit($product->description, 100) }}</p>
                     @if(isset($autoCouponData) && $autoCouponData)
-                        <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-base text-gray-400 line-through">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                            <span class="text-2xl font-bold text-indigo-600" id="product-price">{{ $autoCouponData['final_price_formatted'] }}</span>
+                        <div style="margin-top: 12px; display: flex; align-items: baseline; gap: 8px;">
+                            <span style="font-size: 1rem; color: #64748b; text-decoration: line-through;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                            <span style="font-size: 1.5rem; font-weight: 700; color: #818cf8;" id="product-price">{{ $autoCouponData['final_price_formatted'] }}</span>
                         </div>
                     @else
                         <div class="mt-3 text-2xl font-bold text-indigo-600" id="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
@@ -95,56 +95,56 @@
         </div>
 
         @if(request()->cookie('ref'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm">
+            <div style="background-color: #1a3b2a; border: 1px solid #166534; color: #86efac; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 0.875rem;">
                 Kode referral terdeteksi: <strong>{{ request()->cookie('ref') }}</strong>
             </div>
         @endif
 
         @if(isset($autoCouponData) && $autoCouponData)
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span class="text-sm font-medium text-green-700">
+            <div style="background-color: #1a3b2a; border: 1px solid #166534; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <svg style="width: 20px; height: 20px; color: #86efac;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span style="font-size: 0.875rem; font-weight: 500; color: #86efac;">
                         Kupon <strong>{{ $autoCouponData['code'] }}</strong>@if($autoCouponData['member_name']) dari {{ $autoCouponData['member_name'] }}@endif telah diterapkan — diskon {{ $autoCouponData['discount_label'] }} ({{ $autoCouponData['discount_formatted'] }})
                     </span>
                 </div>
-                <div class="flex justify-between text-sm">
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
                     <span class="text-gray-600">Harga asli</span>
-                    <span class="text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span style="color: #e2e8f0;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                 </div>
-                <div class="flex justify-between text-sm mt-1">
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 4px;">
                     <span class="text-red-600">Diskon ({{ $autoCouponData['name'] }})</span>
                     <span class="text-red-600">-{{ $autoCouponData['discount_formatted'] }}</span>
                 </div>
-                <div class="border-t border-green-200 mt-2 pt-2 flex justify-between">
-                    <span class="text-sm font-semibold text-gray-900">Total bayar</span>
-                    <span class="text-lg font-bold text-indigo-600">{{ $autoCouponData['final_price_formatted'] }}</span>
+                <div style="border-top: 1px solid #166534; margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.875rem; font-weight: 600; color: #e2e8f0;">Total bayar</span>
+                    <span style="font-size: 1.125rem; font-weight: 700; color: #818cf8;">{{ $autoCouponData['final_price_formatted'] }}</span>
                 </div>
             </div>
         @endif
 
-        <div class="border border-gray-200 rounded-lg p-4 mb-6">
-            <label for="coupon_input" class="block text-sm font-medium text-gray-700 mb-2">Punya kode kupon?</label>
-            <div class="flex gap-2">
+        <div style="border: 1px solid #2d3a4a; border-radius: 8px; padding: 16px; margin-bottom: 24px; background-color: #151e2d;">
+            <label for="coupon_input" style="display: block; font-size: 0.875rem; font-weight: 500; color: #cbd5e1; margin-bottom: 8px;">Punya kode kupon?</label>
+            <div style="display: flex; gap: 8px;">
                 <input type="text" id="coupon_input" placeholder="Masukkan kode kupon"
                     value="{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['code'] : '' }}"
                     @if(isset($autoCouponData) && $autoCouponData) readonly @endif
-                    class="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 uppercase text-sm @if(isset($autoCouponData) && $autoCouponData) bg-gray-100 cursor-not-allowed @endif">
-                <button type="button" id="apply-coupon" @if(isset($autoCouponData) && $autoCouponData) disabled @endif class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 font-medium text-sm whitespace-nowrap @if(isset($autoCouponData) && $autoCouponData) opacity-50 cursor-not-allowed @endif">Terapkan</button>
+                    style="flex: 1; background-color: #151e2d; border: 1px solid #2d3a4a; color: #e2e8f0; border-radius: 8px; padding: 8px 12px; text-transform: uppercase; font-size: 0.875rem;" class=" @if(isset($autoCouponData) && $autoCouponData) bg-gray-100 cursor-not-allowed @endif">
+                <button type="button" id="apply-coupon" @if(isset($autoCouponData) && $autoCouponData) disabled @endif style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 0.875rem; white-space: nowrap; border: none; cursor: pointer;" class=" @if(isset($autoCouponData) && $autoCouponData) opacity-50 cursor-not-allowed @endif">Terapkan</button>
             </div>
             <div id="coupon-message" class="mt-2 text-sm hidden"></div>
             <div id="coupon-summary" class="mt-3 {{ isset($autoCouponData) && $autoCouponData ? '' : 'hidden' }}">
-                <div class="flex justify-between text-sm">
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
                     <span class="text-gray-600">Harga asli</span>
-                    <span class="text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span style="color: #e2e8f0;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                 </div>
-                <div class="flex justify-between text-sm mt-1">
+                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 4px;">
                     <span class="text-red-600">Diskon (<span id="coupon-name">{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['name'] : '' }}</span>)</span>
                     <span class="text-red-600" id="discount-value">{{ isset($autoCouponData) && $autoCouponData ? '-' . $autoCouponData['discount_formatted'] : '' }}</span>
                 </div>
-                <div class="border-t border-gray-200 mt-2 pt-2 flex justify-between">
-                    <span class="text-sm font-semibold text-gray-900">Total bayar</span>
-                    <span class="text-lg font-bold text-indigo-600" id="final-price">{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['final_price_formatted'] : '' }}</span>
+                <div style="border-top: 1px solid #2d3a4a; margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.875rem; font-weight: 600; color: #e2e8f0;">Total bayar</span>
+                    <span style="font-size: 1.125rem; font-weight: 700; color: #818cf8;" id="final-price">{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['final_price_formatted'] : '' }}</span>
                 </div>
             </div>
         </div>
@@ -152,12 +152,12 @@
         <form method="POST" action="{{ route('checkout.process', $product->slug) }}" id="checkout-form">
             @csrf
             <input type="hidden" name="coupon_code" id="coupon_code_hidden" value="{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['code'] : '' }}">
-            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold text-lg">
+            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 1.125rem; border: none; cursor: pointer;">
                 Bayar Sekarang
             </button>
         </form>
 
-        <p class="text-center text-gray-500 text-sm mt-4">Anda akan diarahkan ke halaman pembayaran Xendit</p>
+        <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 16px;">Anda akan diarahkan ke halaman pembayaran Xendit</p>
     </div>
 </div>
 
