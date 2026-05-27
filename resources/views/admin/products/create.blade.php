@@ -60,7 +60,7 @@
                     @error('license_duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="dk-card" style="padding:16px">
+                <div id="commission-section" class="dk-card" style="padding:16px; {{ old('product_type') === 'free' ? 'display:none;' : '' }}">
                     <h3 class="text-sm font-semibold dk-heading mb-1">Pengaturan Komisi</h3>
                     <p class="text-xs dk-text-muted mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
 
@@ -134,17 +134,29 @@
         var priceSection = document.getElementById('price-section');
         var priceFreeNotice = document.getElementById('price-free-notice');
         var licenseSection = document.getElementById('license-duration-section');
+        var commissionSection = document.getElementById('commission-section');
         var priceInput = document.getElementById('price');
+        var commissionInputs = ['commission_percent','commission_percent_non_owner','upline_percent','upline_percent_non_owner'];
 
         if (type === 'free') {
             priceSection.style.display = 'none';
             priceFreeNotice.style.display = '';
             priceInput.removeAttribute('required');
             priceInput.value = '0';
+            commissionSection.style.display = 'none';
+            commissionInputs.forEach(function(id){
+                var el = document.getElementById(id);
+                if (el) el.removeAttribute('required');
+            });
         } else {
             priceSection.style.display = '';
             priceFreeNotice.style.display = 'none';
             priceInput.setAttribute('required', 'required');
+            commissionSection.style.display = '';
+            commissionInputs.forEach(function(id){
+                var el = document.getElementById(id);
+                if (el) el.setAttribute('required', 'required');
+            });
         }
 
         licenseSection.style.display = type === 'software' ? '' : 'none';
