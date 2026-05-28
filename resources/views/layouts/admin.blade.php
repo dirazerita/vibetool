@@ -56,9 +56,9 @@
 <body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;">
     <div style="min-height:100vh; display:flex;">
         <aside style="width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column;">
-            <div style="padding:24px 20px;">
-                <a href="{{ route('admin.index') }}" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:56px; width:auto; max-width:160px; object-fit:contain;">
+            <div style="padding:24px 20px; text-align:center;">
+                <a href="{{ route('admin.index') }}" style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; text-decoration:none;">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:90px; width:auto; max-width:200px; object-fit:contain;">
                     <span style="font-size:11px; background:linear-gradient(135deg,#ef4444,#f97316); color:#fff; padding:2px 10px; border-radius:9999px; font-weight:600;">Admin</span>
                 </a>
             </div>
