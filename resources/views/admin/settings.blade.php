@@ -34,7 +34,7 @@
             <h2 class="text-lg font-semibold dk-heading mb-4">Pembayaran Manual (Transfer Bank)</h2>
 
             <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" name="manual_payment_enabled" value="1" x-model="manualOn" class="mt-1 h-4 w-4 rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                <input type="checkbox" name="manual_payment_enabled" value="1" x-model="manualOn" class="dk-checkbox">
                 <span>
                     <span class="block text-sm font-medium dk-heading">Aktifkan Pembayaran Manual</span>
                     <span class="block text-xs dk-text-muted mt-0.5">Kalau diaktifkan, semua checkout akan menggunakan transfer bank manual (Xendit tidak dipakai). Member upload bukti transfer, admin verifikasi & tandai lunas dari menu Pesanan.</span>
@@ -73,7 +73,7 @@
             <p class="text-xs dk-text-muted mb-4">Kirim notifikasi pesanan & member baru ke Telegram admin, plus aktivasi/tandai lunas langsung dari tombol di chat.</p>
 
             <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" name="telegram_enabled" value="1" x-model="telegramOn" class="mt-1 h-4 w-4 rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                <input type="checkbox" name="telegram_enabled" value="1" x-model="telegramOn" class="dk-checkbox">
                 <span>
                     <span class="block text-sm font-medium dk-heading">Aktifkan Notifikasi Telegram</span>
                     <span class="block text-xs dk-text-muted mt-0.5">Notifikasi otomatis terkirim saat: member baru daftar, order manual baru dibuat, bukti transfer diupload.</span>

@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\MemberCommissionController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\LandingPageController;
 use App\Http\Controllers\Admin\VideoTutorialController;
@@ -135,6 +136,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/telegram/test', [AdminSettingController::class, 'testTelegram'])->name('settings.telegram.test');
         Route::post('/settings/telegram/setup-webhook', [AdminSettingController::class, 'setupTelegramWebhook'])->name('settings.telegram.setup-webhook');
+
+        Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
     });
 });
 
