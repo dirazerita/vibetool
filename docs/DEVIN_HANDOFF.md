@@ -157,18 +157,20 @@ The server has a deploy script at `/home/u295282884/pull-vibetool.sh` that handl
 
 ### What pull-vibetool.sh does (overview)
 
+Canonical source-of-truth lives in the repo at `scripts/pull-vibetool.sh`. The server copy at `~/pull-vibetool.sh` must mirror that file — after editing in the repo, copy it onto the server (`scp -P 65002 scripts/pull-vibetool.sh u295282884@145.79.14.140:~/pull-vibetool.sh` or paste over SSH).
+
 1. `git fetch + git reset --hard origin/main` in `~/vibetool-src/`
 2. `rsync` source → `~/domains/vibetool.id/`, EXCLUDING:
    - `.env`, `.env.*` — production env preserved
    - `storage/{app,logs,framework}/*` — user data preserved
-   - `bootstrap/cache/*.php` — Laravel cache (regenerated at step 5)
+   - `bootstrap/cache/*.php` — Laravel cache (regenerated at step 6)
    - `vendor/` — composer-managed
    - `node_modules/`
    - `public/`, `public_html/` — handled separately in step 3
 3. `rsync` source `public/` → `~/domains/vibetool.id/public_html/`, EXCLUDING `build/` (Vite assets preserved) and `storage/` (Laravel storage symlink preserved)
-4. `composer install --no-dev --optimize-autoloader`
-5. `php artisan view:clear && route:clear && config:clear && cache:clear`
-6. `php artisan config:cache && route:cache && view:cache`
+4. **Ensure `public_html/storage` symlink** points at `storage/app/public`. Idempotent: refreshes the symlink if it exists, creates it if missing, errors out if a real directory is in the way. See [Quirk #9](#9-public_htmlstorage-symlink-can-be-missing-after-fresh-deploys--restores).
+5. `composer install --no-dev --optimize-autoloader`
+6. `php artisan view:clear && route:clear && config:clear && cache:clear`, then `php artisan config:cache && route:cache && view:cache`
 
 **What the script does NOT do:**
 - Run migrations (commented out for safety — uncomment in script or run manually if a PR ships a migration)
@@ -314,6 +316,18 @@ hPanel → Databases → MySQL Databases → phpMyAdmin (one-click). Database na
 - User was offered 3 higher-res variants (full / landscape / monogram) but chose to skip.
 - If user changes their mind: see commit history of attempted variants on Devin session 2026-05-28.
 
+### 9. `public_html/storage` symlink can be missing after fresh deploys / restores
+- **Impact:** Any URL under `https://vibetool.id/storage/...` (uploaded files, payment proofs, product thumbnails, landing-page images, etc.) returns 404 because Apache serves from `public_html/` and there is no `public_html/storage` directory to resolve.
+- **Root cause:** Hostinger's DocumentRoot is `public_html/`, not `public/`. Laravel's `php artisan storage:link` creates `public/storage` by default, but Apache never reads that — the symlink that actually matters is `public_html/storage`. On a fresh server, restored backup, or any case where someone recreates `public_html/` from scratch, the symlink is gone and uploaded assets become invisible to the web.
+- **Manual fix (one-off):**
+  ```bash
+  cd ~/domains/vibetool.id
+  ln -sfn /home/u295282884/domains/vibetool.id/storage/app/public public_html/storage
+  ls -la public_html/storage
+  ```
+- **Permanent fix:** `scripts/pull-vibetool.sh` now has a `[4/6] Ensure public_html/storage symlink` step that recreates it idempotently on every deploy. As long as the deploy script on the server is in sync with `scripts/pull-vibetool.sh` in the repo, this should stay self-healing.
+- **Detection:** if you see broken `<img>` URLs pointing at `/storage/...` or webhook proof uploads returning 404 in the browser, `ls -la ~/domains/vibetool.id/public_html/storage` on the server — if it's missing or not a symlink, you've hit this.
+
 ---
 
 ## Open Tasks (as of handoff)
@@ -338,6 +352,7 @@ hPanel → Databases → MySQL Databases → phpMyAdmin (one-click). Database na
 
 | Path | Purpose |
 |---|---|
+| `scripts/pull-vibetool.sh` | Canonical copy of the production deploy script. Server runs the copy at `~/pull-vibetool.sh`; keep both in sync (see [Git Workflow](#git-workflow-for-production-updates)). |
 | `app/Http/Controllers/Admin/*` | Admin controllers |
 | `app/Http/Controllers/Admin/ProfileController.php` | Admin self-profile edit (PR #68) |
 | `app/Models/*` | Eloquent models — User, Product, Order, License, Payment, Setting, etc. |
