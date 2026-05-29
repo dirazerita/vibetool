@@ -20,6 +20,7 @@ use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
+use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\MemberCommissionController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MessageController as AdminMessageController;
@@ -146,6 +147,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/messages/attachment/{message}', [AdminMessageController::class, 'attachment'])->name('messages.attachment');
         Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages.show');
         Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
+
+        Route::get('/broadcasts', [AdminBroadcastController::class, 'index'])->name('broadcasts.index');
+        Route::get('/broadcasts/create', [AdminBroadcastController::class, 'create'])->name('broadcasts.create');
+        Route::post('/broadcasts', [AdminBroadcastController::class, 'store'])->name('broadcasts.store');
+        Route::get('/broadcasts/{broadcast}/attachment', [AdminBroadcastController::class, 'attachment'])->name('broadcasts.attachment');
+        Route::get('/broadcasts/{broadcast}', [AdminBroadcastController::class, 'show'])->name('broadcasts.show');
 
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
