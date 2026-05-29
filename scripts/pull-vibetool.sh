@@ -104,7 +104,7 @@ else
 fi
 
 echo ""
-echo "[6/6] Clear + rebuild Laravel caches..."
+echo "[6/7] Clear + rebuild Laravel caches..."
 php artisan view:clear || true
 php artisan route:clear || true
 php artisan config:clear || true
@@ -113,10 +113,47 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Optional: uncomment if a new migration was shipped
-# echo ""
-# echo "[bonus] Running migrations (if any)..."
-# php artisan migrate --force
+echo ""
+echo "[7/7] Check for pending migrations..."
+# Capture status output, tolerate non-zero exit (e.g. no migrations table yet).
+MIGRATION_STATUS="$(php artisan migrate:status 2>&1 || true)"
+PENDING_LINES="$(echo "$MIGRATION_STATUS" | grep -E 'Pending' || true)"
+
+if [ -n "$PENDING_LINES" ]; then
+    echo "Pending migrations detected:"
+    echo "$PENDING_LINES"
+    echo ""
+
+    # Allow non-interactive auto-confirm via env var, e.g.:
+    #   AUTO_MIGRATE=1 bash ~/pull-vibetool.sh
+    # AUTO_MIGRATE=0 explicitly skips without prompting.
+    if [ "${AUTO_MIGRATE:-}" = "1" ]; then
+        echo "AUTO_MIGRATE=1 -> running migrations without prompt."
+        ANSWER="y"
+    elif [ "${AUTO_MIGRATE:-}" = "0" ]; then
+        echo "AUTO_MIGRATE=0 -> skipping migrations."
+        ANSWER="n"
+    else
+        # Interactive prompt. Default = N (safer).
+        printf "Run 'php artisan migrate --force' now? [y/N] "
+        read -r ANSWER < /dev/tty || ANSWER=""
+    fi
+
+    case "$ANSWER" in
+        y|Y|yes|YES)
+            echo ""
+            echo "Running migrations..."
+            php artisan migrate --force
+            ;;
+        *)
+            echo ""
+            echo "Skipped. Jalankan manual nanti dengan:"
+            echo "  cd $APP && php artisan migrate --force"
+            ;;
+    esac
+else
+    echo "No pending migrations."
+fi
 
 echo ""
 echo "============================================"
