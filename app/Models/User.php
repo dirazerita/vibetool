@@ -114,4 +114,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class, 'created_by');
     }
+
+    public function referralCodeHistories(): HasMany
+    {
+        return $this->hasMany(ReferralCodeHistory::class)->latest('created_at');
+    }
 }

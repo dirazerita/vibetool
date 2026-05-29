@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\PhoneNumber;
 use App\Http\Controllers\Controller;
+use App\Models\ReferralCodeHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,9 +21,9 @@ class MemberController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('whatsapp_number', 'like', "%{$search}%")
-                  ->orWhere('referral_code', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('whatsapp_number', 'like', "%{$search}%")
+                    ->orWhere('referral_code', 'like', "%{$search}%");
             });
         }
 
@@ -38,7 +39,12 @@ class MemberController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.members-edit', compact('user', 'members'));
+        $referralCodeHistories = $user->referralCodeHistories()
+            ->with('changedBy:id,name,email,role')
+            ->limit(50)
+            ->get();
+
+        return view('admin.members-edit', compact('user', 'members', 'referralCodeHistories'));
     }
 
     public function update(Request $request, User $user)
@@ -65,11 +71,14 @@ class MemberController extends Controller
             ]
         );
 
+        $oldCode = $user->referral_code;
+        $newCode = strtoupper($request->referral_code);
+
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'whatsapp_number' => $normalizedWhatsapp,
-            'referral_code' => strtoupper($request->referral_code),
+            'referral_code' => $newCode,
             'upline_id' => $request->upline_id,
             'can_upload_product' => $request->boolean('can_upload_product'),
         ];
@@ -79,6 +88,18 @@ class MemberController extends Controller
         }
 
         $user->update($data);
+
+        if ($oldCode !== $newCode) {
+            ReferralCodeHistory::create([
+                'user_id' => $user->id,
+                'old_code' => $oldCode,
+                'new_code' => $newCode,
+                'changed_by_id' => $request->user()?->id,
+                'changed_by_role' => ReferralCodeHistory::ROLE_ADMIN,
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            ]);
+        }
 
         return redirect()->route('admin.members')->with('success', 'Member berhasil diperbarui.');
     }
