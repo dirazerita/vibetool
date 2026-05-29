@@ -1,7 +1,7 @@
 # VibeTool — Devin Handoff Notes
 
 **Audience:** any future Devin session continuing work on VibeTool.
-**Last updated:** 2026-05-28
+**Last updated:** 2026-05-29 (repo migrated from `rynz2024/vibetool` to `dirazerita/vibetool`)
 **Status:** production, live at https://vibetool.id
 
 Read this top-to-bottom before doing anything on production. Skim the [Onboarding Checklist](#onboarding-checklist-for-new-devin) for the fast path.
@@ -98,7 +98,7 @@ Full routes: see `routes/web.php`.
 │       ├── .env                      # PRODUCTION env — DO NOT commit, DO NOT delete
 │       ├── artisan
 │       └── composer.json
-├── vibetool-src/                     # clean git clone of rynz2024/vibetool, used by pull-vibetool.sh
+├── vibetool-src/                     # clean git clone of dirazerita/vibetool, used by pull-vibetool.sh
 └── pull-vibetool.sh                  # deploy script — see Git Workflow section
 ```
 
@@ -113,8 +113,8 @@ Full routes: see `routes/web.php`.
 - **Database password:** in `/home/u295282884/domains/vibetool.id/.env` on server. Also stored in hPanel → Databases.
 - **Admin login (`admin@vibetool.id`):** set by user via the script described in [Resetting Admin Password](#resetting-admin-password). Stored only in user's password manager.
 - **Telegram bot token + chat ID:** stored in DB `app_settings` table (via `/admin/settings`).
-- **GitHub PAT (for assistant-side pushes):** stored in Devin secret `GITHUB_PAT_RYNZ2024` (org scope).
-- **GitHub deploy key on server:** `~/.ssh/github-vibetool` (ed25519, read-only access to `rynz2024/vibetool`). Public key is added at https://github.com/rynz2024/vibetool/settings/keys.
+- **GitHub PAT (for assistant-side pushes):** stored in Devin secret `GITHUB_PAT_DIRAZERITA` (org scope).
+- **GitHub deploy key on server:** `~/.ssh/github-vibetool` (ed25519, read-only). Public key must be added to **both** `https://github.com/dirazerita/vibetool/settings/keys` (primary) and historically `https://github.com/rynz2024/vibetool/settings/keys` (legacy, can be removed once migration is verified).
 
 If credentials are missing, ASK the user — don't try to reset them via reckless means.
 
@@ -147,7 +147,7 @@ The server has a deploy script at `/home/u295282884/pull-vibetool.sh` that handl
 
 ### Workflow (per code change)
 
-1. Devin creates a PR against `main` of `rynz2024/vibetool` (via `git_create_pr` after fetching the template).
+1. Devin creates a PR against `main` of `dirazerita/vibetool` (via `git_create_pr` after fetching the template).
 2. User reviews & merges the PR on GitHub.
 3. User SSHes to server and runs:
    ```bash
@@ -377,7 +377,7 @@ When starting a new session on this project:
 1. **Read this file fully**, especially [Known Quirks](#known-quirks--workarounds) and [Open Tasks](#open-tasks-as-of-handoff).
 2. **Clone the repo** if not present:
    ```bash
-   gh repo clone rynz2024/vibetool ~/repos/vibetool
+   gh repo clone dirazerita/vibetool ~/repos/vibetool
    ```
 3. **Don't try to SSH into Hostinger** — Devin VMs cannot. Have the user run commands locally.
 4. **For any code change:**
@@ -386,9 +386,12 @@ When starting a new session on this project:
    - User runs `bash ~/pull-vibetool.sh` to apply on prod
 5. **For credentials:** check user's password manager (ask) or look in `.env` on server (only the user can read it).
 6. **Before doing destructive ops** (DB resets, migration rollbacks, force pushes): confirm with user first.
-7. **Existing PRs:**
-   - #68 — Admin Profil Saya + dark-theme checkbox CSS (merged)
-   - #69 — sidebar logo bigger + centered (merged)
+7. **Existing PRs (merged on `rynz2024/vibetool`, history carried into `dirazerita/vibetool`):**
+   - #68 — Admin Profil Saya + dark-theme checkbox CSS
+   - #69 — sidebar logo bigger + centered
+   - #70 — initial Devin handoff notes
+   - #71 — vendored `scripts/pull-vibetool.sh` + auto-heal `public_html/storage` symlink
+   - #72 — TinyMCE rich text editor for landing page Deskripsi Detail (adds `mews/purifier` composer dep)
 8. **Skills / playbooks:** if the user has standing playbooks, run them. If none, follow this doc.
 
 ---
