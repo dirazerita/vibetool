@@ -83,7 +83,7 @@
 
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="dk-checkbox">
                         <span class="ml-2 text-sm dk-text">Kupon Aktif</span>
                     </label>
                 </div>
