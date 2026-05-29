@@ -23,8 +23,25 @@
                 </div>
 
                 <div>
-                    <label class="dk-label">Kode Referral</label>
-                    <input type="text" value="{{ $user->referral_code }}" class="w-full dk-input " style="background:#151e2d font-mono" disabled>
+                    <label for="referral_code" class="dk-label">Kode Referral</label>
+                    <input
+                        type="text"
+                        name="referral_code"
+                        id="referral_code"
+                        value="{{ old('referral_code', $user->referral_code) }}"
+                        class="w-full dk-input font-mono uppercase"
+                        style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; letter-spacing:0.05em;"
+                        maxlength="20"
+                        pattern="[A-Za-z0-9]{4,20}"
+                        autocomplete="off"
+                        spellcheck="false"
+                        required
+                    >
+                    <p class="text-xs mt-1" style="color:#8b95a7;">
+                        4-20 karakter, hanya huruf (A-Z) dan angka (0-9). Otomatis di-uppercase.
+                        Mengubah kode akan membuat link affiliate lama (<code>?ref={{ $user->referral_code }}</code>) tidak berlaku.
+                    </p>
+                    @error('referral_code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="dk-divider pt-6">
