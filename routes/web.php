@@ -9,6 +9,7 @@ use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseContro
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\MemberProductController;
+use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\MemberCommissionController;
 use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
@@ -85,6 +87,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
         Route::get('/settings', [SettingController::class, 'index'])->name('.settings');
         Route::put('/settings', [SettingController::class, 'update'])->name('.settings.update');
+        Route::get('/messages', [DashboardMessageController::class, 'index'])->name('.messages');
+        Route::post('/messages', [DashboardMessageController::class, 'store'])->name('.messages.store');
+        Route::get('/messages/{message}/attachment', [DashboardMessageController::class, 'attachment'])->name('.messages.attachment');
     });
     // (penutup grup `active` di atas)
 
@@ -136,6 +141,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/telegram/test', [AdminSettingController::class, 'testTelegram'])->name('settings.telegram.test');
         Route::post('/settings/telegram/setup-webhook', [AdminSettingController::class, 'setupTelegramWebhook'])->name('settings.telegram.setup-webhook');
+
+        Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/attachment/{message}', [AdminMessageController::class, 'attachment'])->name('messages.attachment');
+        Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages.show');
+        Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
 
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
