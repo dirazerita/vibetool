@@ -12,6 +12,32 @@
     <style>
         img { max-width: 100%; height: auto; }
         body { background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased; }
+        .vt-prose { font-size: 1rem; line-height: 1.75; }
+        .vt-prose > * + * { margin-top: 1rem; }
+        .vt-prose h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; margin: 1.5em 0 0.5em; }
+        .vt-prose h2 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; margin: 1.5em 0 0.5em; }
+        .vt-prose h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 1.25em 0 0.5em; }
+        .vt-prose h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.3; margin: 1.25em 0 0.5em; }
+        .vt-prose h5, .vt-prose h6 { font-size: 1rem; font-weight: 600; margin: 1em 0 0.5em; }
+        .vt-prose p { margin: 0.75em 0; }
+        .vt-prose ul, .vt-prose ol { margin: 0.75em 0; padding-left: 1.5rem; }
+        .vt-prose ul { list-style: disc; }
+        .vt-prose ol { list-style: decimal; }
+        .vt-prose li { margin: 0.25em 0; }
+        .vt-prose li > ul, .vt-prose li > ol { margin: 0.25em 0; }
+        .vt-prose a { color: #4f46e5; text-decoration: underline; }
+        .vt-prose a:hover { color: #4338ca; }
+        .vt-prose blockquote { border-left: 4px solid #c7d2fe; padding: 0.5rem 1rem; margin: 1em 0; color: #4b5563; background: #f5f3ff; border-radius: 0 8px 8px 0; }
+        .vt-prose hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+        .vt-prose img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; }
+        .vt-prose code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.875em; background: #f3f4f6; padding: 0.125em 0.375em; border-radius: 4px; }
+        .vt-prose pre { background: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1em 0; }
+        .vt-prose pre code { background: transparent; padding: 0; color: inherit; }
+        .vt-prose table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        .vt-prose th, .vt-prose td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+        .vt-prose th { background: #f9fafb; font-weight: 600; }
+        .vt-prose strong { font-weight: 700; }
+        .vt-prose em { font-style: italic; }
     </style>
 </head>
 <body style="background-color: #0b1120; color: #e2e8f0; font-family: Figtree, sans-serif; -webkit-font-smoothing: antialiased;">
@@ -114,8 +140,8 @@
     @if($landingPage->about_content)
     <section style="padding: 80px 0; background-color: {{ $landingPage->about_bg_color ?? '#ffffff' }};">
         <div style="max-width: 56rem; margin: 0 auto; padding: 0 1rem;">
-            <h2  style="font-family: '{{ $landingPage->about_font ?? 'Poppins' }}', sans-serif; color: {{ $landingPage->about_color ?? '#374151' }};">Tentang Produk</h2>
-            <div  style="font-family: '{{ $landingPage->about_font ?? 'Poppins' }}', sans-serif; color: {{ $landingPage->about_color ?? '#374151' }};">
+            <h2 style="font-family: '{{ $landingPage->about_font ?? 'Poppins' }}', sans-serif; color: {{ $landingPage->about_color ?? '#374151' }}; font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem;">Tentang Produk</h2>
+            <div class="vt-prose" style="font-family: '{{ $landingPage->about_font ?? 'Poppins' }}', sans-serif; color: {{ $landingPage->about_color ?? '#374151' }};">
                 {!! $landingPage->about_content !!}
             </div>
         </div>
