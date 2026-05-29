@@ -119,4 +119,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(ReferralCodeHistory::class)->latest('created_at');
     }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'user_id');
+    }
+
+    public function unreadAdminMessagesCount(): int
+    {
+        return $this->messages()
+            ->where('sender_role', Message::ROLE_ADMIN)
+            ->whereNull('read_at')
+            ->count();
+    }
 }
