@@ -4,52 +4,43 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Message extends Model
+class Broadcast extends Model
 {
     public const UPDATED_AT = null;
 
-    public const ROLE_ADMIN = 'admin';
+    public const SCOPE_ALL = 'all';
 
-    public const ROLE_MEMBER = 'member';
+    public const SCOPE_ACTIVE = 'active';
 
     protected $fillable = [
-        'user_id',
-        'sender_role',
-        'sender_id',
-        'broadcast_id',
+        'admin_id',
         'body',
         'attachment_path',
         'attachment_name',
         'attachment_mime',
         'attachment_size',
-        'read_at',
+        'audience_scope',
+        'recipients_count',
+        'sent_at',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'read_at' => 'datetime',
+        'sent_at' => 'datetime',
         'attachment_size' => 'integer',
+        'recipients_count' => 'integer',
     ];
 
-    public function user(): BelongsTo
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
-    public function sender(): BelongsTo
+    public function messages(): HasMany
     {
-        return $this->belongsTo(User::class, 'sender_id');
-    }
-
-    public function broadcast(): BelongsTo
-    {
-        return $this->belongsTo(Broadcast::class, 'broadcast_id');
-    }
-
-    public function isBroadcast(): bool
-    {
-        return ! empty($this->broadcast_id);
+        return $this->hasMany(Message::class, 'broadcast_id');
     }
 
     public function hasAttachment(): bool
@@ -76,5 +67,14 @@ class Message extends Model
         }
 
         return number_format($bytes / (1024 * 1024), 1).' MB';
+    }
+
+    public function audienceLabel(): string
+    {
+        return match ($this->audience_scope) {
+            self::SCOPE_ACTIVE => 'Member aktif',
+            self::SCOPE_ALL => 'Semua member',
+            default => $this->audience_scope,
+        };
     }
 }

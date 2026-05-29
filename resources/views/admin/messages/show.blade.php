@@ -44,6 +44,9 @@
         @forelse($messages as $msg)
             @php $mine = $msg->sender_role === \App\Models\Message::ROLE_ADMIN; @endphp
             <div class="chat-bubble {{ $mine ? 'mine' : 'theirs' }}">
+                @if($msg->isBroadcast())
+                    <span style="display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; background:rgba(255,255,255,0.18); padding:2px 8px; border-radius:9999px; margin-bottom:6px;">Broadcast</span>
+                @endif
                 @if($msg->body)
                     {{ $msg->body }}
                 @endif
