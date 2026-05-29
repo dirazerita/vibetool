@@ -119,8 +119,11 @@
                     <div class="space-y-4">
                         <div>
                             <label for="about_content" class="dk-label">Konten tentang produk</label>
-                            <textarea name="about_content" id="about_content" rows="10" class="w-full dk-input">{{ old('about_content', $lp->about_content ?? '') }}</textarea>
-                            <p class="text-xs mt-1 dk-text-muted">Mendukung HTML untuk formatting.</p>
+                            <textarea name="about_content" id="about_content" rows="15" class="w-full dk-input">{{ old('about_content', $lp->about_content ?? '') }}</textarea>
+                            <p class="text-xs mt-1 dk-text-muted">
+                                Pakai toolbar editor di atas untuk format teks (heading, list, link, gambar, dll). Paste dari Word / Google Docs / ChatGPT juga jalan.
+                                Konten lama yang masih mentah (mis. <code>#</code>, <code>###</code>) tampil sebagai teks biasa &mdash; hapus lalu re-format pakai toolbar.
+                            </p>
                             @error('about_content') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div class="grid grid-cols-3 gap-3">
@@ -345,4 +348,35 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.3.0/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof tinymce === 'undefined') {
+            return;
+        }
+        tinymce.init({
+            selector: '#about_content',
+            license_key: 'gpl',
+            promotion: false,
+            branding: false,
+            menubar: false,
+            height: 520,
+            skin: 'oxide-dark',
+            content_css: 'dark',
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | blocks fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | blockquote hr | removeformat code fullscreen',
+            block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Preformatted=pre; Blockquote=blockquote',
+            font_size_formats: '12px 14px 16px 18px 20px 24px 28px 32px 36px 48px',
+            paste_data_images: true,
+            paste_as_text: false,
+            extended_valid_elements: 'a[href|target|rel|title]',
+            link_default_target: '_blank',
+            link_assume_external_targets: 'https',
+            content_style: 'body { font-family: Poppins, sans-serif; font-size: 15px; line-height: 1.6; padding: 12px; }',
+            relative_urls: false,
+            convert_urls: false,
+        });
+    });
+</script>
 @endsection

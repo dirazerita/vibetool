@@ -7,14 +7,15 @@ use App\Http\Controllers\Controller;
 use App\Models\LandingPageImage;
 use App\Models\LandingPageTestimonial;
 use App\Models\Product;
-use App\Models\ProductLandingPage;
 use Illuminate\Http\Request;
+use Mews\Purifier\Facades\Purifier;
 
 class LandingPageController extends Controller
 {
     public function edit(Product $product)
     {
         $product->load(['landingPage', 'landingPageImages', 'landingPageTestimonials']);
+
         return view('admin.products.landing-page', compact('product'));
     }
 
@@ -39,11 +40,16 @@ class LandingPageController extends Controller
             'testimonial_bg_color' => 'nullable|string|max:10',
         ]);
 
+        $aboutContent = $request->input('about_content');
+        if (is_string($aboutContent) && $aboutContent !== '') {
+            $aboutContent = Purifier::clean($aboutContent, 'landing_content');
+        }
+
         $data = [
             'hero_title' => $request->hero_title,
             'hero_subtitle' => $request->hero_subtitle,
             'video_url' => $request->video_url,
-            'about_content' => $request->about_content,
+            'about_content' => $aboutContent,
             'is_published' => $request->boolean('is_published'),
             'hero_title_font' => $request->input('hero_title_font', 'Poppins'),
             'hero_title_size' => $request->input('hero_title_size', '48px'),
@@ -99,6 +105,7 @@ class LandingPageController extends Controller
     public function deleteImage(Product $product, LandingPageImage $image)
     {
         $image->delete();
+
         return redirect()->route('admin.products.landing-page', $product)
             ->with('success', 'Gambar berhasil dihapus.');
     }
@@ -174,13 +181,15 @@ class LandingPageController extends Controller
     public function deleteTestimonial(Product $product, LandingPageTestimonial $testimonial)
     {
         $testimonial->delete();
+
         return redirect()->route('admin.products.landing-page', $product)
             ->with('success', 'Testimonial berhasil dihapus.');
     }
 
     public function toggleTestimonial(Product $product, LandingPageTestimonial $testimonial)
     {
-        $testimonial->update(['is_active' => !$testimonial->is_active]);
+        $testimonial->update(['is_active' => ! $testimonial->is_active]);
+
         return redirect()->route('admin.products.landing-page', $product)
             ->with('success', 'Status testimonial berhasil diubah.');
     }
