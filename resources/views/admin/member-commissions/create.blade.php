@@ -36,7 +36,7 @@
                         <label class="flex items-center px-4 py-3 hover:" style="background:#151e2d cursor-pointer">
                             <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
                                 {{ is_array(old('product_ids')) && in_array($product->id, old('product_ids')) ? 'checked' : '' }}
-                                class="product-checkbox rounded" style="background:#151e2d;border:1px solid #2d3a4a">
+                                class="dk-checkbox product-checkbox">
                             <div class="ml-3 flex-1">
                                 <div class="text-sm font-medium dk-heading">{{ $product->title }}</div>
                                 <div class="dk-text-muted" style="font-size:12px">Rp {{ number_format($product->price, 0, ',', '.') }} — Affiliator: {{ $product->commission_percent }}% / {{ $product->commission_percent_non_owner ?? $product->commission_percent }}% — Upline: {{ $product->upline_percent }}% / {{ $product->upline_percent_non_owner ?? $product->upline_percent }}%</div>
