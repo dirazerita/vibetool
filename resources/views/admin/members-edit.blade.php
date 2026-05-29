@@ -31,6 +31,12 @@
                     <label for="referral_code" class="dk-label">Kode Referral</label>
                     <input type="text" name="referral_code" id="referral_code" value="{{ old('referral_code', $user->referral_code) }}" class="w-full dk-input uppercase" required>
                     @error('referral_code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    @if($referralCodeHistories->isNotEmpty())
+                        <p style="font-size:12px; color:#64748b; margin-top:6px;">
+                            Pernah dipakai: <span class="dk-text">{{ $referralCodeHistories->pluck('old_code')->filter()->unique()->take(5)->join(', ') }}</span>
+                            <a href="#referral-history" style="color:#818cf8; text-decoration:underline;">lihat history</a>
+                        </p>
+                    @endif
                 </div>
 
                 <div>
@@ -93,6 +99,48 @@
                 @csrf @method('PATCH')
                 <button type="submit" class="dk-btn dk-btn-warning">Nonaktifkan (Set ke Pending)</button>
             </form>
+        @endif
+    </div>
+
+    <div id="referral-history" class="dk-card mt-6" style="padding:24px;">
+        <h2 class="dk-heading" style="font-size:18px; font-weight:600; margin-bottom:4px;">History Perubahan Kode Referral</h2>
+        <p class="dk-text-muted" style="font-size:13px; margin-bottom:16px;">Catatan kode referral lama untuk keperluan trace support.</p>
+
+        @if($referralCodeHistories->isEmpty())
+            <p class="dk-text-muted" style="font-size:14px;">Belum ada perubahan tercatat untuk member ini.</p>
+        @else
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #2d3a4a;">
+                            <th style="text-align:left; padding:8px 12px; color:#94a3b8; font-weight:600;">Waktu</th>
+                            <th style="text-align:left; padding:8px 12px; color:#94a3b8; font-weight:600;">Kode Lama</th>
+                            <th style="text-align:left; padding:8px 12px; color:#94a3b8; font-weight:600;">Kode Baru</th>
+                            <th style="text-align:left; padding:8px 12px; color:#94a3b8; font-weight:600;">Diubah Oleh</th>
+                            <th style="text-align:left; padding:8px 12px; color:#94a3b8; font-weight:600;">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($referralCodeHistories as $h)
+                            <tr style="border-bottom:1px solid rgba(45,58,74,0.5);">
+                                <td class="dk-text" style="padding:8px 12px; white-space:nowrap;">{{ $h->created_at->format('d M Y H:i') }}</td>
+                                <td class="dk-text" style="padding:8px 12px; font-family:ui-monospace,monospace;">{{ $h->old_code ?? '—' }}</td>
+                                <td class="dk-text" style="padding:8px 12px; font-family:ui-monospace,monospace;">{{ $h->new_code }}</td>
+                                <td class="dk-text" style="padding:8px 12px;">
+                                    @if($h->changedBy)
+                                        {{ $h->changedBy->name }}
+                                        <span class="dk-text-muted" style="font-size:11px;">({{ $h->changed_by_role }})</span>
+                                    @else
+                                        <span class="dk-text-muted">— ({{ $h->changed_by_role }})</span>
+                                    @endif
+                                </td>
+                                <td class="dk-text-muted" style="padding:8px 12px; font-family:ui-monospace,monospace; font-size:12px;">{{ $h->ip_address ?? '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <p class="dk-text-muted" style="font-size:12px; margin-top:12px;">Menampilkan {{ $referralCodeHistories->count() }} record terbaru.</p>
         @endif
     </div>
 </div>

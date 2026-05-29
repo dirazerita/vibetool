@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReferralCodeHistory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -40,12 +41,27 @@ class SettingController extends Controller
             'referral_code.max' => 'Kode referral maksimal 20 karakter.',
         ]);
 
+        $oldCode = $user->referral_code;
+        $newCode = $validated['referral_code'];
+
         $user->update([
             'name' => $validated['name'],
-            'referral_code' => $validated['referral_code'],
+            'referral_code' => $newCode,
             'bank_name' => $validated['bank_name'] ?? null,
             'bank_account' => $validated['bank_account'] ?? null,
         ]);
+
+        if ($oldCode !== $newCode) {
+            ReferralCodeHistory::create([
+                'user_id' => $user->id,
+                'old_code' => $oldCode,
+                'new_code' => $newCode,
+                'changed_by_id' => $user->id,
+                'changed_by_role' => ReferralCodeHistory::ROLE_SELF,
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            ]);
+        }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
