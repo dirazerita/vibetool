@@ -23,6 +23,12 @@ class CheckoutController extends Controller
         $user = $request->user();
         $referrer = $this->resolveReferrer($request, $user);
 
+        if ($user && $product->created_by && (int) $product->created_by === (int) $user->id) {
+            return redirect()
+                ->route('product.show', $product->slug)
+                ->with('error', 'Anda tidak bisa membeli produk yang Anda upload sendiri. Produk ini sudah otomatis menjadi milik Anda.');
+        }
+
         Log::info('DEBUG checkout', [
             'user_id' => $user?->id,
             'upline_id' => $user?->upline_id,
@@ -66,11 +72,11 @@ class CheckoutController extends Controller
         $referrer = $this->resolveReferrer($request, $user);
         $coupon = Coupon::where('code', strtoupper($request->coupon_code))->first();
 
-        if (!$coupon) {
+        if (! $coupon) {
             return response()->json(['success' => false, 'message' => 'Kode kupon tidak ditemukan.']);
         }
 
-        if (!$this->isCouponAccessible($coupon, $user, $referrer)) {
+        if (! $this->isCouponAccessible($coupon, $user, $referrer)) {
             Log::info('DEBUG checkout applyCoupon rejected', [
                 'user_id' => $user?->id,
                 'upline_id' => $user?->upline_id,
@@ -79,17 +85,18 @@ class CheckoutController extends Controller
                 'session_ref' => session('ref_code'),
                 'resolved_referrer_id' => $referrer?->id,
             ]);
+
             return response()->json(['success' => false, 'message' => 'Kupon tidak valid untuk akun Anda.']);
         }
 
-        if (!$coupon->isValidForProduct($product)) {
+        if (! $coupon->isValidForProduct($product)) {
             return response()->json(['success' => false, 'message' => 'Kupon tidak berlaku untuk produk ini.']);
         }
 
         if ($product->price < $coupon->min_purchase) {
             return response()->json([
                 'success' => false,
-                'message' => 'Minimal pembelian Rp ' . number_format($coupon->min_purchase, 0, ',', '.') . ' untuk menggunakan kupon ini.',
+                'message' => 'Minimal pembelian Rp '.number_format($coupon->min_purchase, 0, ',', '.').' untuk menggunakan kupon ini.',
             ]);
         }
 
@@ -100,9 +107,9 @@ class CheckoutController extends Controller
             'success' => true,
             'message' => 'Kupon berhasil diterapkan!',
             'discount' => $discount,
-            'discount_formatted' => 'Rp ' . number_format($discount, 0, ',', '.'),
+            'discount_formatted' => 'Rp '.number_format($discount, 0, ',', '.'),
             'final_price' => $finalPrice,
-            'final_price_formatted' => 'Rp ' . number_format($finalPrice, 0, ',', '.'),
+            'final_price_formatted' => 'Rp '.number_format($finalPrice, 0, ',', '.'),
             'coupon_name' => $coupon->name,
         ]);
     }
@@ -113,6 +120,12 @@ class CheckoutController extends Controller
         $user = $request->user();
         $referrer = $this->resolveReferrer($request, $user);
 
+        if ($user && $product->created_by && (int) $product->created_by === (int) $user->id) {
+            return redirect()
+                ->route('product.show', $product->slug)
+                ->with('error', 'Anda tidak bisa membeli produk yang Anda upload sendiri.');
+        }
+
         $affiliateId = null;
         $uplineId = null;
         $refCode = $request->cookie('ref') ?? session('ref_code');
@@ -122,6 +135,18 @@ class CheckoutController extends Controller
             if ($affiliate && $affiliate->id !== $user->id) {
                 $affiliateId = $affiliate->id;
                 $uplineId = $affiliate->upline_id;
+            }
+        }
+
+        // Pembuat produk tidak boleh jadi affiliate/upline untuk produknya sendiri.
+        // Kalau ada referral yang nge-resolve ke pembuat → abaikan (anggap no ref).
+        if ($product->created_by) {
+            $creatorId = (int) $product->created_by;
+            if ($affiliateId === $creatorId) {
+                $affiliateId = null;
+            }
+            if ($uplineId === $creatorId) {
+                $uplineId = null;
             }
         }
 
@@ -173,12 +198,12 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.manual', $order->id);
         }
 
-        $xendit = new XenditService();
+        $xendit = new XenditService;
         $invoice = $xendit->createInvoice([
-            'external_id' => 'ORDER-' . $order->id,
+            'external_id' => 'ORDER-'.$order->id,
             'amount' => $amount,
             'payer_email' => $user->email,
-            'description' => 'Pembelian: ' . $product->title,
+            'description' => 'Pembelian: '.$product->title,
             'success_redirect_url' => route('checkout.success', $order->id),
             'failure_redirect_url' => route('product.show', $product->slug),
         ]);
@@ -201,7 +226,7 @@ class CheckoutController extends Controller
         if (($invoice['error_code'] ?? null) === 'XENDIT_SECRET_KEY_MISSING') {
             $errorMessage = 'Konfigurasi pembayaran belum lengkap. Hubungi admin (XENDIT_SECRET_KEY belum di-set).';
         } elseif (isset($invoice['message'])) {
-            $errorMessage = 'Gagal membuat invoice pembayaran: ' . $invoice['message'];
+            $errorMessage = 'Gagal membuat invoice pembayaran: '.$invoice['message'];
         }
 
         return back()->with('error', $errorMessage);
@@ -259,7 +284,7 @@ class CheckoutController extends Controller
             Storage::disk('public')->delete($order->payment_proof);
         }
 
-        $path = $request->file('proof')->store('payment_proofs/' . $order->id, 'public');
+        $path = $request->file('proof')->store('payment_proofs/'.$order->id, 'public');
         $order->update(['payment_proof' => $path]);
 
         try {
@@ -303,12 +328,12 @@ class CheckoutController extends Controller
         ]);
 
         return redirect()->route('dashboard.purchases')
-            ->with('success', 'Pesanan #' . $order->id . ' berhasil dibatalkan.');
+            ->with('success', 'Pesanan #'.$order->id.' berhasil dibatalkan.');
     }
 
     private function authorizeOrderOwner(Request $request, Order $order): void
     {
-        if (!$request->user() || $request->user()->id !== $order->user_id) {
+        if (! $request->user() || $request->user()->id !== $order->user_id) {
             abort(403);
         }
     }
@@ -319,7 +344,7 @@ class CheckoutController extends Controller
 
         if ($refCode) {
             $referrer = User::where('referral_code', $refCode)->first();
-            if ($referrer && (!$user || $referrer->id !== $user->id)) {
+            if ($referrer && (! $user || $referrer->id !== $user->id)) {
                 return $referrer;
             }
         }
@@ -334,7 +359,7 @@ class CheckoutController extends Controller
         $autoCouponMemberId = session('auto_coupon_member_id');
         if ($autoCouponMemberId) {
             $autoMember = User::find($autoCouponMemberId);
-            if ($autoMember && (!$user || $autoMember->id !== $user->id)) {
+            if ($autoMember && (! $user || $autoMember->id !== $user->id)) {
                 return $autoMember;
             }
         }
@@ -344,15 +369,15 @@ class CheckoutController extends Controller
 
     private function isCouponAccessible(Coupon $coupon, ?User $user, ?User $referrer): bool
     {
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         $sessionAuto = session('auto_coupon');
         if ($sessionAuto && strtoupper($sessionAuto) === strtoupper($coupon->code)) {
             return $coupon->is_active
-                && (!$coupon->expired_at || !$coupon->expired_at->isPast())
-                && (!$coupon->max_uses || $coupon->used_count < $coupon->max_uses);
+                && (! $coupon->expired_at || ! $coupon->expired_at->isPast())
+                && (! $coupon->max_uses || $coupon->used_count < $coupon->max_uses);
         }
 
         return $coupon->isAccessibleBy($user, $referrer);
@@ -387,11 +412,12 @@ class CheckoutController extends Controller
                     'user_id' => $user->id,
                     'coupon_code' => $ownedCoupon->code,
                 ]);
+
                 return;
             }
         }
 
-        if (!$referrer) {
+        if (! $referrer) {
             return;
         }
 
@@ -421,14 +447,14 @@ class CheckoutController extends Controller
     private function buildAutoCouponData(Product $product, ?User $user, ?User $referrer): ?array
     {
         $autoCouponCode = session('auto_coupon');
-        if (!$autoCouponCode || !$user) {
+        if (! $autoCouponCode || ! $user) {
             return null;
         }
 
         $coupon = Coupon::where('code', $autoCouponCode)->first();
-        if (!$coupon
-            || !$this->isCouponAccessible($coupon, $user, $referrer)
-            || !$coupon->isValidForProduct($product)
+        if (! $coupon
+            || ! $this->isCouponAccessible($coupon, $user, $referrer)
+            || ! $coupon->isValidForProduct($product)
             || $product->price < $coupon->min_purchase
         ) {
             Log::info('DEBUG checkout buildAutoCouponData rejected', [
@@ -439,23 +465,24 @@ class CheckoutController extends Controller
                 'is_valid_for_product' => $coupon ? $coupon->isValidForProduct($product) : null,
                 'min_purchase_ok' => $coupon ? ($product->price >= $coupon->min_purchase) : null,
             ]);
+
             return null;
         }
 
         $discount = $coupon->calculateDiscount($product->price);
         $discountLabel = $coupon->discount_type === 'percent'
-            ? rtrim(rtrim(number_format($coupon->discount_value, 2, ',', '.'), '0'), ',') . '%'
-            : 'Rp ' . number_format($coupon->discount_value, 0, ',', '.');
+            ? rtrim(rtrim(number_format($coupon->discount_value, 2, ',', '.'), '0'), ',').'%'
+            : 'Rp '.number_format($coupon->discount_value, 0, ',', '.');
 
         return [
             'code' => $coupon->code,
             'name' => $coupon->name,
             'member_name' => session('auto_coupon_member_name'),
             'discount' => $discount,
-            'discount_formatted' => 'Rp ' . number_format($discount, 0, ',', '.'),
+            'discount_formatted' => 'Rp '.number_format($discount, 0, ',', '.'),
             'discount_label' => $discountLabel,
             'final_price' => $product->price - $discount,
-            'final_price_formatted' => 'Rp ' . number_format($product->price - $discount, 0, ',', '.'),
+            'final_price_formatted' => 'Rp '.number_format($product->price - $discount, 0, ',', '.'),
         ];
     }
 }

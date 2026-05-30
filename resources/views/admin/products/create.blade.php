@@ -96,6 +96,19 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Bagian Pembuat Produk</p>
+                            <div>
+                                <label for="creator_share_percent" class="dk-label" style="font-size:12px">Persentase untuk pembuat produk (%)</label>
+                                <input type="number" name="creator_share_percent" id="creator_share_percent" value="{{ old('creator_share_percent', 0) }}" step="0.01" min="0" max="100" class="w-full dk-input">
+                                <p class="text-xs mt-1 dk-text-muted">
+                                    Hanya berlaku untuk produk yang di-upload member. Dibayar ke pembuat <strong>setiap kali produk terjual</strong>,
+                                    sebagai tambahan komisi affiliate/upline (kalau pembuat juga jadi affiliate/upline). Set <code>0</code> untuk skip.
+                                </p>
+                                @error('creator_share_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
 

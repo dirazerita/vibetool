@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
-use App\Models\MemberCommission;
 
 class Product extends Model
 {
@@ -24,6 +23,7 @@ class Product extends Model
         'commission_percent_non_owner',
         'upline_percent',
         'upline_percent_non_owner',
+        'creator_share_percent',
         'product_type',
         'license_duration',
         'file_path',
@@ -43,17 +43,26 @@ class Product extends Model
             'commission_percent_non_owner' => 'decimal:2',
             'upline_percent' => 'decimal:2',
             'upline_percent_non_owner' => 'decimal:2',
+            'creator_share_percent' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }
 
     /**
-     * Apakah user yang diberikan sudah pernah membeli (paid) produk ini.
+     * Apakah user yang diberikan sudah pernah membeli (paid) produk ini,
+     * atau merupakan pembuat (creator) produk tersebut.
+     *
+     * Member yang upload produk otomatis dianggap "owner" -- mereka tidak
+     * perlu (dan tidak boleh) membeli produk sendiri.
      */
     public function isOwnedBy(?User $user): bool
     {
-        if (!$user) {
+        if (! $user) {
             return false;
+        }
+
+        if ($this->created_by && (int) $this->created_by === (int) $user->id) {
+            return true;
         }
 
         return Order::where('user_id', $user->id)
@@ -137,7 +146,7 @@ class Product extends Model
 
     public function requiresPayment(): bool
     {
-        return !$this->isFree();
+        return ! $this->isFree();
     }
 
     public function coupons(): BelongsToMany

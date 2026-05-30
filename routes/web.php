@@ -1,15 +1,32 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
+use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CreatorShareController;
+use App\Http\Controllers\Admin\LandingPageController;
+use App\Http\Controllers\Admin\LicenseController as AdminLicenseController;
+use App\Http\Controllers\Admin\MemberCommissionController;
+use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\MessageController as AdminMessageController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\VideoTutorialController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Dashboard\CommissionController;
 use App\Http\Controllers\Dashboard\CouponController as DashboardCouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseController;
+use App\Http\Controllers\Dashboard\MemberProductController;
+use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TeamController;
-use App\Http\Controllers\Dashboard\MemberProductController;
-use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
@@ -18,22 +35,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
-use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
-use App\Http\Controllers\Admin\MemberCommissionController;
-use App\Http\Controllers\Admin\MemberController;
-use App\Http\Controllers\Admin\MessageController as AdminMessageController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
-use App\Http\Controllers\Admin\CouponController;
-use App\Http\Controllers\Admin\LandingPageController;
-use App\Http\Controllers\Admin\VideoTutorialController;
-use App\Http\Controllers\Admin\LicenseController as AdminLicenseController;
-use App\Http\Controllers\Admin\SettingController as AdminSettingController;
-use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
-use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -127,6 +128,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions');
         Route::get('/commissions/{user}', [AdminCommissionController::class, 'show'])->name('commissions.show');
         Route::resource('member-commissions', MemberCommissionController::class)->except(['show']);
+        Route::get('/creator-shares', [CreatorShareController::class, 'index'])->name('creator-shares.index');
+        Route::put('/creator-shares/{product}', [CreatorShareController::class, 'update'])->name('creator-shares.update');
         Route::get('/licenses', [AdminLicenseController::class, 'index'])->name('licenses');
         Route::get('/licenses/{product}', [AdminLicenseController::class, 'show'])->name('licenses.show');
         Route::post('/licenses/{product}', [AdminLicenseController::class, 'store'])->name('licenses.store');
@@ -160,4 +163,4 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

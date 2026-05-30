@@ -6,8 +6,8 @@ use App\Models\Commission;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderPaymentService
@@ -38,11 +38,16 @@ class OrderPaymentService
     {
         $product = $order->product;
 
-        if (!$product) {
+        if (! $product) {
             return;
         }
 
-        if ($order->affiliate_id) {
+        // Pembuat produk TIDAK BOLEH dapat affiliate/upline commission dari
+        // produk yang dia upload sendiri — yang berhak adalah tim dia &
+        // member lain. Pembuat dapat creator share saja (lihat block di bawah).
+        $creatorId = $product->created_by ? (int) $product->created_by : null;
+
+        if ($order->affiliate_id && (int) $order->affiliate_id !== $creatorId) {
             $affiliate = User::find($order->affiliate_id);
             $directPercent = $product->commissionPercentFor($affiliate);
             $directCommission = $order->amount * ($directPercent / 100);
@@ -60,7 +65,7 @@ class OrderPaymentService
             }
         }
 
-        if ($order->upline_id) {
+        if ($order->upline_id && (int) $order->upline_id !== $creatorId) {
             $upline = User::find($order->upline_id);
             $uplinePercent = $product->uplinePercentFor($upline);
             $uplineCommission = $order->amount * ($uplinePercent / 100);
@@ -77,13 +82,31 @@ class OrderPaymentService
                 $upline->increment('balance', $uplineCommission);
             }
         }
+
+        if ($product->created_by && (float) $product->creator_share_percent > 0) {
+            $creator = User::find($product->created_by);
+            if ($creator) {
+                $creatorPercent = (float) $product->creator_share_percent;
+                $creatorAmount = $order->amount * ($creatorPercent / 100);
+
+                Commission::create([
+                    'user_id' => $creator->id,
+                    'order_id' => $order->id,
+                    'type' => 'creator',
+                    'amount' => $creatorAmount,
+                    'status' => 'approved',
+                ]);
+
+                $creator->increment('balance', $creatorAmount);
+            }
+        }
     }
 
     private function assignLicense(Order $order): void
     {
         $product = $order->product;
 
-        if (!$product || !$product->isSoftware()) {
+        if (! $product || ! $product->isSoftware()) {
             return;
         }
 
@@ -104,7 +127,7 @@ class OrderPaymentService
         ]);
     }
 
-    private function calculateExpiresAt(string $duration): ?\Carbon\Carbon
+    private function calculateExpiresAt(string $duration): ?Carbon
     {
         return match ($duration) {
             '1_month' => now()->addMonth(),
@@ -118,7 +141,7 @@ class OrderPaymentService
     {
         do {
             $key = strtoupper(
-                Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)
+                Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4)
             );
         } while (License::where('product_id', $productId)->where('key', $key)->exists());
 

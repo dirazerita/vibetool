@@ -20,6 +20,9 @@ class CommissionController extends Controller
             ->withSum([
                 'commissions as upline_commission' => fn ($q) => $q->where('type', 'upline'),
             ], 'amount')
+            ->withSum([
+                'commissions as creator_commission' => fn ($q) => $q->where('type', 'creator'),
+            ], 'amount')
             ->orderByDesc('total_commission')
             ->paginate(20);
 
@@ -28,6 +31,7 @@ class CommissionController extends Controller
             'total_commission' => (float) Commission::sum('amount'),
             'total_direct' => (float) Commission::where('type', 'direct')->sum('amount'),
             'total_upline' => (float) Commission::where('type', 'upline')->sum('amount'),
+            'total_creator' => (float) Commission::where('type', 'creator')->sum('amount'),
         ];
 
         return view('admin.commissions.index', compact('members', 'summary'));
@@ -48,6 +52,7 @@ class CommissionController extends Controller
             'total' => (float) $user->commissions()->sum('amount'),
             'direct' => (float) $user->commissions()->where('type', 'direct')->sum('amount'),
             'upline' => (float) $user->commissions()->where('type', 'upline')->sum('amount'),
+            'creator' => (float) $user->commissions()->where('type', 'creator')->sum('amount'),
             'count' => (int) $user->commissions()->count(),
         ];
 
