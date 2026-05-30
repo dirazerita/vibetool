@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -64,6 +65,7 @@ class ProductController extends Controller
         if ($isFree) {
             $request->merge([
                 'price' => 0,
+                'compare_at_price' => null,
                 'commission_percent' => 0,
                 'commission_percent_non_owner' => 0,
                 'upline_percent' => 0,
@@ -76,6 +78,7 @@ class ProductController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'compare_at_price' => 'nullable|numeric|min:0|gte:price',
             'commission_percent' => 'required|numeric|min:0|max:100',
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
@@ -83,12 +86,19 @@ class ProductController extends Controller
             'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
+            'packages' => 'nullable|array',
+            'packages.*.label' => 'nullable|string|max:100',
+            'packages.*.duration_type' => 'required_with:packages|in:1_month,6_months,1_year,lifetime',
+            'packages.*.price' => 'required_with:packages|numeric|min:0',
+            'packages.*.compare_at_price' => 'nullable|numeric|min:0',
+            'packages.*.is_active' => 'nullable|boolean',
             'file' => $isFree ? 'nullable|file|max:102400' : 'nullable|required_without:file_url|file|max:102400',
             'file_url' => $isFree ? 'nullable|url|max:2048' : 'nullable|required_without:file|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
         ], [
             'file.required_without' => 'Upload file produk atau isi link eksternal.',
             'file_url.required_without' => 'Isi link eksternal atau upload file produk.',
+            'compare_at_price.gte' => 'Harga coret harus lebih besar atau sama dengan harga jual.',
         ]);
 
         $data = [
@@ -96,6 +106,7 @@ class ProductController extends Controller
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
+            'compare_at_price' => $isFree ? null : ($request->input('compare_at_price') ?: null),
             'commission_percent' => $isFree ? 0 : $request->commission_percent,
             'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
             'upline_percent' => $isFree ? 0 : $request->upline_percent,
@@ -117,7 +128,11 @@ class ProductController extends Controller
 
         $data['approval_status'] = 'approved';
 
-        Product::create($data);
+        $product = Product::create($data);
+
+        if (! $isFree) {
+            $this->syncPackages($product, $request->input('packages', []));
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -145,6 +160,7 @@ class ProductController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'compare_at_price' => 'nullable|numeric|min:0|gte:price',
             'commission_percent' => 'required|numeric|min:0|max:100',
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
@@ -152,9 +168,18 @@ class ProductController extends Controller
             'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
+            'packages' => 'nullable|array',
+            'packages.*.id' => 'nullable|integer|exists:product_packages,id',
+            'packages.*.label' => 'nullable|string|max:100',
+            'packages.*.duration_type' => 'required_with:packages|in:1_month,6_months,1_year,lifetime',
+            'packages.*.price' => 'required_with:packages|numeric|min:0',
+            'packages.*.compare_at_price' => 'nullable|numeric|min:0',
+            'packages.*.is_active' => 'nullable|boolean',
             'file' => 'nullable|file|max:102400',
             'file_url' => 'nullable|url|max:2048',
             'thumbnail' => 'nullable|image|max:5120',
+        ], [
+            'compare_at_price.gte' => 'Harga coret harus lebih besar atau sama dengan harga jual.',
         ]);
 
         $data = [
@@ -162,6 +187,7 @@ class ProductController extends Controller
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
+            'compare_at_price' => $isFree ? null : ($request->input('compare_at_price') ?: null),
             'commission_percent' => $isFree ? 0 : $request->commission_percent,
             'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
             'upline_percent' => $isFree ? 0 : $request->upline_percent,
@@ -183,7 +209,60 @@ class ProductController extends Controller
 
         $product->update($data);
 
+        if ($isFree) {
+            $product->packages()->delete();
+        } else {
+            $this->syncPackages($product, $request->input('packages', []));
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Produk berhasil diperbarui.');
+    }
+
+    /**
+     * Sync product packages from the form input. The input shape is
+     * an associative array keyed by row index, each value containing
+     * { id?, label, duration_type, price, compare_at_price?, is_active? }.
+     *
+     * Behavior:
+     * - rows with `id` are updated; rows without `id` are created.
+     * - existing packages whose id is missing from input are deleted.
+     * - sort_order follows the row order.
+     */
+    private function syncPackages(Product $product, array $rows): void
+    {
+        $keptIds = [];
+        $sort = 0;
+
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            if (! isset($row['duration_type']) || ! isset($row['price'])) {
+                continue;
+            }
+
+            $payload = [
+                'label' => isset($row['label']) ? (string) $row['label'] : '',
+                'duration_type' => $row['duration_type'],
+                'price' => $row['price'],
+                'compare_at_price' => ($row['compare_at_price'] ?? null) ?: null,
+                'sort_order' => $sort++,
+                'is_active' => (bool) ($row['is_active'] ?? true),
+            ];
+
+            if (! empty($row['id'])) {
+                $pkg = ProductPackage::where('product_id', $product->id)->find($row['id']);
+                if ($pkg) {
+                    $pkg->update($payload);
+                    $keptIds[] = $pkg->id;
+                }
+            } else {
+                $pkg = $product->packages()->create($payload);
+                $keptIds[] = $pkg->id;
+            }
+        }
+
+        $product->packages()->whereNotIn('id', $keptIds ?: [0])->delete();
     }
 
     public function destroy(Product $product)

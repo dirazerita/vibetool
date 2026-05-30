@@ -19,7 +19,7 @@ class CheckoutController extends Controller
 {
     public function show(Request $request, string $slug)
     {
-        $product = Product::with('landingPage')->where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $product = Product::with(['landingPage', 'activePackages'])->where('slug', $slug)->where('is_active', true)->firstOrFail();
         $user = $request->user();
         $referrer = $this->resolveReferrer($request, $user);
 
@@ -27,6 +27,16 @@ class CheckoutController extends Controller
             return redirect()
                 ->route('product.show', $product->slug)
                 ->with('error', 'Anda tidak bisa membeli produk yang Anda upload sendiri. Produk ini sudah otomatis menjadi milik Anda.');
+        }
+
+        $selectedPackage = null;
+        $packageId = (int) $request->input('package_id', 0);
+        if ($packageId > 0) {
+            $selectedPackage = $product->activePackages->firstWhere('id', $packageId);
+        }
+        // Kalau produk punya paket tapi user belum pilih, default ke paket pertama.
+        if (! $selectedPackage && $product->activePackages->isNotEmpty()) {
+            $selectedPackage = $product->activePackages->first();
         }
 
         Log::info('DEBUG checkout', [
@@ -44,7 +54,8 @@ class CheckoutController extends Controller
 
         $this->ensureAutoCouponSession($product, $user, $referrer);
 
-        $autoCouponData = $this->buildAutoCouponData($product, $user, $referrer);
+        $basePriceForCheckout = $selectedPackage ? (float) $selectedPackage->price : (float) $product->price;
+        $autoCouponData = $this->buildAutoCouponData($product, $user, $referrer, $basePriceForCheckout);
 
         $alreadyPurchased = Order::where('user_id', $user->id)
             ->where('product_id', $product->id)
@@ -58,7 +69,7 @@ class CheckoutController extends Controller
             ->latest()
             ->first();
 
-        return view('checkout', compact('product', 'autoCouponData', 'alreadyPurchased', 'pendingOrder'));
+        return view('checkout', compact('product', 'autoCouponData', 'alreadyPurchased', 'pendingOrder', 'selectedPackage'));
     }
 
     public function applyCoupon(Request $request, string $slug)
@@ -126,6 +137,21 @@ class CheckoutController extends Controller
                 ->with('error', 'Anda tidak bisa membeli produk yang Anda upload sendiri.');
         }
 
+        // Resolve package kalau produk punya paket aktif.
+        $selectedPackage = null;
+        $product->load('activePackages');
+        if ($product->activePackages->isNotEmpty()) {
+            $packageId = (int) $request->input('package_id', 0);
+            if ($packageId > 0) {
+                $selectedPackage = $product->activePackages->firstWhere('id', $packageId);
+            }
+            if (! $selectedPackage) {
+                $selectedPackage = $product->activePackages->first();
+            }
+        }
+
+        $basePrice = $selectedPackage ? (float) $selectedPackage->price : (float) $product->price;
+
         $affiliateId = null;
         $uplineId = null;
         $refCode = $request->cookie('ref') ?? session('ref_code');
@@ -150,7 +176,7 @@ class CheckoutController extends Controller
             }
         }
 
-        $amount = $product->price;
+        $amount = $basePrice;
         $couponCode = null;
         $discountAmount = 0;
 
@@ -161,10 +187,10 @@ class CheckoutController extends Controller
             if ($coupon
                 && $this->isCouponAccessible($coupon, $user, $referrer)
                 && $coupon->isValidForProduct($product)
-                && $product->price >= $coupon->min_purchase
+                && $basePrice >= $coupon->min_purchase
             ) {
-                $discountAmount = $coupon->calculateDiscount($product->price);
-                $amount = $product->price - $discountAmount;
+                $discountAmount = $coupon->calculateDiscount($basePrice);
+                $amount = $basePrice - $discountAmount;
                 $couponCode = $coupon->code;
 
                 $coupon->increment('used_count');
@@ -176,6 +202,7 @@ class CheckoutController extends Controller
         $order = Order::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
+            'package_id' => $selectedPackage?->id,
             'affiliate_id' => $affiliateId,
             'upline_id' => $uplineId,
             'amount' => $amount,
@@ -444,18 +471,20 @@ class CheckoutController extends Controller
         }
     }
 
-    private function buildAutoCouponData(Product $product, ?User $user, ?User $referrer): ?array
+    private function buildAutoCouponData(Product $product, ?User $user, ?User $referrer, ?float $basePriceOverride = null): ?array
     {
         $autoCouponCode = session('auto_coupon');
         if (! $autoCouponCode || ! $user) {
             return null;
         }
 
+        $basePrice = $basePriceOverride ?? (float) $product->price;
+
         $coupon = Coupon::where('code', $autoCouponCode)->first();
         if (! $coupon
             || ! $this->isCouponAccessible($coupon, $user, $referrer)
             || ! $coupon->isValidForProduct($product)
-            || $product->price < $coupon->min_purchase
+            || $basePrice < $coupon->min_purchase
         ) {
             Log::info('DEBUG checkout buildAutoCouponData rejected', [
                 'user_id' => $user?->id,
@@ -463,13 +492,13 @@ class CheckoutController extends Controller
                 'coupon_found' => (bool) $coupon,
                 'is_accessible' => $coupon ? $this->isCouponAccessible($coupon, $user, $referrer) : null,
                 'is_valid_for_product' => $coupon ? $coupon->isValidForProduct($product) : null,
-                'min_purchase_ok' => $coupon ? ($product->price >= $coupon->min_purchase) : null,
+                'min_purchase_ok' => $coupon ? ($basePrice >= $coupon->min_purchase) : null,
             ]);
 
             return null;
         }
 
-        $discount = $coupon->calculateDiscount($product->price);
+        $discount = $coupon->calculateDiscount($basePrice);
         $discountLabel = $coupon->discount_type === 'percent'
             ? rtrim(rtrim(number_format($coupon->discount_value, 2, ',', '.'), '0'), ',').'%'
             : 'Rp '.number_format($coupon->discount_value, 0, ',', '.');
@@ -481,8 +510,8 @@ class CheckoutController extends Controller
             'discount' => $discount,
             'discount_formatted' => 'Rp '.number_format($discount, 0, ',', '.'),
             'discount_label' => $discountLabel,
-            'final_price' => $product->price - $discount,
-            'final_price_formatted' => 'Rp '.number_format($product->price - $discount, 0, ',', '.'),
+            'final_price' => $basePrice - $discount,
+            'final_price_formatted' => 'Rp '.number_format($basePrice - $discount, 0, ',', '.'),
         ];
     }
 }

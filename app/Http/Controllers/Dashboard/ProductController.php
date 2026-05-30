@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::with('landingPage')->where('is_active', true)->get();
+        $products = Product::with(['landingPage', 'activePackages'])->where('is_active', true)->get();
         $user = $request->user()->load('upline');
         $downlines = $user->downlines()->select('id', 'name')->get();
 
@@ -29,7 +29,7 @@ class ProductController extends Controller
         $purchaseStatus = [];
         foreach ($userOrders as $order) {
             $pid = $order->product_id;
-            if (!isset($purchaseStatus[$pid])) {
+            if (! isset($purchaseStatus[$pid])) {
                 $purchaseStatus[$pid] = [
                     'paid' => $order->status === 'paid',
                     'pending_order' => $order->status === 'pending' ? $order : null,
@@ -37,7 +37,7 @@ class ProductController extends Controller
             } else {
                 if ($order->status === 'paid') {
                     $purchaseStatus[$pid]['paid'] = true;
-                } elseif (!$purchaseStatus[$pid]['pending_order'] && $order->status === 'pending') {
+                } elseif (! $purchaseStatus[$pid]['pending_order'] && $order->status === 'pending') {
                     $purchaseStatus[$pid]['pending_order'] = $order;
                 }
             }

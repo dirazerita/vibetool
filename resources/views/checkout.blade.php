@@ -79,16 +79,45 @@
                         </div>
                     @endif
                 </div>
+                @php
+                    $checkoutBasePrice = isset($selectedPackage) && $selectedPackage ? (float) $selectedPackage->price : (float) $product->price;
+                    $checkoutCompareAt = null;
+                    if (isset($selectedPackage) && $selectedPackage) {
+                        if ($selectedPackage->compare_at_price !== null && (float) $selectedPackage->compare_at_price > (float) $selectedPackage->price) {
+                            $checkoutCompareAt = (float) $selectedPackage->compare_at_price;
+                        }
+                    } elseif ($product->compare_at_price !== null && (float) $product->compare_at_price > (float) $product->price) {
+                        $checkoutCompareAt = (float) $product->compare_at_price;
+                    }
+                    $pkgDurationLabel = null;
+                    if (isset($selectedPackage) && $selectedPackage) {
+                        $pkgDurationLabel = match($selectedPackage->duration_type) {
+                            '1_month' => '1 Bulan',
+                            '6_months' => '6 Bulan',
+                            '1_year' => '1 Tahun',
+                            'lifetime' => 'Lifetime',
+                            default => $selectedPackage->duration_type,
+                        };
+                    }
+                @endphp
                 <div style="flex: 1; min-width: 0;">
                     <h2 style="font-size: 1.125rem; font-weight: 600; color: #e2e8f0;">{{ $product->title }}</h2>
                     <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 4px;">{{ Str::limit($product->description, 100) }}</p>
+                    @if(isset($selectedPackage) && $selectedPackage)
+                        <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background-color: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4);">
+                            <span style="font-size: 0.75rem; color: #a5b4fc;">Paket: <strong>{{ $selectedPackage->displayLabel() }}</strong> · {{ $pkgDurationLabel }}</span>
+                        </div>
+                    @endif
                     @if(isset($autoCouponData) && $autoCouponData)
                         <div style="margin-top: 12px; display: flex; align-items: baseline; gap: 8px;">
-                            <span style="font-size: 1rem; color: #64748b; text-decoration: line-through;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                            <span style="font-size: 1rem; color: #64748b; text-decoration: line-through;">Rp {{ number_format($checkoutBasePrice, 0, ',', '.') }}</span>
                             <span style="font-size: 1.5rem; font-weight: 700; color: #818cf8;" id="product-price">{{ $autoCouponData['final_price_formatted'] }}</span>
                         </div>
                     @else
-                        <div class="mt-3 text-2xl font-bold text-indigo-600" id="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
+                        @if($checkoutCompareAt !== null)
+                            <div class="mt-2 text-sm" style="color: #64748b; text-decoration: line-through;">Rp {{ number_format($checkoutCompareAt, 0, ',', '.') }}</div>
+                        @endif
+                        <div class="mt-1 text-2xl font-bold text-indigo-600" id="product-price">Rp {{ number_format($checkoutBasePrice, 0, ',', '.') }}</div>
                     @endif
                 </div>
             </div>
@@ -110,7 +139,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
                     <span class="text-gray-600">Harga asli</span>
-                    <span style="color: #e2e8f0;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span style="color: #e2e8f0;">Rp {{ number_format($checkoutBasePrice, 0, ',', '.') }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 4px;">
                     <span class="text-red-600">Diskon ({{ $autoCouponData['name'] }})</span>
@@ -136,7 +165,7 @@
             <div id="coupon-summary" class="mt-3 {{ isset($autoCouponData) && $autoCouponData ? '' : 'hidden' }}">
                 <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
                     <span class="text-gray-600">Harga asli</span>
-                    <span style="color: #e2e8f0;">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span style="color: #e2e8f0;">Rp {{ number_format($checkoutBasePrice, 0, ',', '.') }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 4px;">
                     <span class="text-red-600">Diskon (<span id="coupon-name">{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['name'] : '' }}</span>)</span>
@@ -152,6 +181,9 @@
         <form method="POST" action="{{ route('checkout.process', $product->slug) }}" id="checkout-form">
             @csrf
             <input type="hidden" name="coupon_code" id="coupon_code_hidden" value="{{ isset($autoCouponData) && $autoCouponData ? $autoCouponData['code'] : '' }}">
+            @if(isset($selectedPackage) && $selectedPackage)
+                <input type="hidden" name="package_id" value="{{ $selectedPackage->id }}">
+            @endif
             <button type="submit" style="width: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 1.125rem; border: none; cursor: pointer;">
                 Bayar Sekarang
             </button>

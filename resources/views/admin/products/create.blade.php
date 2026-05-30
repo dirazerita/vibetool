@@ -36,9 +36,17 @@
                 </div>
 
                 <div id="price-section" style="{{ old('product_type') === 'free' ? 'display:none;' : '' }}">
-                    <label for="price" class="dk-label">Harga (Rp)</label>
+                    <label for="price" class="dk-label">Harga Jual (Rp)</label>
                     <input type="number" name="price" id="price" value="{{ old('price') }}" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Harga sebenarnya yang dibayar member.</p>
                     @error('price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div id="compare-at-price-section" style="{{ old('product_type') === 'free' ? 'display:none;' : '' }}">
+                    <label for="compare_at_price" class="dk-label">Harga Coret (Rp) <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
+                    <input type="number" name="compare_at_price" id="compare_at_price" value="{{ old('compare_at_price') }}" placeholder="Kosongkan jika tidak dipakai" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Harga lebih tinggi yang akan ditampilkan dicoret di atas harga jual (bikin keliatan ada diskon). Harus &gt;= harga jual.</p>
+                    @error('compare_at_price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div id="price-free-notice" style="{{ old('product_type') === 'free' ? '' : 'display:none;' }}">
@@ -48,8 +56,14 @@
                     </div>
                 </div>
 
-                <div id="license-duration-section" style="{{ old('product_type') === 'software' ? '' : 'display:none;' }}">
-                    <label for="license_duration" class="dk-label">Masa Berlaku Lisensi</label>
+                @php
+                    $existingPackages = old('packages', []);
+                    $hasPackages = ! empty($existingPackages);
+                @endphp
+                @include('admin.products._packages-section', ['existingPackages' => $existingPackages, 'hasPackages' => $hasPackages, 'productType' => old('product_type', 'digital')])
+
+                <div id="license-duration-section" style="{{ old('product_type') === 'software' && ! $hasPackages ? '' : 'display:none;' }}">
+                    <label for="license_duration" class="dk-label">Masa Berlaku Lisensi <span class="text-xs dk-text-muted font-normal">(berlaku jika paket harga tidak diaktifkan)</span></label>
                     <select name="license_duration" id="license_duration" class="w-full dk-input">
                         <option value="1_month" {{ old('license_duration') === '1_month' ? 'selected' : '' }}>1 Bulan</option>
                         <option value="6_months" {{ old('license_duration') === '6_months' ? 'selected' : '' }}>6 Bulan</option>
@@ -145,14 +159,19 @@
     function toggleProductTypeUI() {
         var type = document.getElementById('product_type').value;
         var priceSection = document.getElementById('price-section');
+        var compareSection = document.getElementById('compare-at-price-section');
         var priceFreeNotice = document.getElementById('price-free-notice');
         var licenseSection = document.getElementById('license-duration-section');
+        var packagesSection = document.getElementById('packages-section');
         var commissionSection = document.getElementById('commission-section');
         var priceInput = document.getElementById('price');
         var commissionInputs = ['commission_percent','commission_percent_non_owner','upline_percent','upline_percent_non_owner'];
+        var packagesToggle = document.getElementById('packages_enabled');
 
         if (type === 'free') {
             priceSection.style.display = 'none';
+            if (compareSection) compareSection.style.display = 'none';
+            if (packagesSection) packagesSection.style.display = 'none';
             priceFreeNotice.style.display = '';
             priceInput.removeAttribute('required');
             priceInput.value = '0';
@@ -163,6 +182,8 @@
             });
         } else {
             priceSection.style.display = '';
+            if (compareSection) compareSection.style.display = '';
+            if (packagesSection) packagesSection.style.display = '';
             priceFreeNotice.style.display = 'none';
             priceInput.setAttribute('required', 'required');
             commissionSection.style.display = '';
@@ -172,9 +193,12 @@
             });
         }
 
-        licenseSection.style.display = type === 'software' ? '' : 'none';
+        var pkgsEnabled = packagesToggle && packagesToggle.checked;
+        licenseSection.style.display = (type === 'software' && ! pkgsEnabled) ? '' : 'none';
     }
     document.getElementById('product_type').addEventListener('change', toggleProductTypeUI);
+    var __pkgToggle = document.getElementById('packages_enabled');
+    if (__pkgToggle) __pkgToggle.addEventListener('change', toggleProductTypeUI);
     toggleProductTypeUI();
 </script>
 @endsection

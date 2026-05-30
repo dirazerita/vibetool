@@ -19,6 +19,7 @@ class Product extends Model
         'slug',
         'description',
         'price',
+        'compare_at_price',
         'commission_percent',
         'commission_percent_non_owner',
         'upline_percent',
@@ -39,6 +40,7 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'compare_at_price' => 'decimal:2',
             'commission_percent' => 'decimal:2',
             'commission_percent_non_owner' => 'decimal:2',
             'upline_percent' => 'decimal:2',
@@ -172,6 +174,34 @@ class Product extends Model
     public function videoTutorials(): HasMany
     {
         return $this->hasMany(VideoTutorial::class)->orderBy('sort_order');
+    }
+
+    public function packages(): HasMany
+    {
+        return $this->hasMany(ProductPackage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function activePackages(): HasMany
+    {
+        return $this->hasMany(ProductPackage::class)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function hasPackages(): bool
+    {
+        return $this->activePackages()->exists();
+    }
+
+    /**
+     * Harga paket termurah yang aktif, atau price kalau tidak ada paket.
+     */
+    public function startingPrice(): float
+    {
+        $min = $this->activePackages()->min('price');
+
+        return $min !== null ? (float) $min : (float) $this->price;
     }
 
     public function creator(): BelongsTo

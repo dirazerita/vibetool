@@ -47,8 +47,22 @@
             $registerUrl .= '?ref=' . urlencode(session('ref_code'));
         }
         $isFree = $product->isFree();
-        $ctaLabel = $isFree ? 'Dapatkan Gratis' : ('Beli Sekarang — Rp ' . number_format($product->price, 0, ',', '.'));
-        $ctaCheckoutUrl = $isFree ? null : route('checkout', $product->slug);
+        $packages = $product->activePackages;
+        $hasPackages = $packages->isNotEmpty();
+        $defaultPackage = $hasPackages ? $packages->first() : null;
+        $displayPrice = $hasPackages ? (float) $defaultPackage->price : (float) $product->price;
+        $displayCompareAt = $hasPackages
+            ? ($defaultPackage->compare_at_price !== null ? (float) $defaultPackage->compare_at_price : null)
+            : ($product->compare_at_price !== null ? (float) $product->compare_at_price : null);
+        $ctaLabel = $isFree
+            ? 'Dapatkan Gratis'
+            : ('Beli Sekarang — Rp ' . number_format($displayPrice, 0, ',', '.'));
+        $ctaCheckoutUrl = null;
+        if (! $isFree) {
+            $ctaCheckoutUrl = $hasPackages
+                ? route('checkout', $product->slug) . '?package_id=' . $defaultPackage->id
+                : route('checkout', $product->slug);
+        }
         $freeClaimUrl = $isFree ? route('free.claim', $product->slug) : null;
     @endphp
 
@@ -148,17 +162,49 @@
     </section>
     @endif
 
-    {{-- Product Info --}}
+    {{-- Product Info / Package Picker --}}
+    @unless($isFree)
     <section style="padding: 80px 0; background-color: #151e2d;">
-        <div style="max-width: 56rem; margin: 0 auto; padding: 0 1rem;">
-            <div style="display: flex; justify-content: center;">
-                <div style="background-color: #1a2332; border-radius: 12px; padding: 24px; border: 1px solid #2d3a4a; text-align: center;">
-                    <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 4px;">Harga</div>
-                    <div style="font-size: 1.875rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
+        <div style="max-width: 64rem; margin: 0 auto; padding: 0 1rem;">
+            @if($hasPackages)
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; text-align: center; margin-bottom: 24px;">Pilih Paket</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    @foreach($packages as $pkg)
+                        @php
+                            $pkgDurationLabel = match($pkg->duration_type) {
+                                '1_month' => '1 Bulan',
+                                '6_months' => '6 Bulan',
+                                '1_year' => '1 Tahun',
+                                'lifetime' => 'Lifetime',
+                                default => $pkg->duration_type,
+                            };
+                            $pkgHasCompare = $pkg->compare_at_price !== null && (float) $pkg->compare_at_price > (float) $pkg->price;
+                        @endphp
+                        <a href="{{ route('checkout', $product->slug) }}?package_id={{ $pkg->id }}" style="display: block; background-color: #1a2332; border-radius: 12px; padding: 24px; border: 1px solid {{ $pkg->id === $defaultPackage->id ? '#6366f1' : '#2d3a4a' }}; text-decoration: none; transition: transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 4px;">{{ $pkg->displayLabel() }}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">Durasi: {{ $pkgDurationLabel }}</div>
+                            @if($pkgHasCompare)
+                                <div style="font-size: 0.875rem; color: #64748b; text-decoration: line-through; margin-bottom: 2px;">Rp {{ number_format($pkg->compare_at_price, 0, ',', '.') }}</div>
+                            @endif
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($pkg->price, 0, ',', '.') }}</div>
+                            <div style="margin-top: 16px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; padding: 10px 16px; border-radius: 8px; font-weight: 600; text-align: center;">Pilih Paket</div>
+                        </a>
+                    @endforeach
                 </div>
-            </div>
+            @else
+                <div style="display: flex; justify-content: center;">
+                    <div style="background-color: #1a2332; border-radius: 12px; padding: 24px; border: 1px solid #2d3a4a; text-align: center;">
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 4px;">Harga</div>
+                        @if($displayCompareAt !== null && $displayCompareAt > $displayPrice)
+                            <div style="font-size: 1rem; color: #64748b; text-decoration: line-through;">Rp {{ number_format($displayCompareAt, 0, ',', '.') }}</div>
+                        @endif
+                        <div style="font-size: 1.875rem; font-weight: 700; color: #818cf8;">Rp {{ number_format($displayPrice, 0, ',', '.') }}</div>
+                    </div>
+                </div>
+            @endif
         </div>
     </section>
+    @endunless
 
     {{-- Gallery Section --}}
     @if($product->landingPageImages->count() > 0)
