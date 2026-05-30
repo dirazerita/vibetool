@@ -17,11 +17,16 @@ class FreeProductController extends Controller
     {
         $product = Product::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        if (!$product->isFree()) {
+        if (! $product->isFree()) {
             return redirect()->route('checkout', $product->slug);
         }
 
         $user = $request->user();
+
+        if ($product->created_by && (int) $product->created_by === (int) $user->id) {
+            return redirect()->route('product.show', $product->slug)
+                ->with('error', 'Anda tidak bisa klaim produk yang Anda upload sendiri. Produk ini sudah otomatis menjadi milik Anda.');
+        }
 
         $existing = Order::where('user_id', $user->id)
             ->where('product_id', $product->id)
@@ -67,6 +72,6 @@ class FreeProductController extends Controller
         }
 
         return redirect()->route('dashboard.purchases')
-            ->with('success', 'Produk gratis "' . $product->title . '" berhasil diklaim! Login ke softwarenya pakai email + password akun PRODIG kamu.');
+            ->with('success', 'Produk gratis "'.$product->title.'" berhasil diklaim! Login ke softwarenya pakai email + password akun PRODIG kamu.');
     }
 }

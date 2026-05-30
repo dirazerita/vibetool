@@ -104,6 +104,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Bagian Pembuat Produk</p>
+                            <div>
+                                <label for="creator_share_percent" class="dk-label" style="font-size:12px">
+                                    Persentase untuk pembuat produk (%)
+                                    @if($product->created_by && $product->creator)
+                                        <span class="dk-text-muted">— pembuat: <strong>{{ $product->creator->name }}</strong></span>
+                                    @endif
+                                </label>
+                                <input type="number" name="creator_share_percent" id="creator_share_percent" value="{{ old('creator_share_percent', $product->creator_share_percent ?? 0) }}" step="0.01" min="0" max="100" class="w-full dk-input">
+                                <p class="text-xs mt-1 dk-text-muted">
+                                    @if($product->created_by)
+                                        Dibayar ke pembuat <strong>setiap kali produk terjual</strong>, sebagai tambahan komisi affiliate/upline. Set <code>0</code> untuk skip.
+                                    @else
+                                        Produk ini di-upload oleh admin (bukan member), jadi field ini tidak dipakai. Set <code>0</code>.
+                                    @endif
+                                </p>
+                                @error('creator_share_percent') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
 

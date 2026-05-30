@@ -6,8 +6,8 @@ use App\Models\Commission;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderPaymentService
@@ -38,7 +38,7 @@ class OrderPaymentService
     {
         $product = $order->product;
 
-        if (!$product) {
+        if (! $product) {
             return;
         }
 
@@ -77,13 +77,31 @@ class OrderPaymentService
                 $upline->increment('balance', $uplineCommission);
             }
         }
+
+        if ($product->created_by && (float) $product->creator_share_percent > 0) {
+            $creator = User::find($product->created_by);
+            if ($creator) {
+                $creatorPercent = (float) $product->creator_share_percent;
+                $creatorAmount = $order->amount * ($creatorPercent / 100);
+
+                Commission::create([
+                    'user_id' => $creator->id,
+                    'order_id' => $order->id,
+                    'type' => 'creator',
+                    'amount' => $creatorAmount,
+                    'status' => 'approved',
+                ]);
+
+                $creator->increment('balance', $creatorAmount);
+            }
+        }
     }
 
     private function assignLicense(Order $order): void
     {
         $product = $order->product;
 
-        if (!$product || !$product->isSoftware()) {
+        if (! $product || ! $product->isSoftware()) {
             return;
         }
 
@@ -104,7 +122,7 @@ class OrderPaymentService
         ]);
     }
 
-    private function calculateExpiresAt(string $duration): ?\Carbon\Carbon
+    private function calculateExpiresAt(string $duration): ?Carbon
     {
         return match ($duration) {
             '1_month' => now()->addMonth(),
@@ -118,7 +136,7 @@ class OrderPaymentService
     {
         do {
             $key = strtoupper(
-                Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)
+                Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4)
             );
         } while (License::where('product_id', $productId)->where('key', $key)->exists());
 

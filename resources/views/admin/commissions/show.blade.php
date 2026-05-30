@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
     <div class="dk-card p-5">
         <div class="text-xs dk-text-muted uppercase">Total Komisi</div>
         <div class="text-2xl font-bold" style="color:#818cf8 mt-1">Rp {{ number_format($stats['total'], 0, ',', '.') }}</div>
@@ -22,6 +22,10 @@
     <div class="dk-card p-5">
         <div class="text-xs dk-text-muted uppercase">Bonus Upline</div>
         <div class="text-2xl font-bold" style="color:#c4b5fd mt-1">Rp {{ number_format($stats['upline'], 0, ',', '.') }}</div>
+    </div>
+    <div class="dk-card p-5">
+        <div class="text-xs dk-text-muted uppercase">Bagian Pembuat</div>
+        <div class="text-2xl font-bold mt-1" style="color:#fbbf24">Rp {{ number_format($stats['creator'] ?? 0, 0, ',', '.') }}</div>
     </div>
     <div class="dk-card p-5">
         <div class="text-xs dk-text-muted uppercase">Jumlah Transaksi</div>
@@ -53,8 +57,12 @@
                     <td class="px-6 py-4 text-sm">
                         @if($commission->type === 'direct')
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">Direct</span>
-                        @else
+                        @elseif($commission->type === 'upline')
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(168,85,247,0.15);color:#c4b5fd">Upline</span>
+                        @elseif($commission->type === 'creator')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="background:rgba(251,191,36,0.15);color:#fbbf24">Pembuat</span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="background:rgba(100,116,139,0.15);color:#cbd5e1">{{ ucfirst($commission->type) }}</span>
                         @endif
                     </td>
                     <td class="px-6 py-4 text-sm text-right font-semibold text-indigo-700">Rp {{ number_format((float) $commission->amount, 0, ',', '.') }}</td>

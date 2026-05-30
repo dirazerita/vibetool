@@ -12,6 +12,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with(['landingPage', 'creator'])->latest()->paginate(15);
+
         return view('admin.products.index', compact('products'));
     }
 
@@ -22,6 +23,7 @@ class ProductController extends Controller
             ->whereNotNull('created_by')
             ->latest()
             ->paginate(15);
+
         return view('admin.products.pending', compact('products'));
     }
 
@@ -33,7 +35,7 @@ class ProductController extends Controller
             'rejection_reason' => null,
         ]);
 
-        return redirect()->back()->with('success', 'Produk "' . $product->title . '" berhasil disetujui.');
+        return redirect()->back()->with('success', 'Produk "'.$product->title.'" berhasil disetujui.');
     }
 
     public function reject(Request $request, Product $product)
@@ -48,7 +50,7 @@ class ProductController extends Controller
             'rejection_reason' => $request->input('rejection_reason'),
         ]);
 
-        return redirect()->back()->with('success', 'Produk "' . $product->title . '" ditolak.');
+        return redirect()->back()->with('success', 'Produk "'.$product->title.'" ditolak.');
     }
 
     public function create()
@@ -66,6 +68,7 @@ class ProductController extends Controller
                 'commission_percent_non_owner' => 0,
                 'upline_percent' => 0,
                 'upline_percent_non_owner' => 0,
+                'creator_share_percent' => 0,
             ]);
         }
 
@@ -77,6 +80,7 @@ class ProductController extends Controller
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
+            'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
             'file' => $isFree ? 'nullable|file|max:102400' : 'nullable|required_without:file_url|file|max:102400',
@@ -96,6 +100,7 @@ class ProductController extends Controller
             'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
             'upline_percent' => $isFree ? 0 : $request->upline_percent,
             'upline_percent_non_owner' => $isFree ? 0 : $request->upline_percent_non_owner,
+            'creator_share_percent' => $isFree ? 0 : ($request->input('creator_share_percent') ?? 0),
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'file_url' => $request->input('file_url') ?: null,
@@ -132,6 +137,7 @@ class ProductController extends Controller
                 'commission_percent_non_owner' => 0,
                 'upline_percent' => 0,
                 'upline_percent_non_owner' => 0,
+                'creator_share_percent' => 0,
             ]);
         }
 
@@ -143,6 +149,7 @@ class ProductController extends Controller
             'commission_percent_non_owner' => 'required|numeric|min:0|max:100',
             'upline_percent' => 'required|numeric|min:0|max:100',
             'upline_percent_non_owner' => 'required|numeric|min:0|max:100',
+            'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
             'file' => 'nullable|file|max:102400',
@@ -159,6 +166,7 @@ class ProductController extends Controller
             'commission_percent_non_owner' => $isFree ? 0 : $request->commission_percent_non_owner,
             'upline_percent' => $isFree ? 0 : $request->upline_percent,
             'upline_percent_non_owner' => $isFree ? 0 : $request->upline_percent_non_owner,
+            'creator_share_percent' => $isFree ? 0 : ($request->input('creator_share_percent') ?? 0),
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
             'is_active' => $request->boolean('is_active'),
@@ -181,6 +189,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+
         return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dihapus.');
     }
 }
