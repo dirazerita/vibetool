@@ -50,6 +50,17 @@ class FreeProductController extends Controller
             }
         }
 
+        // Pembuat produk tidak boleh jadi affiliate/upline untuk produknya sendiri.
+        if ($product->created_by) {
+            $creatorId = (int) $product->created_by;
+            if ($affiliateId === $creatorId) {
+                $affiliateId = null;
+            }
+            if ($uplineId === $creatorId) {
+                $uplineId = null;
+            }
+        }
+
         $order = Order::create([
             'user_id' => $user->id,
             'product_id' => $product->id,

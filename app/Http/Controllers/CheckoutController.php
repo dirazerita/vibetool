@@ -138,6 +138,18 @@ class CheckoutController extends Controller
             }
         }
 
+        // Pembuat produk tidak boleh jadi affiliate/upline untuk produknya sendiri.
+        // Kalau ada referral yang nge-resolve ke pembuat → abaikan (anggap no ref).
+        if ($product->created_by) {
+            $creatorId = (int) $product->created_by;
+            if ($affiliateId === $creatorId) {
+                $affiliateId = null;
+            }
+            if ($uplineId === $creatorId) {
+                $uplineId = null;
+            }
+        }
+
         $amount = $product->price;
         $couponCode = null;
         $discountAmount = 0;

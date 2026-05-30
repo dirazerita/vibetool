@@ -42,7 +42,12 @@ class OrderPaymentService
             return;
         }
 
-        if ($order->affiliate_id) {
+        // Pembuat produk TIDAK BOLEH dapat affiliate/upline commission dari
+        // produk yang dia upload sendiri — yang berhak adalah tim dia &
+        // member lain. Pembuat dapat creator share saja (lihat block di bawah).
+        $creatorId = $product->created_by ? (int) $product->created_by : null;
+
+        if ($order->affiliate_id && (int) $order->affiliate_id !== $creatorId) {
             $affiliate = User::find($order->affiliate_id);
             $directPercent = $product->commissionPercentFor($affiliate);
             $directCommission = $order->amount * ($directPercent / 100);
@@ -60,7 +65,7 @@ class OrderPaymentService
             }
         }
 
-        if ($order->upline_id) {
+        if ($order->upline_id && (int) $order->upline_id !== $creatorId) {
             $upline = User::find($order->upline_id);
             $uplinePercent = $product->uplinePercentFor($upline);
             $uplineCommission = $order->amount * ($uplinePercent / 100);
