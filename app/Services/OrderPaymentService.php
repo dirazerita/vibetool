@@ -115,7 +115,11 @@ class OrderPaymentService
         }
 
         $key = $this->generateUniqueLicenseKey($product->id);
-        $expiresAt = $this->calculateExpiresAt($product->license_duration ?? 'lifetime');
+
+        // Kalau order pakai paket harga, durasi mengikuti paket. Kalau tidak,
+        // fallback ke license_duration default produk.
+        $duration = $order->package?->duration_type ?? ($product->license_duration ?? 'lifetime');
+        $expiresAt = $this->calculateExpiresAt($duration);
 
         License::create([
             'product_id' => $product->id,

@@ -11,7 +11,8 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $products = Product::with('landingPage')->where('is_active', true)->where('approval_status', 'approved')->latest()->get();
+        $products = Product::with(['landingPage', 'activePackages'])->where('is_active', true)->where('approval_status', 'approved')->latest()->get();
+
         return view('home', compact('products'));
     }
 
@@ -47,10 +48,13 @@ class HomeController extends Controller
                 'landingPageTestimonials' => function ($query) {
                     $query->where('is_active', true);
                 },
+                'activePackages',
             ]);
 
             return view('product.landing', compact('product', 'landingPage'));
         }
+
+        $product->load('activePackages');
 
         return view('product.show', compact('product'));
     }

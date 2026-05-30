@@ -25,6 +25,12 @@
             $isMyProduct = $product->created_by && (int) $product->created_by === (int) $user->id;
             $creatorSharePercent = (float) ($product->creator_share_percent ?? 0);
             $creatorShareAmount = $product->price * $creatorSharePercent / 100;
+            $productPackages = $product->activePackages;
+            $productHasPackages = $productPackages->isNotEmpty();
+            $startingPrice = $productHasPackages ? (float) $productPackages->min('price') : (float) $product->price;
+            $cardCompareAt = ! $productHasPackages && $product->compare_at_price !== null && (float) $product->compare_at_price > (float) $product->price
+                ? (float) $product->compare_at_price
+                : null;
         @endphp
         <div class="dk-table">
             {{-- Thumbnail --}}
@@ -45,7 +51,13 @@
                     <p class="text-lg font-bold mb-1" style="color:#10b981">GRATIS</p>
                     <p class="text-xs dk-text-muted mb-3">Klaim langsung — login software pakai email + password akun VibeTool.Id kamu.</p>
                 @else
-                    <p class="text-lg font-bold text-indigo-600 mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                    @if($cardCompareAt !== null)
+                        <p class="text-sm text-gray-400 mb-0" style="text-decoration: line-through;">Rp {{ number_format($cardCompareAt, 0, ',', '.') }}</p>
+                    @endif
+                    <p class="text-lg font-bold text-indigo-600 mb-1">
+                        @if($productHasPackages)<span class="text-xs font-normal text-gray-400">Mulai </span>@endif
+                        Rp {{ number_format($startingPrice, 0, ',', '.') }}
+                    </p>
                     <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs dk-text-muted font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
                     <p class="text-xs text-purple-500">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
                     @if($isMyProduct && $creatorSharePercent > 0)
@@ -109,6 +121,53 @@
                                 Dapatkan Gratis
                             </button>
                         </form>
+                    @elseif($productHasPackages)
+                        <button type="button" onclick="openPackagePicker({{ $product->id }})"
+                                class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                                style="background-color:#16a34a; color:#ffffff; border:0; cursor:pointer;"
+                                onmouseover="this.style.backgroundColor='#15803d'"
+                                onmouseout="this.style.backgroundColor='#16a34a'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Pilih Paket
+                        </button>
+                        <div id="pkg-modal-{{ $product->id }}" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:16px;">
+                            <div class="dk-card" style="max-width: 480px; width: 100%; padding: 24px;">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold dk-heading">Pilih Paket — {{ $product->title }}</h3>
+                                    <button type="button" onclick="closePackagePicker({{ $product->id }})" class="text-xl dk-text-muted" style="background:none;border:0;cursor:pointer;color:#94a3b8;">&times;</button>
+                                </div>
+                                <div class="space-y-2">
+                                    @foreach($productPackages as $pkg)
+                                        @php
+                                            $pkgDurationLabel = match($pkg->duration_type) {
+                                                '1_month' => '1 Bulan',
+                                                '6_months' => '6 Bulan',
+                                                '1_year' => '1 Tahun',
+                                                'lifetime' => 'Lifetime',
+                                                default => $pkg->duration_type,
+                                            };
+                                            $pkgHasCompare = $pkg->compare_at_price !== null && (float) $pkg->compare_at_price > (float) $pkg->price;
+                                        @endphp
+                                        <a href="{{ route('checkout', $product->slug) }}?package_id={{ $pkg->id }}"
+                                           class="flex items-center justify-between gap-3 p-3 rounded-lg"
+                                           style="background:#0f1828; border:1px solid #2d3a4a; text-decoration:none;"
+                                           onmouseover="this.style.borderColor='#6366f1'"
+                                           onmouseout="this.style.borderColor='#2d3a4a'">
+                                            <div>
+                                                <div class="font-semibold dk-heading text-sm">{{ $pkg->displayLabel() }}</div>
+                                                <div class="text-xs dk-text-muted">Durasi: {{ $pkgDurationLabel }}</div>
+                                            </div>
+                                            <div class="text-right">
+                                                @if($pkgHasCompare)
+                                                    <div class="text-xs text-gray-400" style="text-decoration: line-through;">Rp {{ number_format($pkg->compare_at_price, 0, ',', '.') }}</div>
+                                                @endif
+                                                <div class="text-base font-bold text-indigo-400">Rp {{ number_format($pkg->price, 0, ',', '.') }}</div>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     @else
                         <a href="{{ route('checkout', $product->slug) }}"
                            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
@@ -254,5 +313,21 @@ function copyLink(link, btn) {
         }, 2000);
     });
 }
+
+function openPackagePicker(productId) {
+    var modal = document.getElementById('pkg-modal-' + productId);
+    if (modal) modal.style.display = 'flex';
+}
+
+function closePackagePicker(productId) {
+    var modal = document.getElementById('pkg-modal-' + productId);
+    if (modal) modal.style.display = 'none';
+}
+
+document.addEventListener('click', function (event) {
+    if (event.target && event.target.id && event.target.id.indexOf('pkg-modal-') === 0) {
+        event.target.style.display = 'none';
+    }
+});
 </script>
 @endsection
