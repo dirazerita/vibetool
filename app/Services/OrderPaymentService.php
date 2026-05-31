@@ -19,7 +19,10 @@ class OrderPaymentService
         }
 
         DB::transaction(function () use ($order) {
-            $order->update(['status' => 'paid']);
+            $order->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
             $this->processCommissions($order);
             $this->assignLicense($order);
         });
@@ -47,9 +50,16 @@ class OrderPaymentService
         // member lain. Pembuat dapat creator share saja (lihat block di bawah).
         $creatorId = $product->created_by ? (int) $product->created_by : null;
 
+        // PENTING: tarif komisi (owner vs non-owner) ditentukan berdasarkan
+        // status kepemilikan affiliate/upline PADA SAAT order ini dibuat
+        // ($order->created_at), bukan saat commission diproses. Ini supaya
+        // affiliate yang baru beli produknya setelah sale terjadi tidak
+        // "naik tarif" secara retroaktif.
+        $referenceTime = $order->created_at;
+
         if ($order->affiliate_id && (int) $order->affiliate_id !== $creatorId) {
             $affiliate = User::find($order->affiliate_id);
-            $directPercent = $product->commissionPercentFor($affiliate);
+            $directPercent = $product->commissionPercentFor($affiliate, $referenceTime);
             $directCommission = $order->amount * ($directPercent / 100);
 
             Commission::create([
@@ -67,7 +77,7 @@ class OrderPaymentService
 
         if ($order->upline_id && (int) $order->upline_id !== $creatorId) {
             $upline = User::find($order->upline_id);
-            $uplinePercent = $product->uplinePercentFor($upline);
+            $uplinePercent = $product->uplinePercentFor($upline, $referenceTime);
             $uplineCommission = $order->amount * ($uplinePercent / 100);
 
             Commission::create([
