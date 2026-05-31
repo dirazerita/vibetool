@@ -76,7 +76,9 @@ Body (JSON):
 ```json
 {
   "key": "ABCD-1234-EFGH-5678",
-  "product_slug": "telegram-blaster-pro"
+  "product_slug": "telegram-blaster-pro",
+  "device_fingerprint": "a1b2c3d4...",
+  "device_label": "Laptop Budi"
 }
 ```
 
@@ -84,6 +86,8 @@ Body (JSON):
 |---|---|---|---|
 | `key` | ya | string | Kode lisensi yang di-paste user. |
 | `product_slug` | tidak (tapi **disarankan**) | string | Slug produk dari Vibetool. Jika diisi, server pastikan lisensi memang untuk produk ini (cegah user pakai key produk lain). |
+| `device_fingerprint` | tidak (tapi **disarankan**) | string max 128 | Hash identitas device. Lihat Section 3.6 untuk cara generate. Kalau dikirim, server akan track device dan menolak kalau jumlah device melebihi `max_devices` produk. |
+| `device_label` | tidak | string max 64 | Label human-friendly device (mis. `"Laptop Budi - Windows 11"`) supaya admin gampang identifikasi waktu reset. |
 
 **Slug produk** = bagian terakhir URL landing page produk di Vibetool, misal: `https://vibetool.id/p/telegram-blaster-pro` → slug = `telegram-blaster-pro`. **Hardcode** slug ini di software Anda.
 
@@ -98,7 +102,8 @@ Body (JSON):
     "product": {
       "id": 7,
       "title": "Telegram Blaster Pro",
-      "slug": "telegram-blaster-pro"
+      "slug": "telegram-blaster-pro",
+      "max_devices": 2
     },
     "user": {
       "id": 42,
@@ -108,7 +113,14 @@ Body (JSON):
     "assigned_at": "2026-05-20T10:23:00+00:00",
     "expires_at": "2027-05-20T10:23:00+00:00",
     "is_lifetime": false
-  }
+  },
+  "device": {
+    "fingerprint": "a1b2c3d4...",
+    "label": "Laptop Budi",
+    "first_seen_at": "2026-05-30T07:34:00+00:00",
+    "last_seen_at": "2026-05-31T08:12:00+00:00"
+  },
+  "max_devices": 2
 }
 ```
 
@@ -116,7 +128,11 @@ Body (JSON):
 |---|---|
 | `license.user.name` / `email` | Tampilkan di pojok kanan atas software ("Halo, Budi"). |
 | `license.expires_at` | Tampilkan tanggal kedaluwarsa di About / Settings software. `null` artinya lifetime. |
-| `license.is_lifetime` | `true` = lisetime, jangan tampilkan expiry. |
+| `license.is_lifetime` | `true` = lifetime, jangan tampilkan expiry. |
+| `license.product.max_devices` / `max_devices` | Jumlah maksimum device yang boleh dipakai 1 lisensi. Tampilkan di About kalau perlu. |
+| `device.*` | Info device yang baru di-register/touch (hanya ada kalau `device_fingerprint` dikirim). |
+
+> Kalau `device_fingerprint` **tidak** dikirim di request, response sukses **tidak** akan punya field `device` / `max_devices`. Existing software lama tanpa device tracking tetap kompatibel.
 
 ### 3.4 Response gagal
 
@@ -125,6 +141,7 @@ Body (JSON):
 | 422 | (validasi Laravel) | `key` kosong | Minta user paste key. |
 | 404 | `license_not_found` | Key salah / belum dialokasikan / bukan untuk produk ini | Tampilkan pesan + minta user copy ulang dari email/dashboard Vibetool. |
 | 403 | `license_expired` | Lisensi sudah lewat tanggal kedaluwarsa | Tampilkan pesan + ajak user perpanjang (link ke landing page produk). |
+| 403 | `device_limit_exceeded` | Lisensi valid tapi sudah dipakai di N device (N >= `max_devices`) dan request datang dari device baru | Tampilkan pesan + tombol **Hubungi Admin** untuk minta reset. Response body berisi list `devices` yang sudah terdaftar supaya user bisa identifikasi. |
 
 Contoh response gagal:
 ```json
@@ -135,9 +152,118 @@ Contoh response gagal:
 }
 ```
 
+Contoh response `device_limit_exceeded`:
+```json
+{
+  "valid": false,
+  "error": "device_limit_exceeded",
+  "message": "Lisensi ini sudah dipakai di 2 device (batas maksimum). Hubungi admin untuk reset device kalau ganti perangkat.",
+  "license": { "... seperti format normal ...": null },
+  "devices": [
+    { "fingerprint": "abc...", "label": "PC Kantor", "first_seen_at": "...", "last_seen_at": "..." },
+    { "fingerprint": "xyz...", "label": "Laptop Pribadi", "first_seen_at": "...", "last_seen_at": "..." }
+  ],
+  "max_devices": 2
+}
+```
+
 ### 3.5 Rate limit
 
 Tidak ada rate-limit eksplisit di endpoint ini, **tetapi** semua endpoint Vibetool di belakang reverse proxy Hostinger yang akan throttle kalau spam (>~60 req/menit/IP). Software cukup validate **1x per startup**.
+
+### 3.6 Device tracking (opsional, tapi sangat disarankan)
+
+Kalau Anda mau **1 lisensi cuma boleh dipakai di N device** (misal 1 PC, atau 2 PC untuk dual-boot), aktifkan device tracking dengan cara:
+
+1. **Admin set `max_devices`** di Vibetool (`/admin/products/{id}/edit` → field "Batas Device per Lisensi"). Default = 1.
+2. **Software generate fingerprint** dari hardware/OS info yang stabil di-PC-yang-sama. Lihat contoh di bawah.
+3. **Software kirim `device_fingerprint`** (dan optional `device_label`) di setiap request validate.
+4. **Server tracking otomatis**:
+   - Fingerprint baru + masih ada slot → **register**, return `valid: true` + `device: {...}`.
+   - Fingerprint sudah pernah register → **touch** `last_seen_at` + return `valid: true`.
+   - Fingerprint baru + slot penuh → return `valid: false, error: device_limit_exceeded` + list device yang sudah terdaftar.
+5. **Reset device**: kalau user ganti laptop, admin buka `/admin/licenses/{produk}` → tombol **Reset Device** (hapus semua) atau **Hapus device** (per-device). Setelah reset, user bisa aktivasi ulang di device baru.
+
+#### Cara generate fingerprint yang stabil
+
+Fingerprint harus **stabil di device yang sama** tapi **berbeda di device lain**. Contoh hash dari kombinasi atribut hardware/OS:
+
+**Node.js** (pakai `node:os` + `node:crypto`, no deps):
+```javascript
+const os = require('node:os');
+const crypto = require('node:crypto');
+
+function getDeviceFingerprint() {
+  // Ambil MAC address pertama yang non-internal (bukan loopback / virtual)
+  const ifaces = os.networkInterfaces();
+  let mac = '';
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (!iface.internal && iface.mac && iface.mac !== '00:00:00:00:00:00') {
+        mac = iface.mac;
+        break;
+      }
+    }
+    if (mac) break;
+  }
+  const raw = [mac, os.hostname(), os.platform(), os.arch(), os.userInfo().username].join('|');
+  return crypto.createHash('sha256').update(raw).digest('hex');
+}
+
+function getDeviceLabel() {
+  return `${os.hostname()} - ${os.platform()} ${os.arch()}`;
+}
+```
+
+**Python** (pakai `uuid`, `platform`, `hashlib`, `getpass` — stdlib):
+```python
+import uuid, platform, hashlib, getpass
+
+def get_device_fingerprint() -> str:
+    mac = uuid.getnode()  # int representing MAC address
+    raw = '|'.join([
+        format(mac, 'x'),
+        platform.node(),
+        platform.system(),
+        platform.machine(),
+        getpass.getuser(),
+    ])
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+def get_device_label() -> str:
+    return f"{platform.node()} - {platform.system()} {platform.machine()}"
+```
+
+**PHP** (mix dari `php_uname` + MAC via `ifconfig` / `getmac`):
+```php
+function getDeviceFingerprint(): string {
+    // MAC address (best-effort)
+    $mac = '';
+    if (PHP_OS_FAMILY === 'Windows') {
+        @exec('getmac', $out);
+        foreach ($out as $line) {
+            if (preg_match('/([0-9A-F]{2}[-:]){5}[0-9A-F]{2}/i', $line, $m)) { $mac = $m[0]; break; }
+        }
+    } else {
+        @exec('ip link show 2>/dev/null || ifconfig 2>/dev/null', $out);
+        foreach ($out as $line) {
+            if (preg_match('/(?:HWaddr|ether|link\/ether)\s+([0-9a-f:]{17})/i', $line, $m)) { $mac = $m[1]; break; }
+        }
+    }
+    $raw = implode('|', [$mac, php_uname('n'), php_uname('s'), php_uname('m'), get_current_user()]);
+    return hash('sha256', $raw);
+}
+
+function getDeviceLabel(): string {
+    return php_uname('n') . ' - ' . php_uname('s') . ' ' . php_uname('m');
+}
+```
+
+**Catatan penting:**
+- **Jangan pakai random UUID** — software harus kasih fingerprint **yang sama** tiap startup di PC yang sama, kalau random user akan tertolak setelah restart.
+- **Jangan pakai `crypto.randomUUID()` lalu cache** — kalau user clear cache / re-install software, fingerprint akan beda dan jadi "device baru". Pakai info hardware/OS yang persistent.
+- Pakai SHA-256 hex (panjang 64) atau truncate kalau perlu — max 128 karakter di server.
+- Kalau user pakai VPN atau virtualisasi, MAC bisa berubah — di kasus itu lebih mengandalkan hostname + username untuk stabilitas. Trade-off: kurang unik antar VM.
 
 ---
 
@@ -324,14 +450,39 @@ Buka link ini di browser default user — WA Web / WA Desktop / WA HP akan langs
 
 ```javascript
 // licenseClient.js
+const os = require('node:os');
+const crypto = require('node:crypto');
+
 const BASE_URL = 'https://vibetool.id/api';
 const PRODUCT_SLUG = 'telegram-blaster-pro'; // hardcode slug produk Anda
+
+function getDeviceFingerprint() {
+  const ifaces = os.networkInterfaces();
+  let mac = '';
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (!iface.internal && iface.mac && iface.mac !== '00:00:00:00:00:00') { mac = iface.mac; break; }
+    }
+    if (mac) break;
+  }
+  const raw = [mac, os.hostname(), os.platform(), os.arch(), os.userInfo().username].join('|');
+  return crypto.createHash('sha256').update(raw).digest('hex');
+}
+
+function getDeviceLabel() {
+  return `${os.hostname()} - ${os.platform()} ${os.arch()}`;
+}
 
 async function validateLicense(key) {
   const res = await fetch(`${BASE_URL}/license/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ key, product_slug: PRODUCT_SLUG }),
+    body: JSON.stringify({
+      key,
+      product_slug: PRODUCT_SLUG,
+      device_fingerprint: getDeviceFingerprint(),
+      device_label: getDeviceLabel(),
+    }),
   });
   const data = await res.json();
   return { ok: res.ok, ...data };
@@ -372,10 +523,30 @@ import requests
 BASE_URL = 'https://vibetool.id/api'
 PRODUCT_SLUG = 'telegram-blaster-pro'
 
+def _device_fingerprint() -> str:
+    import uuid, platform, hashlib, getpass
+    raw = '|'.join([
+        format(uuid.getnode(), 'x'),
+        platform.node(),
+        platform.system(),
+        platform.machine(),
+        getpass.getuser(),
+    ])
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+def _device_label() -> str:
+    import platform
+    return f"{platform.node()} - {platform.system()} {platform.machine()}"
+
 def validate_license(key: str) -> dict:
     r = requests.post(
         f'{BASE_URL}/license/validate',
-        json={'key': key, 'product_slug': PRODUCT_SLUG},
+        json={
+            'key': key,
+            'product_slug': PRODUCT_SLUG,
+            'device_fingerprint': _device_fingerprint(),
+            'device_label': _device_label(),
+        },
         headers={'Accept': 'application/json'},
         timeout=10,
     )
@@ -425,9 +596,31 @@ function vibetoolPost(string $path, array $payload): array
     return json_decode($body, true) ?? [];
 }
 
+function vibetoolDeviceFingerprint(): string {
+    $mac = '';
+    if (PHP_OS_FAMILY === 'Windows') {
+        @exec('getmac', $out);
+        foreach ($out as $line) {
+            if (preg_match('/([0-9A-F]{2}[-:]){5}[0-9A-F]{2}/i', $line, $m)) { $mac = $m[0]; break; }
+        }
+    } else {
+        @exec('ip link show 2>/dev/null || ifconfig 2>/dev/null', $out);
+        foreach ($out as $line) {
+            if (preg_match('/(?:HWaddr|ether|link\/ether)\s+([0-9a-f:]{17})/i', $line, $m)) { $mac = $m[1]; break; }
+        }
+    }
+    $raw = implode('|', [$mac, php_uname('n'), php_uname('s'), php_uname('m'), get_current_user()]);
+    return hash('sha256', $raw);
+}
+
 function validateLicense(string $key): array
 {
-    return vibetoolPost('/license/validate', ['key' => $key, 'product_slug' => PRODUCT_SLUG]);
+    return vibetoolPost('/license/validate', [
+        'key' => $key,
+        'product_slug' => PRODUCT_SLUG,
+        'device_fingerprint' => vibetoolDeviceFingerprint(),
+        'device_label' => php_uname('n') . ' - ' . php_uname('s'),
+    ]);
 }
 
 function validateMember(string $email, string $password): array
@@ -465,10 +658,11 @@ Tandai satu per satu:
 
 **Khusus software BERBAYAR (Mode A):**
 - [ ] Form input lisensi muncul saat first run.
-- [ ] POST ke `/license/validate` dengan `{ key, product_slug }`.
+- [ ] POST ke `/license/validate` dengan `{ key, product_slug, device_fingerprint, device_label }`.
+- [ ] Fingerprint device stabil di device yang sama (lihat Section 3.6 — hash dari MAC + hostname + OS + username, BUKAN random UUID).
 - [ ] Cache hasil sukses di file lokal (key only, atau key + cached timestamp).
 - [ ] Re-validate maksimal 1x per startup.
-- [ ] Handle `license_not_found` (key salah) dan `license_expired` (perpanjangan).
+- [ ] Handle `license_not_found` (key salah), `license_expired` (perpanjangan), dan `device_limit_exceeded` (tampilkan list device terdaftar + tombol Hubungi Admin).
 
 **Khusus software GRATIS (Mode B):**
 - [ ] Form login (email + password) muncul saat first run.

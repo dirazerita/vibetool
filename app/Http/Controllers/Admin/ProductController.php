@@ -86,6 +86,7 @@ class ProductController extends Controller
             'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
+            'max_devices' => 'nullable|integer|min:1|max:100',
             'packages' => 'nullable|array',
             'packages.*.label' => 'nullable|string|max:100',
             'packages.*.duration_type' => 'required_with:packages|in:1_month,6_months,1_year,lifetime',
@@ -114,6 +115,7 @@ class ProductController extends Controller
             'creator_share_percent' => $isFree ? 0 : ($request->input('creator_share_percent') ?? 0),
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
+            'max_devices' => $request->product_type === 'software' ? max(1, (int) ($request->input('max_devices') ?? 1)) : 1,
             'file_url' => $request->input('file_url') ?: null,
             'file_path' => null,
         ];
@@ -168,6 +170,7 @@ class ProductController extends Controller
             'creator_share_percent' => 'nullable|numeric|min:0|max:100',
             'product_type' => 'required|in:digital,software,free',
             'license_duration' => 'nullable|in:1_month,6_months,1_year,lifetime',
+            'max_devices' => 'nullable|integer|min:1|max:100',
             'packages' => 'nullable|array',
             'packages.*.id' => 'nullable|integer|exists:product_packages,id',
             'packages.*.label' => 'nullable|string|max:100',
@@ -195,6 +198,7 @@ class ProductController extends Controller
             'creator_share_percent' => $isFree ? 0 : ($request->input('creator_share_percent') ?? 0),
             'product_type' => $request->product_type,
             'license_duration' => $request->product_type === 'software' ? ($request->input('license_duration') ?? 'lifetime') : 'lifetime',
+            'max_devices' => $request->product_type === 'software' ? max(1, (int) ($request->input('max_devices') ?? 1)) : 1,
             'is_active' => $request->boolean('is_active'),
             'file_url' => $request->input('file_url') ?: null,
         ];

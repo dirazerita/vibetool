@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\License;
+use App\Models\LicenseDevice;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\OrderPaymentService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -39,7 +41,10 @@ class LicenseController extends Controller
         abort_unless($product->isSoftware(), 404);
 
         $licenses = $product->licenses()
-            ->with(['user', 'order'])
+            ->with(['user', 'order', 'devices' => function ($q) {
+                $q->orderBy('first_seen_at');
+            }])
+            ->withCount('devices')
             ->orderByRaw('order_id IS NULL DESC')
             ->orderBy('assigned_at', 'desc')
             ->orderBy('id', 'desc')
@@ -139,6 +144,25 @@ class LicenseController extends Controller
         return redirect()->route('admin.licenses.show', $productId)->with('success', 'Lisensi berhasil dihapus.');
     }
 
+    public function resetDevices(License $license)
+    {
+        $deleted = $license->devices()->delete();
+
+        return redirect()
+            ->route('admin.licenses.show', $license->product_id)
+            ->with('success', "Berhasil reset {$deleted} device untuk lisensi {$license->key}.");
+    }
+
+    public function deleteDevice(License $license, LicenseDevice $device)
+    {
+        abort_unless((int) $device->license_id === (int) $license->id, 404);
+        $device->delete();
+
+        return redirect()
+            ->route('admin.licenses.show', $license->product_id)
+            ->with('success', "Device dihapus dari lisensi {$license->key}.");
+    }
+
     public function assignOrder(Order $order, OrderPaymentService $service)
     {
         if ($order->status !== 'paid') {
@@ -150,7 +174,7 @@ class LicenseController extends Controller
         }
 
         $product = $order->product;
-        if (!$product || !$product->isSoftware()) {
+        if (! $product || ! $product->isSoftware()) {
             return back()->withErrors(['order' => 'Produk bukan software.']);
         }
 
@@ -166,10 +190,10 @@ class LicenseController extends Controller
             'expires_at' => $expiresAt,
         ]);
 
-        return back()->with('success', 'Lisensi berhasil di-generate dan dialokasikan ke order #' . $order->id . '.');
+        return back()->with('success', 'Lisensi berhasil di-generate dan dialokasikan ke order #'.$order->id.'.');
     }
 
-    private function calculateExpiresAt(string $duration): ?\Carbon\Carbon
+    private function calculateExpiresAt(string $duration): ?Carbon
     {
         return match ($duration) {
             '1_month' => now()->addMonth(),
@@ -183,7 +207,7 @@ class LicenseController extends Controller
     {
         do {
             $key = strtoupper(
-                Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4) . '-' . Str::random(4)
+                Str::random(4).'-'.Str::random(4).'-'.Str::random(4).'-'.Str::random(4)
             );
         } while (License::where('product_id', $productId)->where('key', $key)->exists());
 

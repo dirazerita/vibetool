@@ -136,6 +136,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/licenses/{license}', [AdminLicenseController::class, 'destroy'])->name('licenses.destroy');
         Route::put('/licenses/{license}', [AdminLicenseController::class, 'update'])->name('licenses.update');
         Route::post('/licenses/assign-order/{order}', [AdminLicenseController::class, 'assignOrder'])->name('licenses.assign-order');
+        Route::post('/licenses/{license}/reset-devices', [AdminLicenseController::class, 'resetDevices'])->name('licenses.reset-devices');
+        Route::delete('/licenses/{license}/devices/{device}', [AdminLicenseController::class, 'deleteDevice'])->name('licenses.devices.destroy');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');

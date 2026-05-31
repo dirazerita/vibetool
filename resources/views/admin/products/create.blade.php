@@ -74,6 +74,13 @@
                     @error('license_duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div id="max-devices-section" style="{{ old('product_type') === 'software' ? '' : 'display:none;' }}">
+                    <label for="max_devices" class="dk-label">Batas Device per Lisensi</label>
+                    <input type="number" name="max_devices" id="max_devices" min="1" max="100" value="{{ old('max_devices', 1) }}" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Jumlah maksimal device yang boleh dipakai 1 kunci lisensi. <strong>1</strong> = 1 lisensi 1 PC (paling ketat). Jika user ganti laptop, admin bisa reset device di halaman Lisensi.</p>
+                    @error('max_devices') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div id="commission-section" class="dk-card" style="padding:16px; {{ old('product_type') === 'free' ? 'display:none;' : '' }}">
                     <h3 class="text-sm font-semibold dk-heading mb-1">Pengaturan Komisi</h3>
                     <p class="text-xs dk-text-muted mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
@@ -162,6 +169,7 @@
         var compareSection = document.getElementById('compare-at-price-section');
         var priceFreeNotice = document.getElementById('price-free-notice');
         var licenseSection = document.getElementById('license-duration-section');
+        var maxDevicesSection = document.getElementById('max-devices-section');
         var packagesSection = document.getElementById('packages-section');
         var commissionSection = document.getElementById('commission-section');
         var priceInput = document.getElementById('price');
@@ -195,6 +203,7 @@
 
         var pkgsEnabled = packagesToggle && packagesToggle.checked;
         licenseSection.style.display = (type === 'software' && ! pkgsEnabled) ? '' : 'none';
+        if (maxDevicesSection) maxDevicesSection.style.display = (type === 'software') ? '' : 'none';
     }
     document.getElementById('product_type').addEventListener('change', toggleProductTypeUI);
     var __pkgToggle = document.getElementById('packages_enabled');

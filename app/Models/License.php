@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class License extends Model
 {
@@ -56,5 +57,10 @@ class License extends Model
     public function isAssigned(): bool
     {
         return $this->order_id !== null;
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(LicenseDevice::class);
     }
 }
