@@ -25,12 +25,14 @@ class Order extends Model
         'payment_proof',
         'xendit_id',
         'download_token',
+        'paid_at',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 

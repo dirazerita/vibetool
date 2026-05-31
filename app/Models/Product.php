@@ -60,8 +60,13 @@ class Product extends Model
      *
      * Member yang upload produk otomatis dianggap "owner" -- mereka tidak
      * perlu (dan tidak boleh) membeli produk sendiri.
+     *
+     * Parameter $asOf opsional: kalau diberikan, fungsi ini menjawab
+     * "apakah user sudah punya produk ini PADA waktu tersebut", bukan
+     * sekarang. Pakai ini saat menghitung komisi historis supaya tarif
+     * komisi tidak naik retroaktif setelah affiliate beli produknya sendiri.
      */
-    public function isOwnedBy(?User $user): bool
+    public function isOwnedBy(?User $user, ?\DateTimeInterface $asOf = null): bool
     {
         if (! $user) {
             return false;
@@ -71,17 +76,35 @@ class Product extends Model
             return true;
         }
 
-        return Order::where('user_id', $user->id)
+        $query = Order::where('user_id', $user->id)
             ->where('product_id', $this->id)
-            ->where('status', 'paid')
-            ->exists();
+            ->where('status', 'paid');
+
+        if ($asOf !== null) {
+            // Hanya hitung pembelian yang sudah dibayar PADA atau SEBELUM
+            // waktu referensi. Pakai paid_at (waktu sebenarnya order di-mark
+            // paid). Untuk order lama yang belum sempat di-backfill paid_at,
+            // fallback ke updated_at. Operator <= dipilih supaya kasus
+            // simultan (paid_at == referensi) tetap dihitung sebagai owner.
+            $query->where(function ($q) use ($asOf) {
+                $q->where('paid_at', '<=', $asOf)
+                    ->orWhere(function ($q2) use ($asOf) {
+                        $q2->whereNull('paid_at')->where('updated_at', '<=', $asOf);
+                    });
+            });
+        }
+
+        return $query->exists();
     }
 
     /**
      * Tarif komisi direct (%) yang berlaku untuk user.
      * Cek komisi khusus dulu, lalu fallback ke tarif produk.
+     *
+     * Parameter $asOf opsional: untuk evaluasi historis. Kalau null,
+     * memakai state saat ini (untuk display "komisi kamu sekarang").
      */
-    public function commissionPercentFor(?User $user): float
+    public function commissionPercentFor(?User $user, ?\DateTimeInterface $asOf = null): float
     {
         if ($user) {
             $custom = MemberCommission::where('user_id', $user->id)
@@ -92,7 +115,7 @@ class Product extends Model
             }
         }
 
-        if ($this->isOwnedBy($user)) {
+        if ($this->isOwnedBy($user, $asOf)) {
             return (float) $this->commission_percent;
         }
 
@@ -102,8 +125,11 @@ class Product extends Model
     /**
      * Tarif bonus upline (%) yang berlaku untuk user.
      * Cek komisi khusus dulu, lalu fallback ke tarif produk.
+     *
+     * Parameter $asOf opsional: untuk evaluasi historis. Kalau null,
+     * memakai state saat ini (untuk display "komisi kamu sekarang").
      */
-    public function uplinePercentFor(?User $user): float
+    public function uplinePercentFor(?User $user, ?\DateTimeInterface $asOf = null): float
     {
         if ($user) {
             $custom = MemberCommission::where('user_id', $user->id)
@@ -114,7 +140,7 @@ class Product extends Model
             }
         }
 
-        if ($this->isOwnedBy($user)) {
+        if ($this->isOwnedBy($user, $asOf)) {
             return (float) $this->upline_percent;
         }
 
