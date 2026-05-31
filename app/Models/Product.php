@@ -27,6 +27,7 @@ class Product extends Model
         'creator_share_percent',
         'product_type',
         'license_duration',
+        'max_devices',
         'file_path',
         'file_url',
         'thumbnail',
@@ -47,6 +48,7 @@ class Product extends Model
             'upline_percent_non_owner' => 'decimal:2',
             'creator_share_percent' => 'decimal:2',
             'is_active' => 'boolean',
+            'max_devices' => 'integer',
         ];
     }
 

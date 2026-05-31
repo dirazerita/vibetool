@@ -95,7 +95,17 @@
             <tbody class="dk-card ">
                 @foreach($licenses as $license)
                 <tr>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm font-mono dk-heading">{{ $license->key }}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm font-mono dk-heading">
+                        <div>{{ $license->key }}</div>
+                        @if($license->isAssigned() && ($product->max_devices ?? 1) > 0)
+                            <div class="mt-1 text-[10px] dk-text-muted font-sans font-normal">
+                                Device: {{ $license->devices_count ?? 0 }}/{{ $product->max_devices ?? 1 }}
+                                @if(($license->devices_count ?? 0) > 0)
+                                    <button type="button" onclick="document.getElementById('devices-row-{{ $license->id }}').classList.toggle('hidden')" class="ml-1 text-indigo-600 hover:underline">lihat</button>
+                                @endif
+                            </div>
+                        @endif
+                    </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                         @if($license->isAssigned())
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Terpakai</span>
@@ -134,6 +144,12 @@
                         <div class="flex items-center gap-2">
                             @if($license->isAssigned())
                                 <button type="button" onclick="openEditModal({{ $license->id }}, '{{ $license->expires_at ? $license->expires_at->format('Y-m-d\TH:i') : '' }}', {{ $license->isLifetime() ? 'true' : 'false' }})" class="text-indigo-600 hover:text-indigo-700 text-xs font-medium">Edit</button>
+                                @if(($license->devices_count ?? 0) > 0)
+                                    <form method="POST" action="{{ route('admin.licenses.reset-devices', $license) }}" onsubmit="return confirm('Reset semua device untuk lisensi {{ $license->key }}? User harus aktivasi ulang dari awal.');">
+                                        @csrf
+                                        <button type="submit" class="text-amber-600 hover:text-amber-700 text-xs font-medium">Reset Device</button>
+                                    </form>
+                                @endif
                             @endif
                             <form method="POST" action="{{ route('admin.licenses.destroy', $license) }}" onsubmit="return confirm('Hapus lisensi ini? Tindakan ini tidak bisa dibatalkan.');">
                                 @csrf @method('DELETE')
@@ -142,6 +158,32 @@
                         </div>
                     </td>
                 </tr>
+                @if($license->isAssigned() && ($license->devices_count ?? 0) > 0)
+                <tr id="devices-row-{{ $license->id }}" class="hidden">
+                    <td colspan="7" class="px-6 py-3 dk-card" style="background:rgba(99,102,241,0.05)">
+                        <div class="text-xs font-semibold dk-heading mb-2">Device terdaftar untuk lisensi {{ $license->key }}:</div>
+                        <div class="space-y-2">
+                            @foreach($license->devices as $device)
+                            <div class="flex items-center justify-between dk-card rounded-lg p-2 text-xs" style="border:1px solid #1e2b3d">
+                                <div class="min-w-0 flex-1">
+                                    <div class="dk-heading font-medium">{{ $device->label ?: 'Device tanpa label' }}</div>
+                                    <div class="dk-text-muted font-mono text-[10px] truncate">{{ Str::limit($device->fingerprint, 60) }}</div>
+                                    <div class="dk-text-muted mt-0.5">
+                                        Pertama: {{ $device->first_seen_at?->format('d M Y H:i') ?? '—' }} ·
+                                        Terakhir: {{ $device->last_seen_at?->format('d M Y H:i') ?? '—' }}
+                                        @if($device->ip_address) · IP {{ $device->ip_address }} @endif
+                                    </div>
+                                </div>
+                                <form method="POST" action="{{ route('admin.licenses.devices.destroy', [$license, $device]) }}" onsubmit="return confirm('Hapus device ini? Lisensi tetap aktif, hanya device ini yang di-revoke.');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="ml-2 text-red-600 hover:text-red-700 text-[11px] font-medium whitespace-nowrap">Hapus device</button>
+                                </form>
+                            </div>
+                            @endforeach
+                        </div>
+                    </td>
+                </tr>
+                @endif
                 @endforeach
             </tbody>
         </table>
