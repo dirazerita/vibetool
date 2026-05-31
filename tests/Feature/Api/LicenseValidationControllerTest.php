@@ -139,6 +139,76 @@ class LicenseValidationControllerTest extends TestCase
         $this->assertSame(2, LicenseDevice::where('license_id', $license->id)->count());
     }
 
+    public function test_matched_slug_is_returned_for_single_slug_request(): void
+    {
+        $license = $this->seedAssignedLicense();
+
+        $response = $this->postJson('/api/license/validate', [
+            'key' => $license->key,
+            'product_slug' => $license->product->slug,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('license.matched_slug', $license->product->slug);
+    }
+
+    public function test_validates_when_one_of_multiple_slugs_matches(): void
+    {
+        $license = $this->seedAssignedLicense();
+        $matched = $license->product->slug;
+
+        $response = $this->postJson('/api/license/validate', [
+            'key' => $license->key,
+            'product_slug' => ['some-other-slug', $matched, 'yet-another'],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('valid', true);
+        $response->assertJsonPath('license.matched_slug', $matched);
+    }
+
+    public function test_returns_not_found_when_none_of_multiple_slugs_match(): void
+    {
+        $license = $this->seedAssignedLicense();
+
+        $response = $this->postJson('/api/license/validate', [
+            'key' => $license->key,
+            'product_slug' => ['nope-1', 'nope-2'],
+        ]);
+
+        $response->assertStatus(404);
+        $response->assertJsonPath('error', 'license_not_found');
+    }
+
+    public function test_accepts_json_encoded_array_string_for_product_slug(): void
+    {
+        $license = $this->seedAssignedLicense();
+        $payload = json_encode([$license->product->slug, 'another-slug']);
+
+        $response = $this->postJson('/api/license/validate', [
+            'key' => $license->key,
+            'product_slug' => $payload,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('valid', true);
+        $response->assertJsonPath('license.matched_slug', $license->product->slug);
+    }
+
+    public function test_empty_array_for_product_slug_is_treated_as_no_filter(): void
+    {
+        $license = $this->seedAssignedLicense();
+
+        $response = $this->postJson('/api/license/validate', [
+            'key' => $license->key,
+            'product_slug' => [],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('valid', true);
+        $response->assertJsonPath('license.matched_slug', $license->product->slug);
+    }
+
     public function test_returns_expired_error_when_license_is_past_expiry(): void
     {
         $license = $this->seedAssignedLicense([

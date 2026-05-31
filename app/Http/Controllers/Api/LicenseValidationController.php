@@ -14,18 +14,24 @@ class LicenseValidationController extends Controller
     {
         $request->validate([
             'key' => 'required|string',
-            'product_slug' => 'nullable|string',
+            'product_slug' => 'nullable',
+            'product_slug.*' => 'string|max:255',
             'device_fingerprint' => 'nullable|string|max:128',
             'device_label' => 'nullable|string|max:64',
         ]);
+
+        // Accept product_slug as either a single string OR an array of strings.
+        // Lets one software validate against multiple product slugs (e.g. a Suite
+        // app that accepts both "tools-basic" and "tools-pro" licenses).
+        $slugs = $this->normalizeProductSlugs($request->input('product_slug'));
 
         $query = License::with(['product:id,title,slug,product_type,max_devices', 'user:id,name,email'])
             ->where('key', $request->input('key'))
             ->whereNotNull('order_id');
 
-        if ($request->filled('product_slug')) {
-            $query->whereHas('product', function ($q) use ($request) {
-                $q->where('slug', $request->input('product_slug'));
+        if (! empty($slugs)) {
+            $query->whereHas('product', function ($q) use ($slugs) {
+                $q->whereIn('slug', $slugs);
             });
         }
 
@@ -166,6 +172,54 @@ class LicenseValidationController extends Controller
         ];
     }
 
+    /**
+     * Normalize the incoming product_slug input into a deduped list of slug strings.
+     * Accepts:
+     *   - null / missing / empty string  → []  (no filter)
+     *   - single string "foo"            → ['foo']
+     *   - array ["foo", "bar"]           → ['foo', 'bar']
+     *   - JSON-encoded array string '["foo","bar"]' (defensive — some clients
+     *     can't easily send arrays in form-encoded POST and fall back to JSON-in-string)
+     */
+    private function normalizeProductSlugs(mixed $raw): array
+    {
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+
+        if (is_string($raw)) {
+            $trimmed = trim($raw);
+            // Try parse as JSON array first (e.g. '["a","b"]')
+            if (str_starts_with($trimmed, '[')) {
+                $decoded = json_decode($trimmed, true);
+                if (is_array($decoded)) {
+                    $raw = $decoded;
+                }
+            }
+            if (is_string($raw)) {
+                return [$trimmed];
+            }
+        }
+
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $slugs = [];
+        foreach ($raw as $value) {
+            if (! is_string($value)) {
+                continue;
+            }
+            $value = trim($value);
+            if ($value === '') {
+                continue;
+            }
+            $slugs[] = $value;
+        }
+
+        return array_values(array_unique($slugs));
+    }
+
     private function formatLicense(License $license): array
     {
         return [
@@ -176,6 +230,10 @@ class LicenseValidationController extends Controller
                 'slug' => $license->product->slug,
                 'max_devices' => max(1, (int) ($license->product->max_devices ?? 1)),
             ] : null,
+            // Convenience: top-level matched_slug equals license.product.slug. Useful when
+            // the caller sent multiple product_slug candidates and wants to know which
+            // one this license belongs to without digging into the nested product object.
+            'matched_slug' => $license->product?->slug,
             'user' => $license->user ? [
                 'id' => $license->user->id,
                 'name' => $license->user->name,

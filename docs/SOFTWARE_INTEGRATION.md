@@ -87,11 +87,44 @@ Body (JSON):
 | Field | Wajib | Tipe | Keterangan |
 |---|---|---|---|
 | `key` | ya | string | Kode lisensi yang di-paste user. |
-| `product_slug` | tidak (tapi **disarankan**) | string | Slug produk dari Vibetool. Jika diisi, server pastikan lisensi memang untuk produk ini (cegah user pakai key produk lain). |
+| `product_slug` | tidak (tapi **disarankan**) | string **atau** array | Slug produk dari Vibetool. Jika diisi, server pastikan lisensi memang untuk salah satu produk yang dicantumkan (cegah user pakai key produk lain). Lihat 3.2.1 untuk multi-produk. |
 | `device_fingerprint` | tidak (tapi **disarankan**) | string max 128 | Hash identitas device. Lihat Section 3.6 untuk cara generate. Kalau dikirim, server akan track device dan menolak kalau jumlah device melebihi `max_devices` produk. |
 | `device_label` | tidak | string max 64 | Label human-friendly device (mis. `"Laptop Budi - Windows 11"`) supaya admin gampang identifikasi waktu reset. |
 
 **Slug produk** = bagian terakhir URL landing page produk di Vibetool, misal: `https://vibetool.id/p/telegram-blaster-pro` → slug = `telegram-blaster-pro`. **Hardcode** slug ini di software Anda.
+
+### 3.2.1 Multi-produk per software (opsional)
+
+Kalau satu software bisa di-unlock oleh beberapa produk berbeda (mis. paket Basic / Pro / Suite, atau seri produk yang share kode software yang sama), kirim `product_slug` sebagai **array** alih-alih string tunggal:
+
+```json
+{
+  "key": "ABCD-1234-EFGH-5678",
+  "product_slug": ["tools-basic", "tools-pro", "tools-suite"]
+}
+```
+
+Server akan validasi kalau lisensi cocok dengan **salah satu** slug di array (OR matching). Response sukses tetap sama, dengan tambahan `license.matched_slug` di response root supaya software tahu user beli paket yang mana:
+
+```json
+{
+  "valid": true,
+  "license": {
+    "matched_slug": "tools-pro",
+    "product": { "slug": "tools-pro", "title": "Tools Pro", ... },
+    ...
+  }
+}
+```
+
+Backward compat: `product_slug` sebagai string tunggal (cara lama) tetap berfungsi tanpa perubahan, dan response selalu menyertakan `license.matched_slug` (sama dengan `license.product.slug`).
+
+**Pakai array kalau** Anda mau:
+- Software "Tools Suite" yang menerima lisensi `tools-basic` (fitur terbatas) ATAU `tools-pro` (fitur full) — software cek `license.matched_slug` untuk gating feature.
+- Migrasi produk: produk lama `legacy-foo` rename jadi `foo` — software accept keduanya selama transisi.
+- Series produk: `course-v1`, `course-v2`, `course-v3` di-validasi oleh 1 reader app.
+
+Untuk request `form-urlencoded` yang sulit kirim array (mis. PHP cURL tanpa array bracket), Anda bisa kirim **JSON-encoded array sebagai string**: `product_slug=["tools-basic","tools-pro"]` — server akan auto-detect dan parse.
 
 ### 3.3 Response sukses (HTTP 200)
 
@@ -107,6 +140,7 @@ Body (JSON):
       "slug": "telegram-blaster-pro",
       "max_devices": 2
     },
+    "matched_slug": "telegram-blaster-pro",
     "user": {
       "id": 42,
       "name": "Budi",
@@ -132,6 +166,7 @@ Body (JSON):
 | `license.expires_at` | Tampilkan tanggal kedaluwarsa di About / Settings software. `null` artinya lifetime. |
 | `license.is_lifetime` | `true` = lifetime, jangan tampilkan expiry. |
 | `license.product.max_devices` / `max_devices` | Jumlah maksimum device yang boleh dipakai 1 lisensi. Tampilkan di About kalau perlu. |
+| `license.matched_slug` | Slug produk yang cocok dengan lisensi. Sama dengan `license.product.slug`. Useful kalau Anda kirim `product_slug` array di request (lihat 3.2.1) untuk tahu paket mana yang user beli. |
 | `device.*` | Info device yang baru di-register/touch (hanya ada kalau `device_fingerprint` dikirim). |
 
 > Kalau `device_fingerprint` **tidak** dikirim di request, response sukses **tidak** akan punya field `device` / `max_devices`. Existing software lama tanpa device tracking tetap kompatibel.
@@ -476,7 +511,7 @@ Body (JSON):
 |---|---|---|---|
 | `email` | ya | email | Email akun Vibetool user. |
 | `password` | ya | string | Password akun Vibetool user (plain di request body — transport-nya HTTPS). |
-| `product_slug` | **ya** | string | Slug produk free yang ingin diakses. **Hardcode** di software. |
+| `product_slug` | **ya** | string **atau** array | Slug produk free yang ingin diakses. Boleh kirim array untuk satu software yang menerima beberapa produk free — lihat 3.2.1 (perilaku identik dengan Mode A). |
 
 ### 4.3 Response sukses (HTTP 200)
 
@@ -494,11 +529,12 @@ Body (JSON):
     "title": "WA Multi Device Free",
     "slug": "wa-multi-device-free",
     "type": "free"
-  }
+  },
+  "matched_slug": "wa-multi-device-free"
 }
 ```
 
-Tampilkan `user.name` di software seperti pada Mode A.
+Tampilkan `user.name` di software seperti pada Mode A. Kalau Anda kirim `product_slug` sebagai array, `matched_slug` memberi tahu produk mana yang dipakai user (dipilih berdasar urutan pertama di array yang user punya akses berbayar).
 
 ### 4.4 Response gagal
 
