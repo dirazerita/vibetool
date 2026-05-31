@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\VideoTutorialController;
+use App\Http\Controllers\Admin\WebhookDeliveryController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Dashboard\CommissionController;
@@ -138,6 +139,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/licenses/assign-order/{order}', [AdminLicenseController::class, 'assignOrder'])->name('licenses.assign-order');
         Route::post('/licenses/{license}/reset-devices', [AdminLicenseController::class, 'resetDevices'])->name('licenses.reset-devices');
         Route::delete('/licenses/{license}/devices/{device}', [AdminLicenseController::class, 'deleteDevice'])->name('licenses.devices.destroy');
+        Route::get('/products/{product}/webhook-deliveries', [WebhookDeliveryController::class, 'index'])->name('products.webhook-deliveries');
+        Route::get('/products/{product}/webhook-deliveries/{delivery}', [WebhookDeliveryController::class, 'show'])->name('products.webhook-deliveries.show');
+        Route::post('/products/{product}/webhook-deliveries/{delivery}/retry', [WebhookDeliveryController::class, 'retry'])->name('products.webhook-deliveries.retry');
         Route::resource('coupons', CouponController::class);
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');

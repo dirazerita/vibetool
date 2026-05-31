@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\License;
 use App\Models\Message;
+use App\Observers\LicenseObserver;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +17,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        License::observe(LicenseObserver::class);
+
         View::composer(['layouts.dashboard', 'layouts.admin'], function ($view) {
             $user = auth()->user();
             if (! $user) {
