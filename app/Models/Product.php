@@ -28,6 +28,8 @@ class Product extends Model
         'product_type',
         'license_duration',
         'max_devices',
+        'webhook_url',
+        'webhook_secret',
         'file_path',
         'file_url',
         'thumbnail',
@@ -136,6 +138,11 @@ class Product extends Model
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class);
+    }
+
+    public function webhookDeliveries(): HasMany
+    {
+        return $this->hasMany(WebhookDelivery::class);
     }
 
     public function isSoftware(): bool

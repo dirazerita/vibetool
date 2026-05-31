@@ -98,6 +98,29 @@
                     @error('max_devices') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div id="webhook-section" class="dk-card" style="padding:16px; {{ old('product_type', $product->product_type) === 'software' ? '' : 'display:none;' }}">
+                    <h3 class="text-sm font-semibold dk-heading mb-1">Webhook (opsional)</h3>
+                    <p class="text-xs dk-text-muted mb-3">Kirim notifikasi otomatis ke software builder saat lisensi <code>issued</code> / <code>revoked</code> / <code>renewed</code>. Lihat <a href="/docs/SOFTWARE_INTEGRATION.md" target="_blank" class="underline">dokumen integrasi</a> untuk format payload + verifikasi signature.</p>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="webhook_url" class="dk-label" style="font-size:12px">Webhook URL</label>
+                            <input type="url" name="webhook_url" id="webhook_url" value="{{ old('webhook_url', $product->webhook_url) }}" placeholder="https://software-anda.com/api/vibetool-webhook" class="w-full dk-input">
+                            @error('webhook_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="webhook_secret" class="dk-label" style="font-size:12px">Webhook Secret (HMAC signature)</label>
+                            <input type="text" name="webhook_secret" id="webhook_secret" value="{{ old('webhook_secret', $product->webhook_secret) }}" maxlength="128" placeholder="random string panjang min 32 karakter" class="w-full dk-input">
+                            <p class="text-xs mt-1 dk-text-muted">HMAC-SHA256(body, secret) dikirim di header <code>X-Vibetool-Signature</code>.</p>
+                            @error('webhook_secret') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        @if($product->webhook_url)
+                        <div class="pt-2">
+                            <a href="{{ route('admin.products.webhook-deliveries', $product) }}" class="dk-btn dk-btn-outline text-xs">Lihat Riwayat Pengiriman Webhook</a>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
                 <div id="commission-section" class="dk-card" style="padding:16px; {{ old('product_type', $product->product_type ?? 'digital') === 'free' ? 'display:none;' : '' }}">
                     <h3 class="text-sm font-semibold dk-heading mb-1">Pengaturan Komisi</h3>
                     <p class="text-xs dk-text-muted mb-4">Member yang sudah pernah membeli produk ini biasanya dapat tarif lebih tinggi. Member yang ikut promosi tapi belum membeli produknya tetap dapat komisi, tapi lebih kecil.</p>
@@ -213,6 +236,7 @@
         var priceFreeNotice = document.getElementById('price-free-notice');
         var licenseSection = document.getElementById('license-duration-section');
         var maxDevicesSection = document.getElementById('max-devices-section');
+        var webhookSection = document.getElementById('webhook-section');
         var packagesSection = document.getElementById('packages-section');
         var commissionSection = document.getElementById('commission-section');
         var priceInput = document.getElementById('price');
@@ -247,6 +271,7 @@
         var pkgsEnabled = packagesToggle && packagesToggle.checked;
         licenseSection.style.display = (type === 'software' && ! pkgsEnabled) ? '' : 'none';
         if (maxDevicesSection) maxDevicesSection.style.display = (type === 'software') ? '' : 'none';
+        if (webhookSection) webhookSection.style.display = (type === 'software') ? '' : 'none';
     }
     document.getElementById('product_type').addEventListener('change', toggleProductTypeUI);
     var __pkgToggle = document.getElementById('packages_enabled');

@@ -34,6 +34,8 @@ Base URL produksi: `https://vibetool.id/api`
 
 Semua endpoint di-rate-limit per IP (lihat detail per endpoint).
 
+**Outbound webhook** (Vibetool → software builder): selain endpoint di atas, software builder bisa konfigurasi **webhook URL** di admin produk untuk menerima notifikasi `license.issued`, `license.revoked`, `license.renewed`. Lihat [section 3.7](#37-webhook-events-opsional-untuk-server-software-builder).
+
 ---
 
 ## 3. Mode A — Software Berbayar (License Key)
@@ -267,6 +269,160 @@ function getDeviceLabel(): string {
 
 ---
 
+## 3.7 Webhook events (opsional, untuk server software builder)
+
+Vibetool bisa **push notification otomatis** ke endpoint software builder setiap kali ada perubahan status lisensi. Berguna kalau software Anda punya database sendiri yang harus tetap sinkron — mis. auto-aktivasi user, soft-disable account, dll.
+
+**Event yang didukung:**
+
+| Event | Trigger | Frekuensi |
+|---|---|---|
+| `license.issued` | Lisensi pertama kali di-assign ke user (auto-issue saat order paid, atau admin manual assign) | Sekali per lisensi |
+| `license.revoked` | Lisensi di-hapus oleh admin (mis. refund) | Sekali per lisensi |
+| `license.renewed` | Admin extend `expires_at` lisensi | Setiap renewal |
+
+### 3.7.1 Setup di Vibetool
+
+Admin produk:
+1. Login di `/admin/login`.
+2. Buka **Admin → Produk → Edit** produk software Anda.
+3. Scroll ke section **Webhook (opsional)**:
+   - **Webhook URL** — endpoint software builder (mis. `https://software-anda.com/api/vibetool-webhook`). Harus HTTPS di production.
+   - **Webhook Secret** — random string min 32 karakter. Dipakai untuk HMAC-SHA256 signature. Simpan secret yang sama di software builder.
+4. Save.
+
+Setelah disimpan, semua event lisensi untuk produk ini akan otomatis di-POST ke webhook URL.
+
+### 3.7.2 Format request yang dikirim Vibetool
+
+**Method:** `POST`
+**Content-Type:** `application/json`
+**Timeout:** Software builder harus respond dalam **10 detik**, kalau tidak Vibetool tandai gagal.
+
+**Headers:**
+```
+Content-Type: application/json
+User-Agent: Vibetool-Webhook/1.0
+X-Vibetool-Event: license.issued
+X-Vibetool-Delivery: <UUID — unik per delivery, bisa pakai untuk dedup>
+X-Vibetool-Signature: sha256=<hex digest HMAC-SHA256 dari raw body + webhook_secret>
+```
+
+**Body (sama untuk semua 3 event):**
+```json
+{
+  "event": "license.issued",
+  "occurred_at": "2025-12-25T10:30:00+00:00",
+  "license": {
+    "key": "ABCD-1234-EFGH-5678",
+    "assigned_at": "2025-12-25T10:30:00+00:00",
+    "expires_at": "2026-12-25T10:30:00+00:00",
+    "is_lifetime": false
+  },
+  "product": {
+    "id": 12,
+    "title": "Telegram Blaster Pro",
+    "slug": "telegram-blaster-pro"
+  },
+  "user": {
+    "id": 345,
+    "name": "Budi Hartono",
+    "email": "budi@example.com"
+  }
+}
+```
+
+### 3.7.3 Verifikasi signature (WAJIB)
+
+Tanpa verifikasi siapa saja bisa POST data palsu ke webhook URL Anda. Selalu hitung signature dari raw body + secret, lalu bandingkan dengan header.
+
+**Node.js (Express)**
+```javascript
+const crypto = require('node:crypto');
+const express = require('express');
+const app = express();
+
+const WEBHOOK_SECRET = process.env.VIBETOOL_WEBHOOK_SECRET;
+
+// IMPORTANT: gunakan raw body, bukan parsed JSON, supaya signature match.
+app.post('/api/vibetool-webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.header('X-Vibetool-Signature') || '';
+  const expected = 'sha256=' + crypto
+    .createHmac('sha256', WEBHOOK_SECRET)
+    .update(req.body)
+    .digest('hex');
+
+  // timing-safe compare
+  if (signature.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+    return res.status(401).json({ error: 'invalid signature' });
+  }
+
+  const payload = JSON.parse(req.body.toString());
+  // ... handle event ...
+
+  res.status(200).json({ ok: true });
+});
+```
+
+**Python (Flask)**
+```python
+import hmac, hashlib, os
+from flask import Flask, request, abort
+
+app = Flask(__name__)
+WEBHOOK_SECRET = os.environ['VIBETOOL_WEBHOOK_SECRET']
+
+@app.post('/api/vibetool-webhook')
+def webhook():
+    raw = request.get_data()  # raw bytes — BUKAN request.json
+    signature = request.headers.get('X-Vibetool-Signature', '')
+    expected = 'sha256=' + hmac.new(
+        WEBHOOK_SECRET.encode(), raw, hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(signature, expected):
+        abort(401)
+    payload = request.get_json()
+    # ... handle event ...
+    return {'ok': True}, 200
+```
+
+**PHP (plain, tanpa framework)**
+```php
+<?php
+$secret = getenv('VIBETOOL_WEBHOOK_SECRET');
+$raw = file_get_contents('php://input');                       // raw bytes
+$signature = $_SERVER['HTTP_X_VIBETOOL_SIGNATURE'] ?? '';
+$expected = 'sha256=' . hash_hmac('sha256', $raw, $secret);
+
+if (! hash_equals($expected, $signature)) {
+    http_response_code(401);
+    echo json_encode(['error' => 'invalid signature']);
+    exit;
+}
+$payload = json_decode($raw, true);
+// ... handle event ...
+http_response_code(200);
+echo json_encode(['ok' => true]);
+```
+
+### 3.7.4 Best practice di endpoint Anda
+
+- **Idempotent:** event yang sama bisa kebetulan dikirim 2x (mis. admin retry). Gunakan `X-Vibetool-Delivery` (UUID per delivery) untuk dedup, ATAU minimal cek `license.key` + `event` untuk skip kalau sudah pernah diproses.
+- **Respond cepat:** kembalikan `200` segera setelah validasi signature. Lakukan pekerjaan berat (kirim email, panggil API lain) di background job — Vibetool akan tandai gagal kalau request >10 detik.
+- **Status code:** `2xx` = sukses. `3xx`/`4xx`/`5xx` = gagal (admin lihat di log delivery).
+- **Logging:** simpan setiap delivery (event, payload, response) supaya bisa di-audit kalau ada masalah.
+
+### 3.7.5 Retry & log
+
+Setiap event di-log otomatis di `/admin/produk/{id}/edit → Lihat Riwayat Pengiriman Webhook`:
+
+- Detail status code, response body, signature, dan payload tersimpan.
+- Kalau gagal (timeout / non-2xx), admin bisa klik **Retry** untuk kirim ulang manual. Vibetool **tidak** auto-retry — admin yang putuskan kapan retry.
+- Setiap retry mencatat attempt # baru di tabel delivery (row asli tidak di-overwrite).
+
+---
+
 ## 4. Mode B — Software Gratis (Login Akun Vibetool)
 
 ### 4.1 Flow di software
@@ -416,7 +572,6 @@ Response gagal validasi (HTTP 422):
 Iterate `errors` (object dengan key = field, value = array of pesan) untuk tampilkan inline error per field.
 
 ---
-
 ## 5. Tombol "Hubungi Admin"
 
 Ambil nomor WA admin dari endpoint publik supaya selalu up-to-date kalau admin ganti nomor:
