@@ -6,17 +6,26 @@
 
 {{-- Ringkasan --}}
 <div class="dk-grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
-        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Tim Langsung</div>
-        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #111827;">{{ $downlines->count() }}</div>
+    <div style="background: #1a2332; border-radius: 14px; border: 1px solid #2d3a4a; padding: 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <div style="width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: rgba(99,102,241,0.15); color: #818cf8;">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Total Tim Langsung</div>
+        <div style="margin-top: 6px; font-size: 28px; font-weight: 700; color: #818cf8;">{{ $downlines->count() }}</div>
     </div>
-    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
-        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Semua Downline</div>
-        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #111827;">{{ $downlines->count() + $downlines->sum(fn($d) => $d->downlines->count()) }}</div>
+    <div style="background: #1a2332; border-radius: 14px; border: 1px solid #2d3a4a; padding: 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <div style="width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: rgba(16,185,129,0.15); color: #6ee7b7;">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Total Semua Downline</div>
+        <div style="margin-top: 6px; font-size: 28px; font-weight: 700; color: #6ee7b7;">{{ $downlines->count() + $downlines->sum(fn($d) => $d->downlines->count()) }}</div>
     </div>
-    <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
-        <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Penjualan Tim</div>
-        <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #4f46e5;">{{ $downlines->sum('total_sales') + $downlines->sum(fn($d) => $d->downlines->sum('total_sales')) }}</div>
+    <div style="background: #1a2332; border-radius: 14px; border: 1px solid #2d3a4a; padding: 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <div style="width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: rgba(168,85,247,0.15); color: #c4b5fd;">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Total Penjualan Tim</div>
+        <div style="margin-top: 6px; font-size: 28px; font-weight: 700; color: #c4b5fd;">{{ $downlines->sum('total_sales') + $downlines->sum(fn($d) => $d->downlines->sum('total_sales')) }}</div>
     </div>
 </div>
 
