@@ -128,7 +128,7 @@
                     <div class="space-y-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Komisi Affiliator (penjualan langsung dari user)</p>
-                            <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                            <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                                 <div>
                                     <label for="commission_percent" class="dk-label" style="font-size:12px">Sudah beli produk (%)</label>
                                     <input type="number" name="commission_percent" id="commission_percent" value="{{ old('commission_percent', $product->commission_percent) }}" step="0.01" class="w-full dk-input" required>
@@ -144,7 +144,7 @@
 
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wide dk-text mb-2">Bonus Upline (penjualan dari downline)</p>
-                            <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                            <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                                 <div>
                                     <label for="upline_percent" class="dk-label" style="font-size:12px">Sudah beli produk (%)</label>
                                     <input type="number" name="upline_percent" id="upline_percent" value="{{ old('upline_percent', $product->upline_percent) }}" step="0.01" class="w-full dk-input" required>

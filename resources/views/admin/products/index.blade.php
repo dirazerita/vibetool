@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
+<div class="dk-grid-3 gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
     @foreach($products as $product)
         @php
             $lp = $product->landingPage;

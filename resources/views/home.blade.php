@@ -2,7 +2,7 @@
 @section('title', 'VibeTool.Id - Marketplace Produk Digital')
 
 @section('content')
-<div style="background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95); padding: 64px 0;">
+<div class="vt-hero" style="background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95); padding: 64px 0;">
     <div style="max-width: 80rem; margin: 0 auto; padding: 0 1rem; text-align: center;">
         <h1 style="font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 16px;">Marketplace Produk Digital</h1>
         <p style="font-size: 1.25rem; color: #c7d2fe; margin-bottom: 32px;">Temukan produk digital berkualitas dan dapatkan komisi sebagai affiliator!</p>
@@ -12,9 +12,9 @@
     </div>
 </div>
 
-<div style="max-width: 80rem; margin: 0 auto; padding: 48px 1rem;">
+<div class="vt-section-pad" style="max-width: 80rem; margin: 0 auto; padding: 48px 1rem;">
     <h2 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 32px;">Produk Digital</h2>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+    <div class="vt-product-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
         @foreach($products as $product)
         @php
             $thumbUrl = null;

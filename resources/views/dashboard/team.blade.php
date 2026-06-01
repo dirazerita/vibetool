@@ -5,7 +5,7 @@
 <h1 class="text-2xl font-bold dk-heading mb-6">Tim / Downline</h1>
 
 {{-- Ringkasan --}}
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+<div class="dk-grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
     <div style="background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; padding: 16px;">
         <div style="font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Total Tim Langsung</div>
         <div style="margin-top: 4px; font-size: 24px; font-weight: 700; color: #111827;">{{ $downlines->count() }}</div>

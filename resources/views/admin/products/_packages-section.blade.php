@@ -29,7 +29,7 @@
                         <p class="text-xs uppercase tracking-wide font-semibold" style="color:#a5b4fc">Paket #{{ $idx + 1 }}</p>
                         <button type="button" class="text-xs" style="color:#ef4444" onclick="removePackageRow(this)">Hapus</button>
                     </div>
-                    <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr);">
+                    <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr);">
                         <div>
                             <label class="dk-label" style="font-size:12px">Label (opsional)</label>
                             <input type="text" name="packages[{{ $idx }}][label]" value="{{ $pkg['label'] ?? '' }}" placeholder="mis. Paket 1 Tahun" class="w-full dk-input">
@@ -100,7 +100,7 @@
                 + '    <p class="text-xs uppercase tracking-wide font-semibold" style="color:#a5b4fc">Paket #' + (idx + 1) + '</p>'
                 + '    <button type="button" class="text-xs" style="color:#ef4444" onclick="removePackageRow(this)">Hapus</button>'
                 + '  </div>'
-                + '  <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr);">'
+                + '  <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr);">'
                 + '    <div><label class="dk-label" style="font-size:12px">Label (opsional)</label>'
                 + '      <input type="text" name="packages[' + idx + '][label]" placeholder="mis. Paket 1 Tahun" class="w-full dk-input"></div>'
                 + '    <div><label class="dk-label" style="font-size:12px">Durasi Lisensi</label>'

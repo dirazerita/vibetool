@@ -2,6 +2,26 @@
 @section('title', 'Semua Pesanan')
 
 @section('content')
+<style>
+    @media (max-width: 768px) {
+        /* Ubah tabel pesanan jadi kartu bertumpuk di layar kecil */
+        .orders-table-wrap { background: transparent !important; border: none !important; border-radius: 0 !important; overflow: visible !important; }
+        .orders-table-wrap .overflow-x-auto { overflow: visible !important; }
+        .orders-card-table { min-width: 0 !important; width: 100% !important; }
+        .orders-card-table thead { display: none; }
+        .orders-card-table tbody, .orders-card-table tr, .orders-card-table td { display: block; width: 100%; }
+        .orders-card-table tr { background: #1a2332; border: 1px solid #2d3a4a; border-radius: 12px; margin-bottom: 14px; padding: 6px 0; }
+        .orders-card-table td {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+            padding: 8px 16px !important; border: none !important; text-align: right; white-space: normal !important;
+        }
+        .orders-card-table td::before {
+            content: attr(data-label); font-weight: 600; color: #94a3b8; text-align: left;
+            flex-shrink: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .orders-card-table td > * { margin-left: auto; }
+    }
+</style>
 <h1 class="text-2xl font-bold dk-heading mb-6">Semua Pesanan</h1>
 
 @if(session('success'))
@@ -11,9 +31,9 @@
     <div class="dk-alert-error">{{ session('error') }}</div>
 @endif
 
-<div class="dk-table">
+<div class="dk-table orders-table-wrap">
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full orders-card-table">
         <thead>
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">ID</th>
@@ -31,8 +51,8 @@
         <tbody>
             @forelse($orders as $order)
             <tr>
-                <td class="px-6 py-4 text-sm" style="color:#94a3b8">#{{ $order->id }}</td>
-                <td class="px-6 py-4 text-sm" style="color:#e2e8f0">
+                <td class="px-6 py-4 text-sm" data-label="ID" style="color:#94a3b8">#{{ $order->id }}</td>
+                <td class="px-6 py-4 text-sm" data-label="Pembeli" style="color:#e2e8f0">
                     {{ $order->user->name ?? '-' }}
                     @if($order->user && $order->user->status !== 'active')
                         <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium " style="background:rgba(251,146,60,0.15);color:#fdba74;border:1px solid rgba(251,146,60,0.3)">
@@ -41,9 +61,9 @@
                         </span>
                     @endif
                 </td>
-                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $order->product->title ?? '-' }}</td>
-                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $order->affiliate->name ?? '-' }}</td>
-                <td class="px-6 py-4 text-sm">
+                <td class="px-6 py-4 text-sm" data-label="Produk" style="color:#94a3b8">{{ $order->product->title ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm" data-label="Affiliator" style="color:#94a3b8">{{ $order->affiliate->name ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm" data-label="Kupon">
                     @if($order->coupon_code)
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">{{ $order->coupon_code }}</span>
                         @if($order->discount_amount)
@@ -53,22 +73,22 @@
                         <span style="color:#4a5568">-</span>
                     @endif
                 </td>
-                <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">Rp {{ number_format($order->amount, 0, ',', '.') }}</td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 text-sm font-medium" data-label="Jumlah" style="color:#e2e8f0">Rp {{ number_format($order->amount, 0, ',', '.') }}</td>
+                <td class="px-6 py-4" data-label="Metode">
                     @if($order->payment_method === 'manual')
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium dk-badge" style="background:rgba(168,85,247,0.15);color:#c4b5fd">Manual</span>
                     @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium " style="background:#151e2d dk-text">Xendit</span>
                     @endif
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4" data-label="Status">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {{ $order->status === 'paid' ? 'dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7"' : ($order->status === 'pending' ? 'dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047"' : 'dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5"') }}">
+                        {{ $order->status === 'paid' ? 'dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7"' : ($order->status === 'pending' ? 'dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047"' : 'dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5"') }}>
                         {{ ucfirst($order->status) }}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $order->created_at->format('d M Y H:i') }}</td>
-                <td class="px-6 py-4 text-sm whitespace-nowrap align-top">
+                <td class="px-6 py-4 text-sm" data-label="Tanggal" style="color:#94a3b8">{{ $order->created_at->format('d M Y H:i') }}</td>
+                <td class="px-6 py-4 text-sm whitespace-nowrap align-top" data-label="Aksi">
                     @if($order->status === 'pending' && $order->payment_method === 'manual')
                         @php
                             $memberInactive = $order->user && $order->user->status !== 'active';

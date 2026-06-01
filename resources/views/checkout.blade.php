@@ -37,7 +37,7 @@
                     </div>
                 </div>
             </div>
-            <div style="display: flex; gap: 12px; margin-top: 8px;">
+            <div class="vt-modal-actions" style="display: flex; gap: 12px; margin-top: 8px;">
                 <a href="{{ route('product.show', $product->slug) }}"
                    style="flex: 1; text-align: center; padding: 10px 16px; border-radius: 8px; border: 1px solid #2d3a4a; color: #cbd5e1; font-weight: 500; font-size: 0.875rem; text-decoration: none;">
                     Batal
