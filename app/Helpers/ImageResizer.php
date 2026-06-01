@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -12,6 +13,54 @@ class ImageResizer
     private static function manager(): ImageManager
     {
         return new ImageManager(new Driver());
+    }
+
+    /**
+     * Compress & resize a product thumbnail: scale down to max 600x600
+     * (keep aspect ratio, no upscaling), save as WebP (preserves transparency,
+     * smaller than PNG/JPEG). Falls back to raw store if processing fails.
+     */
+    public static function resizeThumbnail(UploadedFile $file, string $directory = 'products'): string
+    {
+        try {
+            $image = self::manager()->read($file->getPathname());
+            $image->scaleDown(600, 600);
+
+            $filename = uniqid('thumb_') . '.webp';
+            $path = $directory . '/' . $filename;
+
+            Storage::disk('public')->put($path, $image->toWebp(82)->toString());
+
+            return $path;
+        } catch (\Throwable $e) {
+            Log::warning('ImageResizer::resizeThumbnail failed, storing raw: ' . $e->getMessage());
+
+            return $file->store($directory, 'public');
+        }
+    }
+
+    /**
+     * Compress a payment-proof screenshot: scale down to max 1600x1600
+     * (keep aspect ratio, no upscaling), save as JPEG 80%.
+     * Falls back to raw store if processing fails.
+     */
+    public static function resizeProof(UploadedFile $file, string $directory): string
+    {
+        try {
+            $image = self::manager()->read($file->getPathname());
+            $image->scaleDown(1600, 1600);
+
+            $filename = uniqid('proof_') . '.jpg';
+            $path = $directory . '/' . $filename;
+
+            Storage::disk('public')->put($path, $image->toJpeg(80)->toString());
+
+            return $path;
+        } catch (\Throwable $e) {
+            Log::warning('ImageResizer::resizeProof failed, storing raw: ' . $e->getMessage());
+
+            return $file->store($directory, 'public');
+        }
     }
 
     /**

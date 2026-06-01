@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ImageResizer;
 use App\Helpers\WhatsApp;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -311,7 +312,7 @@ class CheckoutController extends Controller
             Storage::disk('public')->delete($order->payment_proof);
         }
 
-        $path = $request->file('proof')->store('payment_proofs/'.$order->id, 'public');
+        $path = ImageResizer::resizeProof($request->file('proof'), 'payment_proofs/'.$order->id);
         $order->update(['payment_proof' => $path]);
 
         try {
