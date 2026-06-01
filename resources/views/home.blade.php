@@ -13,7 +13,7 @@
 </div>
 
 <div class="vt-section-pad" style="max-width: 80rem; margin: 0 auto; padding: 48px 1rem;">
-    <h2 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 32px;">Produk Digital</h2>
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 32px;">Tools Produk Marketing Terbaik</h2>
     <div class="vt-product-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
         @foreach($products as $product)
         @php
@@ -25,9 +25,9 @@
             }
         @endphp
         <div style="background-color: #1a2332; border: 1px solid #2d3a4a; border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s;">
-            <div style="height: 192px; position: relative;">
+            <div style="aspect-ratio: 1 / 1; position: relative; background-color: #151e2d;">
                 @if($thumbUrl)
-                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" style="width: 100%; height: 100%; object-fit: contain;">
                 @else
                     <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed, #4338ca); display: flex; align-items: center; justify-content: center; padding: 16px;">
                         <span style="color: #ffffff; font-size: 1.125rem; font-weight: 700; text-align: center; line-height: 1.4;">{{ $product->title }}</span>
