@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ImageResizer;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductPackage;
@@ -129,7 +130,7 @@ class ProductController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $data['thumbnail'] = ImageResizer::resizeThumbnail($request->file('thumbnail'));
         }
 
         $data['approval_status'] = 'approved';
@@ -216,7 +217,7 @@ class ProductController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $data['thumbnail'] = ImageResizer::resizeThumbnail($request->file('thumbnail'));
         }
 
         $product->update($data);

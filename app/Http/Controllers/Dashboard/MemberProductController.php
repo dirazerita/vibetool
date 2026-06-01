@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\ImageResizer;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -80,7 +81,7 @@ class MemberProductController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $data['thumbnail'] = ImageResizer::resizeThumbnail($request->file('thumbnail'));
         }
 
         Product::create($data);
@@ -140,7 +141,7 @@ class MemberProductController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $data['thumbnail'] = ImageResizer::resizeThumbnail($request->file('thumbnail'));
         }
 
         $product->update($data);
