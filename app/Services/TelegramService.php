@@ -36,7 +36,7 @@ class TelegramService
     {
         $client = Http::withOptions([
             'force_ip_resolve' => 'v4',
-            'verify' => filter_var(env('TELEGRAM_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+            'verify' => config('services.telegram.verify_ssl', true),
             'curl' => [
                 CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
                 CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,

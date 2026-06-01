@@ -40,4 +40,8 @@ return [
         'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
     ],
 
+    'telegram' => [
+        'verify_ssl' => filter_var(env('TELEGRAM_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];
