@@ -13,7 +13,7 @@
     </a>
 </div>
 
-<div style="display:flex; gap:16px; margin-bottom:24px;">
+<div class="dk-grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
     <div class="dk-stat-card" style="flex:1;">
         <div class="dk-stat-icon" style="background:rgba(79,70,229,0.15); color:#a5b4fc;">
             <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
