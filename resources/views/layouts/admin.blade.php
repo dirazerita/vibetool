@@ -65,10 +65,12 @@
         .dk-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); }
         .dk-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); }
         .dk-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); }
+        .dk-grid-5 { display:grid; grid-template-columns:repeat(5,1fr); }
 
         @media (max-width:1024px) {
             .dk-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
             .dk-grid-3 { grid-template-columns:repeat(2,1fr) !important; }
+            .dk-grid-5 { grid-template-columns:repeat(3,1fr) !important; }
         }
 
         @media (max-width:768px) {
@@ -85,6 +87,7 @@
             .dk-grid-4 { grid-template-columns:1fr !important; }
             .dk-grid-3 { grid-template-columns:1fr !important; }
             .dk-grid-2 { grid-template-columns:1fr !important; }
+            .dk-grid-5 { grid-template-columns:1fr !important; }
         }
     </style>
 </head>

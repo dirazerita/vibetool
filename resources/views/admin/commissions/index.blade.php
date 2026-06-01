@@ -4,7 +4,7 @@
 @section('content')
 <h1 class="text-2xl font-bold dk-heading mb-6">Komisi Member</h1>
 
-<div class="gap-6 mb-8" style="display:grid;grid-template-columns:repeat(5,1fr)">
+<div class="dk-grid-5 gap-6 mb-8" style="display:grid;grid-template-columns:repeat(5,1fr)">
     <div class="dk-stat-card">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl " style="background:#151e2d dk-text flex items-center justify-center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
