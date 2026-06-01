@@ -42,7 +42,8 @@
         .dk-text-muted { color:#64748b; }
         .dk-text { color:#cbd5e1; }
         .dk-divider { border-top:1px solid #1e2b3d; margin:12px 0; }
-        .dk-stat-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:14px; padding:24px; display:flex; align-items:center; gap:16px; }
+        .dk-stat-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:14px; padding:24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; }
+        .dk-stat-card > div { min-width:0; }
         .dk-stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         select.dk-input { appearance:auto; }
         textarea.dk-input { resize:vertical; }
