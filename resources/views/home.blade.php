@@ -27,7 +27,7 @@
         <div style="background-color: #1a2332; border: 1px solid #2d3a4a; border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s;">
             <div style="aspect-ratio: 1 / 1; position: relative; background-color: #151e2d;">
                 @if($thumbUrl)
-                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                    <img src="{{ $thumbUrl }}" alt="{{ $product->title }}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: contain;">
                 @else
                     <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed, #4338ca); display: flex; align-items: center; justify-content: center; padding: 16px;">
                         <span style="color: #ffffff; font-size: 1.125rem; font-weight: 700; text-align: center; line-height: 1.4;">{{ $product->title }}</span>

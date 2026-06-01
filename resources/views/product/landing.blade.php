@@ -117,7 +117,7 @@
     <section style="position: relative;">
         @if($landingPage->hero_image)
             <div class="vt-hero-media" style="position: relative; height: 500px;">
-                <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="{{ $landingPage->hero_title }}" style="width: 100%; height: 500px; object-fit: cover;">
+                <img src="{{ asset('storage/' . $landingPage->hero_image) }}" alt="{{ $landingPage->hero_title }}" fetchpriority="high" decoding="async" style="width: 100%; height: 500px; object-fit: cover;">
                 <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.4), rgba(0,0,0,0.7));"></div>
                 <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                     <div style="text-align: center; padding: 0 16px; max-width: 56rem;">
@@ -240,7 +240,7 @@
             <div class="vt-grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
                 @foreach($product->landingPageImages as $image)
                     <div style="border-radius: 12px; overflow: hidden; border: 1px solid #2d3a4a; background-color: #1a2332;">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->caption ?? $product->title }}" style="width: 100%; height: 250px; object-fit: cover;">
+                        <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->caption ?? $product->title }}" loading="lazy" decoding="async" style="width: 100%; height: 250px; object-fit: cover;">
                         @if($image->caption)
                             <div style="padding: 12px;">
                                 <p style="font-size: 0.875rem; color: #94a3b8;">{{ $image->caption }}</p>
@@ -264,7 +264,7 @@
                     <div style="background-color: #1a2332; border-radius: 12px; border: 1px solid #2d3a4a; padding: 24px; text-align: center;">
                         <div style="display: flex; justify-content: center; margin-bottom: 12px;">
                             @if($testimonial->avatar)
-                                <img src="{{ asset('storage/' . $testimonial->avatar) }}" alt="{{ $testimonial->name }}" style="border-radius: 50%; object-fit: cover; width: 64px; height: 64px;">
+                                <img src="{{ asset('storage/' . $testimonial->avatar) }}" alt="{{ $testimonial->name }}" loading="lazy" decoding="async" style="border-radius: 50%; object-fit: cover; width: 64px; height: 64px;">
                             @else
                                 <div style="border-radius: 50%; background-color: #312e81; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;">
                                     <span style="color: #818cf8; font-weight: 700; font-size: 1.25rem;">{{ strtoupper(substr($testimonial->name, 0, 1)) }}</span>
