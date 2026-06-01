@@ -15,7 +15,7 @@
 @endif
 
 @if($products->count() > 0)
-<div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
+<div class="dk-grid-3 gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
     @foreach($products as $product)
         @php
             $cardImage = $product->thumbnail ? asset('storage/' . $product->thumbnail) : null;

@@ -51,11 +51,47 @@
         .dk-checkbox:checked { background:linear-gradient(135deg,#4f46e5,#7c3aed); border-color:#4f46e5; }
         .dk-checkbox:checked::after { content:''; position:absolute; left:4px; top:0; width:6px; height:11px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
         .dk-checkbox:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(99,102,241,0.25); }
+
+        /* Layout shell */
+        * { box-sizing: border-box; }
+        .dk-shell { min-height:100vh; display:flex; }
+        .dk-sidebar { width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column; }
+        .dk-main { flex:1; overflow:auto; min-width:0; }
+        .dk-content { padding:32px; }
+        .dk-topbar { display:none; }
+        .dk-overlay { display:none; }
+
+        /* Responsive stat / card grids */
+        .dk-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); }
+        .dk-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); }
+        .dk-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); }
+
+        @media (max-width:1024px) {
+            .dk-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
+            .dk-grid-3 { grid-template-columns:repeat(2,1fr) !important; }
+        }
+
+        @media (max-width:768px) {
+            .dk-sidebar { position:fixed; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); transition:transform 0.25s ease; overflow-y:auto; }
+            .dk-sidebar.dk-open { transform:translateX(0); }
+            .dk-topbar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#0f1729; border-bottom:1px solid #1e2b3d; position:fixed; top:0; left:0; right:0; z-index:30; height:60px; }
+            .dk-content { padding:78px 16px 20px; }
+            .dk-overlay.dk-open { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+            .dk-table { display:block; overflow-x:auto; white-space:nowrap; }
+            .dk-table th, .dk-table td { padding:12px 16px; }
+        }
+
+        @media (max-width:640px) {
+            .dk-grid-4 { grid-template-columns:1fr !important; }
+            .dk-grid-3 { grid-template-columns:1fr !important; }
+            .dk-grid-2 { grid-template-columns:1fr !important; }
+        }
     </style>
 </head>
-<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;">
-    <div style="min-height:100vh; display:flex;">
-        <aside style="width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column;">
+<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;" x-data="{ sidebarOpen: false }">
+    <div class="dk-shell">
+        <div class="dk-overlay" :class="sidebarOpen ? 'dk-open' : ''" @click="sidebarOpen = false"></div>
+        <aside class="dk-sidebar" :class="sidebarOpen ? 'dk-open' : ''">
             <div style="padding:24px 20px; text-align:center;">
                 <a href="{{ route('admin.index') }}" style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; text-decoration:none;">
                     <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:90px; width:auto; max-width:200px; object-fit:contain;">
@@ -130,8 +166,17 @@
             </nav>
         </aside>
 
-        <div style="flex:1; overflow:auto;">
-            <div style="padding:32px;">
+        <div class="dk-main">
+            <div class="dk-topbar">
+                <button type="button" @click="sidebarOpen = true" style="background:none; border:none; cursor:pointer; color:#e2e8f0; padding:4px; display:flex; align-items:center;">
+                    <svg style="width:26px; height:26px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <a href="{{ route('admin.index') }}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:36px; width:auto; max-width:150px; object-fit:contain;">
+                    <span style="font-size:11px; background:linear-gradient(135deg,#ef4444,#f97316); color:#fff; padding:2px 10px; border-radius:9999px; font-weight:600;">Admin</span>
+                </a>
+            </div>
+            <div class="dk-content">
                 @if(session('error'))
                     <div class="dk-alert-error">{{ session('error') }}</div>
                 @endif

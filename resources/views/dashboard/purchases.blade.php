@@ -15,7 +15,7 @@
         </a>
     </div>
 @else
-    <div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
+    <div class="dk-grid-3 gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
         @foreach($purchases as $order)
             @php
                 $product = $order->product;

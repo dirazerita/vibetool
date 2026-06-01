@@ -4,7 +4,7 @@
 @section('content')
 <h1 class="text-2xl font-bold dk-heading mb-6">Produk</h1>
 
-<div class="gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
+<div class="dk-grid-3 gap-6" style="display:grid;grid-template-columns:repeat(3,1fr)">
     @foreach($products as $product)
         @php
             $lp = $product->landingPage;

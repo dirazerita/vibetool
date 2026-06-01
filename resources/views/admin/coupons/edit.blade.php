@@ -21,7 +21,7 @@
                     @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                <div class="dk-grid-2 gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
                     <div>
                         <label for="discount_type" class="dk-label">Tipe Diskon</label>
                         <select name="discount_type" id="discount_type" class="w-full dk-input" required>
@@ -37,7 +37,7 @@
                     </div>
                 </div>
 
-                <div class="gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                <div class="dk-grid-2 gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
                     <div>
                         <label for="min_purchase" class="dk-label">Minimal Pembelian (Rp)</label>
                         <input type="number" name="min_purchase" id="min_purchase" value="{{ old('min_purchase', $coupon->min_purchase) }}" step="0.01" class="w-full dk-input">

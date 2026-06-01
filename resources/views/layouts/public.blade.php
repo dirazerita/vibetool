@@ -10,19 +10,42 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
+        * { box-sizing: border-box; }
+        html, body { max-width: 100%; overflow-x: hidden; }
         body { background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased; }
+        img { max-width: 100%; }
+
+        /* Responsive product grid */
+        .vt-product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+
+        @media (max-width: 1024px) {
+            .vt-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
+        }
+
+        @media (max-width: 640px) {
+            .vt-product-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+            .vt-hero { padding: 40px 0 !important; }
+            .vt-hero h1 { font-size: 1.75rem !important; }
+            .vt-hero p { font-size: 1rem !important; }
+            .vt-nav-logo { height: 44px !important; max-width: 150px !important; }
+            .vt-nav-row { height: 60px !important; }
+            .vt-nav-actions { gap: 10px !important; }
+            .vt-nav-actions a { font-size: 0.875rem !important; }
+            .vt-modal-actions { flex-direction: column !important; }
+            .vt-section-pad { padding: 32px 1rem !important; }
+        }
     </style>
 </head>
 <body style="background-color: #0b1120; color: #e2e8f0; font-family: 'Figtree', sans-serif; -webkit-font-smoothing: antialiased;">
     <nav style="background-color: #1a2332; border-bottom: 1px solid #2d3a4a;">
         <div style="max-width: 80rem; margin: 0 auto; padding: 0 1rem;">
-            <div style="display: flex; justify-content: space-between; height: 80px; align-items: center;">
+            <div class="vt-nav-row" style="display: flex; justify-content: space-between; height: 80px; align-items: center;">
                 <div style="display: flex; align-items: center;">
                     <a href="{{ route('home') }}" style="display: block; padding: 8px 0;">
-                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height: 64px; width: auto; max-width: 220px; object-fit: contain;">
+                        <img src="{{ asset('logo.png') }}" alt="VibeTool.id" class="vt-nav-logo" style="height: 64px; width: auto; max-width: 220px; object-fit: contain;">
                     </a>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="vt-nav-actions" style="display: flex; align-items: center; gap: 16px;">
                     @auth
                         <a href="{{ route('dashboard') }}" style="color: #cbd5e1; font-weight: 500; text-decoration: none;">Dashboard</a>
                         @if(auth()->user()->isAdmin())

@@ -4,7 +4,7 @@
 @section('content')
 <h1 class="text-2xl font-bold dk-heading mb-6">Dashboard</h1>
 
-<div class="gap-6 mb-8" style="display:grid;grid-template-columns:repeat(4,1fr)">
+<div class="dk-grid-4 gap-6 mb-8" style="display:grid;grid-template-columns:repeat(4,1fr)">
     <div class="dk-stat-card">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(99,102,241,0.15);color:#818cf8;display:flex;align-items:center;justify-content:center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>

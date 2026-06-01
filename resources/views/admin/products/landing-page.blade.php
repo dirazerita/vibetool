@@ -67,7 +67,7 @@
                                 <input type="color" name="hero_title_color" id="hero_title_color" value="{{ old('hero_title_color', $lp->hero_title_color ?? '#ffffff') }}" class="w-full h-9 dk-input rounded-lg shadow-sm cursor-pointer">
                             </div>
                         </div>
-                        <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                        <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                             <div>
                                 <label for="hero_subtitle_font" class="block text-xs font-medium dk-text mb-1">Font Subjudul</label>
                                 <select name="hero_subtitle_font" id="hero_subtitle_font" class="w-full text-sm dk-input rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -150,7 +150,7 @@
                 {{-- Testimonial Styling --}}
                 <div style="border-bottom:1px solid #1e2b3d pb-6">
                     <h3 class="text-sm font-semibold uppercase tracking-wider mb-4 dk-text">Tampilan Testimonial</h3>
-                    <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                    <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                         <div>
                             <label for="testimonial_title_color" class="block text-xs font-medium dk-text mb-1">Warna Judul Section</label>
                             <input type="color" name="testimonial_title_color" id="testimonial_title_color" value="{{ old('testimonial_title_color', $lp->testimonial_title_color ?? '#111827') }}" class="w-full h-9 dk-input rounded-lg shadow-sm cursor-pointer">
@@ -271,7 +271,7 @@
                             <summary class="text-xs font-medium" style="color:#818cf8 cursor-pointer">Edit testimonial</summary>
                             <form method="POST" action="{{ route('admin.products.landing-page.testimonials.update', [$product, $testimonial]) }}" enctype="multipart/form-data" class="mt-3 space-y-3 dk-divider pt-3">
                                 @csrf @method('PUT')
-                                <div class="gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                                <div class="dk-grid-2 gap-3" style="display:grid;grid-template-columns:repeat(2,1fr)">
                                     <div>
                                         <label class="block text-xs font-medium dk-text mb-1">Nama</label>
                                         <input type="text" name="name" value="{{ $testimonial->name }}" class="w-full text-sm dk-input rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
@@ -315,7 +315,7 @@
             <form method="POST" action="{{ route('admin.products.landing-page.testimonials.store', $product) }}" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
-                    <div class="gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
+                    <div class="dk-grid-2 gap-4" style="display:grid;grid-template-columns:repeat(2,1fr)">
                         <div>
                             <label for="testi_name" class="dk-label">Nama</label>
                             <input type="text" name="name" id="testi_name" class="w-full dk-input" required>

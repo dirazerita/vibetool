@@ -43,7 +43,7 @@
 
                 <div id="default-rates" class="{{ $memberCommission->product_id ? '' : 'hidden' }} dk-card" style="padding:16px">
                     <h4 class="text-xs font-semibold dk-text-muted uppercase mb-2">Tarif Default Produk</h4>
-                    <div class="gap-4" style="display:grid;grid-template-columns:repeat(2,1fr) text-sm">
+                    <div class="dk-grid-2 gap-4 text-sm" style="display:grid;grid-template-columns:repeat(2,1fr)">
                         <div>
                             <span class="dk-text-muted">Affiliator (sudah beli):</span>
                             <span id="def-commission" class="font-medium dk-heading">{{ $memberCommission->product->commission_percent ?? '' }}%</span>

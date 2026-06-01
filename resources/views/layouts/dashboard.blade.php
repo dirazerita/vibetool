@@ -46,11 +46,45 @@
         .dk-stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         select.dk-input { appearance:auto; }
         textarea.dk-input { resize:vertical; }
+
+        /* Layout shell */
+        * { box-sizing: border-box; }
+        .dk-shell { min-height:100vh; display:flex; }
+        .dk-sidebar { width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column; }
+        .dk-main { flex:1; overflow:auto; min-width:0; }
+        .dk-content { padding:32px; }
+        .dk-topbar { display:none; }
+        .dk-overlay { display:none; }
+
+        /* Responsive stat / card grids */
+        .dk-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); }
+        .dk-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); }
+
+        @media (max-width:1024px) {
+            .dk-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
+            .dk-grid-3 { grid-template-columns:repeat(2,1fr) !important; }
+        }
+
+        @media (max-width:768px) {
+            .dk-sidebar { position:fixed; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); transition:transform 0.25s ease; }
+            .dk-sidebar.dk-open { transform:translateX(0); }
+            .dk-topbar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#0f1729; border-bottom:1px solid #1e2b3d; position:fixed; top:0; left:0; right:0; z-index:30; height:60px; }
+            .dk-content { padding:78px 16px 20px; }
+            .dk-overlay.dk-open { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+            .dk-table { display:block; overflow-x:auto; white-space:nowrap; }
+            .dk-table th, .dk-table td { padding:12px 16px; }
+        }
+
+        @media (max-width:640px) {
+            .dk-grid-4 { grid-template-columns:1fr !important; }
+            .dk-grid-3 { grid-template-columns:1fr !important; }
+        }
     </style>
 </head>
-<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;">
-    <div style="min-height:100vh; display:flex;">
-        <aside style="width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column;">
+<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;" x-data="{ sidebarOpen: false }">
+    <div class="dk-shell">
+        <div class="dk-overlay" :class="sidebarOpen ? 'dk-open' : ''" @click="sidebarOpen = false"></div>
+        <aside class="dk-sidebar" :class="sidebarOpen ? 'dk-open' : ''">
             <div style="padding:24px 20px; text-align:center;">
                 <a href="{{ route('home') }}" style="display:inline-block; text-decoration:none;">
                     <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:90px; width:auto; max-width:200px; object-fit:contain;">
@@ -134,8 +168,16 @@
             </div>
         </aside>
 
-        <div style="flex:1; overflow:auto;">
-            <div style="padding:32px;">
+        <div class="dk-main">
+            <div class="dk-topbar">
+                <button type="button" @click="sidebarOpen = true" style="background:none; border:none; cursor:pointer; color:#e2e8f0; padding:4px; display:flex; align-items:center;">
+                    <svg style="width:26px; height:26px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <a href="{{ route('home') }}" style="display:inline-block;">
+                    <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:36px; width:auto; max-width:150px; object-fit:contain;">
+                </a>
+            </div>
+            <div class="dk-content">
                 @if(session('error'))
                     <div class="dk-alert-error">{{ session('error') }}</div>
                 @endif
