@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\SoftwareRequestController as AdminSoftwareRequestController;
 use App\Http\Controllers\Admin\VideoTutorialController;
 use App\Http\Controllers\Admin\WebhookDeliveryController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Dashboard\MessageController as DashboardMessageControll
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
+use App\Http\Controllers\Dashboard\SoftwareRequestController as DashboardSoftwareRequestController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
@@ -93,6 +95,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/messages', [DashboardMessageController::class, 'index'])->name('.messages');
         Route::post('/messages', [DashboardMessageController::class, 'store'])->name('.messages.store');
         Route::get('/messages/{message}/attachment', [DashboardMessageController::class, 'attachment'])->name('.messages.attachment');
+
+        Route::get('/software-requests', [DashboardSoftwareRequestController::class, 'index'])->name('.software-requests.index');
+        Route::get('/software-requests/create', [DashboardSoftwareRequestController::class, 'create'])->name('.software-requests.create');
+        Route::post('/software-requests', [DashboardSoftwareRequestController::class, 'store'])->name('.software-requests.store');
+        Route::get('/software-requests/{softwareRequest}', [DashboardSoftwareRequestController::class, 'show'])->name('.software-requests.show');
+        Route::get('/software-requests/{softwareRequest}/attachment', [DashboardSoftwareRequestController::class, 'attachment'])->name('.software-requests.attachment');
     });
     // (penutup grup `active` di atas)
 
@@ -156,6 +164,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/messages/attachment/{message}', [AdminMessageController::class, 'attachment'])->name('messages.attachment');
         Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages.show');
         Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
+
+        Route::get('/software-requests', [AdminSoftwareRequestController::class, 'index'])->name('software-requests.index');
+        Route::get('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'show'])->name('software-requests.show');
+        Route::put('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'update'])->name('software-requests.update');
+        Route::delete('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'destroy'])->name('software-requests.destroy');
+        Route::get('/software-requests/{softwareRequest}/attachment', [AdminSoftwareRequestController::class, 'attachment'])->name('software-requests.attachment');
 
         Route::get('/broadcasts', [AdminBroadcastController::class, 'index'])->name('broadcasts.index');
         Route::get('/broadcasts/create', [AdminBroadcastController::class, 'create'])->name('broadcasts.create');

@@ -134,6 +134,13 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
                     Broadcast
                 </a>
+                <a href="{{ route('admin.software-requests.index') }}" class="dk-sidebar-link {{ request()->routeIs('admin.software-requests*') ? 'active' : '' }}" style="position:relative;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    Request Software
+                    @if(($adminPendingSoftwareRequests ?? 0) > 0)
+                        <span style="margin-left:auto; background:#ef4444; color:#fff; font-size:11px; font-weight:700; padding:1px 8px; border-radius:9999px; min-width:20px; text-align:center;">{{ $adminPendingSoftwareRequests }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.commissions') }}" class="dk-sidebar-link {{ request()->routeIs('admin.commissions*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Komisi Member
