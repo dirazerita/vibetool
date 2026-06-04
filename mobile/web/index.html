@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://vibetool.id https://*.vibetool.id; img-src 'self' data: https://vibetool.id https://*.vibetool.id; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <title>VibeTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            background: #0b1120;
+            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .wrap { max-width: 320px; }
+        .logo {
+            width: 84px; height: 84px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            margin: 0 auto 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 30px; color: #fff;
+            box-shadow: 0 12px 30px rgba(99,102,241,0.35);
+        }
+        h1 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        p { font-size: 14px; color: #94a3b8; line-height: 1.55; margin-bottom: 24px; }
+        button {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #fff; border: none;
+            padding: 12px 28px; border-radius: 9999px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(99,102,241,0.3);
+        }
+        button:active { transform: scale(0.97); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="logo">VT</div>
+        <h1>Tidak ada koneksi internet</h1>
+        <p>Aplikasi VibeTool butuh koneksi internet untuk berfungsi. Periksa Wi-Fi atau data seluler Anda lalu coba lagi.</p>
+        <button onclick="window.location.reload()">Coba Lagi</button>
+    </div>
+</body>
+</html>
