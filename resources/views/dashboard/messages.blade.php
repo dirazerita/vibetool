@@ -5,7 +5,8 @@
 <style>
     .chat-shell { display:flex; flex-direction:column; height: calc(100vh - 96px); max-height: 800px; }
     .chat-stream { flex:1; overflow-y:auto; padding:16px 0; display:flex; flex-direction:column; gap:12px; }
-    .chat-bubble { max-width: 75%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; word-wrap:break-word; white-space:pre-wrap; }
+    .chat-bubble { max-width: 75%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; word-wrap:break-word; text-align:left; }
+    .chat-body { margin:0; white-space:pre-wrap; word-wrap:break-word; overflow-wrap:break-word; }
     .chat-bubble.mine { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
     .chat-bubble.theirs { background:#1e2b3d; color:#e2e8f0; align-self:flex-start; border-bottom-left-radius:4px; }
     .chat-meta { font-size:11px; color:#64748b; margin-top:4px; display:block; }
@@ -30,9 +31,7 @@
         @forelse($messages as $msg)
             @php $mine = $msg->sender_role === \App\Models\Message::ROLE_MEMBER; @endphp
             <div class="chat-bubble {{ $mine ? 'mine' : 'theirs' }}">
-                @if($msg->body)
-                    {{ $msg->body }}
-                @endif
+                @if($msg->body)<p class="chat-body">{{ $msg->body }}</p>@endif
                 @if($msg->hasAttachment())
                     <div class="chat-attachment">
                         @if($msg->isImage())
