@@ -11,7 +11,7 @@ class CommissionController extends Controller
     public function index()
     {
         $members = User::where('role', 'member')
-            ->whereHas('commissions')
+            ->whereHas('commissions', fn ($q) => $q->where('amount', '>', 0))
             ->withCount('commissions')
             ->withSum('commissions as total_commission', 'amount')
             ->withSum([
@@ -27,7 +27,7 @@ class CommissionController extends Controller
             ->paginate(20);
 
         $summary = [
-            'total_members' => User::where('role', 'member')->whereHas('commissions')->count(),
+            'total_members' => User::where('role', 'member')->whereHas('commissions', fn ($q) => $q->where('amount', '>', 0))->count(),
             'total_commission' => (float) Commission::sum('amount'),
             'total_direct' => (float) Commission::where('type', 'direct')->sum('amount'),
             'total_upline' => (float) Commission::where('type', 'upline')->sum('amount'),
@@ -44,6 +44,7 @@ class CommissionController extends Controller
         }
 
         $commissions = $user->commissions()
+            ->where('amount', '>', 0)
             ->with(['order.product', 'order.user'])
             ->latest()
             ->paginate(25);

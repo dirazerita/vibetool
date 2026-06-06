@@ -11,6 +11,7 @@ class CommissionController extends Controller
     {
         $commissions = $request->user()
             ->commissions()
+            ->where('amount', '>', 0)
             ->with('order.product')
             ->latest()
             ->paginate(15);
