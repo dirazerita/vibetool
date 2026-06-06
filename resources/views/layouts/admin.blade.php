@@ -15,7 +15,7 @@
         .dk-sidebar-link.active { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(99,102,241,0.3); }
         .dk-sidebar-link svg { width:20px; height:20px; margin-right:12px; flex-shrink:0; }
         .dk-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; }
-        .dk-table { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; overflow:hidden; }
+        .dk-table { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; overflow-x:auto; }
         .dk-table thead { background:#151e2d; }
         .dk-table th { color:#94a3b8 !important; border-bottom:1px solid #2d3a4a; padding:12px 24px; text-align:left; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
         .dk-table td { color:#cbd5e1 !important; border-bottom:1px solid #1e2b3d; padding:16px 24px; font-size:14px; }
