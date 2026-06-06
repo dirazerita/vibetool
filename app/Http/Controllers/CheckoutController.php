@@ -70,7 +70,11 @@ class CheckoutController extends Controller
             ->latest()
             ->first();
 
-        return view('checkout', compact('product', 'autoCouponData', 'alreadyPurchased', 'pendingOrder', 'selectedPackage'));
+        $manualEnabled = Setting::get('manual_payment_enabled') === '1';
+        $pakasirEnabled = (new PakasirService())->isEnabled();
+        $activePaymentMethod = $manualEnabled ? 'manual' : ($pakasirEnabled ? 'pakasir' : 'xendit');
+
+        return view('checkout', compact('product', 'autoCouponData', 'alreadyPurchased', 'pendingOrder', 'selectedPackage', 'activePaymentMethod'));
     }
 
     public function applyCoupon(Request $request, string $slug)
