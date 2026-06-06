@@ -49,6 +49,7 @@ Route::get('/pending', [PendingController::class, 'show'])->name('pending');
 
 // Webhook (no CSRF)
 Route::post('/webhook/xendit', [WebhookController::class, 'xendit'])->name('webhook.xendit');
+Route::post('/webhook/pakasir', [WebhookController::class, 'pakasir'])->name('webhook.pakasir');
 Route::post('/webhook/telegram/{secret}', [TelegramWebhookController::class, 'handle'])->name('webhook.telegram');
 
 // Download

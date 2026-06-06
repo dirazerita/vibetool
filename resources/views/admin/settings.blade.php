@@ -17,7 +17,7 @@
 @endif
 
 <div class="max-w-2xl">
-    <form method="POST" action="{{ route('admin.settings.update') }}" x-data="{ manualOn: {{ old('manual_payment_enabled', $manualPaymentEnabled) ? 'true' : 'false' }}, telegramOn: {{ old('telegram_enabled', $telegramEnabled) ? 'true' : 'false' }} }">
+    <form method="POST" action="{{ route('admin.settings.update') }}" x-data="{ manualOn: {{ old('manual_payment_enabled', $manualPaymentEnabled) ? 'true' : 'false' }}, pakasirOn: {{ old('pakasir_enabled', $pakasirEnabled) ? 'true' : 'false' }}, telegramOn: {{ old('telegram_enabled', $telegramEnabled) ? 'true' : 'false' }} }">
         @csrf @method('PUT')
 
         <div class="dk-card" style="padding:24px mb-6">
@@ -64,6 +64,40 @@
                     <label for="manual_payment_note" class="dk-label">Catatan Tambahan (opsional)</label>
                     <textarea name="manual_payment_note" id="manual_payment_note" rows="3" placeholder="Contoh: Mohon transfer sesuai nominal yang tertera & cantumkan ID pesanan di berita transfer." class="w-full dk-input">{{ old('manual_payment_note', $manualPaymentNote) }}</textarea>
                     @error('manual_payment_note') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class="dk-card" style="padding:24px; margin-bottom:24px;">
+            <h2 class="text-lg font-semibold dk-heading mb-1">Pembayaran via Pakasir.com</h2>
+            <p class="text-xs dk-text-muted mb-4">Payment gateway QRIS & Virtual Account via <a href="https://pakasir.com" target="_blank" style="color:#818cf8">pakasir.com</a>. Kalau diaktifkan, checkout akan diarahkan ke halaman pembayaran Pakasir (Xendit tidak dipakai).</p>
+
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="pakasir_enabled" value="1" x-model="pakasirOn" class="dk-checkbox">
+                <span>
+                    <span class="block text-sm font-medium dk-heading">Aktifkan Pakasir.com</span>
+                    <span class="block text-xs dk-text-muted mt-0.5">Prioritas: Pembayaran Manual &gt; Pakasir &gt; Xendit. Kalau pembayaran manual juga aktif, manual tetap dipakai.</span>
+                </span>
+            </label>
+
+            <div x-show="pakasirOn" x-transition class="mt-6 space-y-4 dk-divider pt-6">
+                <div>
+                    <label for="pakasir_slug" class="dk-label">Slug Proyek <span class="text-red-500">*</span></label>
+                    <input type="text" name="pakasir_slug" id="pakasir_slug" value="{{ old('pakasir_slug', $pakasirSlug) }}" placeholder="contoh: vibetool" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">Slug proyek Anda di Pakasir.com (lihat di halaman detail proyek).</p>
+                    @error('pakasir_slug') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="pakasir_api_key" class="dk-label">API Key <span class="text-red-500">*</span></label>
+                    <input type="text" name="pakasir_api_key" id="pakasir_api_key" value="{{ old('pakasir_api_key', $pakasirApiKey) }}" placeholder="API Key dari proyek Pakasir Anda" class="w-full dk-input">
+                    <p class="text-xs mt-1 dk-text-muted">API Key proyek Anda di Pakasir.com (lihat di halaman detail proyek). Dibutuhkan untuk verifikasi webhook.</p>
+                    @error('pakasir_api_key') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:8px; padding:12px 16px;">
+                    <p class="text-xs font-medium" style="color:#a5b4fc; margin-bottom:4px;">Webhook URL (isi di dashboard Pakasir):</p>
+                    <code class="text-xs" style="color:#e2e8f0; word-break:break-all;">{{ url('/webhook/pakasir') }}</code>
                 </div>
             </div>
         </div>
