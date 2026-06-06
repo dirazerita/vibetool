@@ -189,7 +189,13 @@
             </button>
         </form>
 
-        <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 16px;">Anda akan diarahkan ke halaman pembayaran Xendit</p>
+        @if(($activePaymentMethod ?? 'xendit') === 'manual')
+            <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 16px;">Anda akan diarahkan ke halaman transfer bank manual</p>
+        @elseif(($activePaymentMethod ?? 'xendit') === 'pakasir')
+            <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 16px;">Anda akan diarahkan ke halaman pembayaran Pakasir</p>
+        @else
+            <p style="text-align: center; color: #64748b; font-size: 0.875rem; margin-top: 16px;">Anda akan diarahkan ke halaman pembayaran Xendit</p>
+        @endif
     </div>
 </div>
 
