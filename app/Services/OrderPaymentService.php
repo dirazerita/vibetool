@@ -45,6 +45,11 @@ class OrderPaymentService
             return;
         }
 
+        // Produk gratis (harga 0) tidak menghasilkan komisi
+        if ($order->amount <= 0) {
+            return;
+        }
+
         // Pembuat produk TIDAK BOLEH dapat affiliate/upline commission dari
         // produk yang dia upload sendiri — yang berhak adalah tim dia &
         // member lain. Pembuat dapat creator share saja (lihat block di bawah).
