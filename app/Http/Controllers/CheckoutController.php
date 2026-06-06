@@ -199,6 +199,10 @@ class CheckoutController extends Controller
         }
 
         $manualEnabled = Setting::get('manual_payment_enabled') === '1';
+        $pakasirEnabled = (new PakasirService())->isEnabled();
+
+        // Prioritas: manual > pakasir > xendit
+        $paymentMethod = $manualEnabled ? 'manual' : ($pakasirEnabled ? 'pakasir' : 'xendit');
 
         $order = Order::create([
             'user_id' => $user->id,
@@ -210,11 +214,11 @@ class CheckoutController extends Controller
             'coupon_code' => $couponCode,
             'discount_amount' => $discountAmount,
             'status' => 'pending',
-            'payment_method' => $manualEnabled ? 'manual' : 'xendit',
+            'payment_method' => $paymentMethod,
             'download_token' => Str::uuid()->toString(),
         ]);
 
-        if ($manualEnabled) {
+        if ($paymentMethod === 'manual') {
             session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id', 'intended_product_slug', 'ref_code']);
 
             try {
@@ -224,6 +228,25 @@ class CheckoutController extends Controller
             }
 
             return redirect()->route('checkout.manual', $order->id);
+        }
+
+        if ($paymentMethod === 'pakasir') {
+            session()->forget(['auto_coupon', 'auto_coupon_member_name', 'auto_coupon_member_id', 'intended_product_slug', 'ref_code']);
+
+            try {
+                app(TelegramService::class)->notifyNewOrder($order->fresh()->load(['user', 'product', 'affiliate']));
+            } catch (\Throwable $e) {
+                Log::warning('Telegram notify new order failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            }
+
+            $pakasir = new PakasirService();
+            $payUrl = $pakasir->getPaymentUrl(
+                'ORDER-' . $order->id,
+                (int) $amount,
+                route('checkout.success', $order->id)
+            );
+
+            return redirect($payUrl);
         }
 
         $xendit = new XenditService;

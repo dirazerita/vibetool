@@ -25,6 +25,9 @@ class SettingController extends Controller
             'telegramBotToken' => Setting::get('telegram_bot_token', ''),
             'telegramChatId' => Setting::get('telegram_chat_id', ''),
             'telegramWebhookUrl' => $this->resolveWebhookUrl(),
+            'pakasirEnabled' => Setting::get('pakasir_enabled') === '1',
+            'pakasirSlug' => Setting::get('pakasir_slug', ''),
+            'pakasirApiKey' => Setting::get('pakasir_api_key', ''),
         ]);
     }
 
@@ -32,6 +35,7 @@ class SettingController extends Controller
     {
         $manualEnabled = $request->boolean('manual_payment_enabled');
         $telegramEnabled = $request->boolean('telegram_enabled');
+        $pakasirEnabled = $request->boolean('pakasir_enabled');
 
         $request->validate(
             [
@@ -41,6 +45,9 @@ class SettingController extends Controller
                 'manual_bank_account' => [$manualEnabled ? 'required' : 'nullable', 'string', 'max:100'],
                 'manual_bank_holder' => [$manualEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'manual_payment_note' => ['nullable', 'string', 'max:2000'],
+                'pakasir_enabled' => ['nullable'],
+                'pakasir_slug' => [$pakasirEnabled ? 'required' : 'nullable', 'string', 'max:100'],
+                'pakasir_api_key' => [$pakasirEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'telegram_enabled' => ['nullable'],
                 'telegram_bot_token' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'telegram_chat_id' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:50'],
@@ -51,6 +58,8 @@ class SettingController extends Controller
                 'manual_bank_name.required' => 'Nama bank wajib diisi kalau pembayaran manual diaktifkan.',
                 'manual_bank_account.required' => 'Nomor rekening wajib diisi kalau pembayaran manual diaktifkan.',
                 'manual_bank_holder.required' => 'Atas nama wajib diisi kalau pembayaran manual diaktifkan.',
+                'pakasir_slug.required' => 'Slug proyek wajib diisi kalau Pakasir diaktifkan.',
+                'pakasir_api_key.required' => 'API Key wajib diisi kalau Pakasir diaktifkan.',
                 'telegram_bot_token.required' => 'Bot Token wajib diisi kalau notifikasi Telegram diaktifkan.',
                 'telegram_chat_id.required' => 'Chat ID wajib diisi kalau notifikasi Telegram diaktifkan.',
             ]
@@ -64,6 +73,10 @@ class SettingController extends Controller
         Setting::set('manual_bank_account', $request->input('manual_bank_account'));
         Setting::set('manual_bank_holder', $request->input('manual_bank_holder'));
         Setting::set('manual_payment_note', $request->input('manual_payment_note'));
+
+        Setting::set('pakasir_enabled', $pakasirEnabled ? '1' : '0');
+        Setting::set('pakasir_slug', trim((string) $request->input('pakasir_slug')));
+        Setting::set('pakasir_api_key', trim((string) $request->input('pakasir_api_key')));
 
         Setting::set('telegram_enabled', $telegramEnabled ? '1' : '0');
         Setting::set('telegram_bot_token', trim((string) $request->input('telegram_bot_token')));
