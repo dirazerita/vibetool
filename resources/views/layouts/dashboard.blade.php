@@ -91,7 +91,24 @@
                     <img src="{{ asset('logo.png') }}" alt="VibeTool.id" style="height:90px; width:auto; max-width:200px; object-fit:contain;">
                 </a>
             </div>
-            <nav style="padding:0 12px; flex:1; display:flex; flex-direction:column; gap:4px;">
+            <div style="padding:0 20px 16px; text-align:center;">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                    @if(auth()->user()->profile_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="{{ auth()->user()->name }}"
+                             style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid #2d3a4a;">
+                    @else
+                        <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#4f46e5,#7c3aed); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; color:#fff; border:2px solid #2d3a4a;">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                    @endif
+                    <div>
+                        <div style="font-size:14px; font-weight:600; color:#e2e8f0;">{{ auth()->user()->name }}</div>
+                        <div style="font-size:12px; color:#64748b;">{{ auth()->user()->email }}</div>
+                    </div>
+                </div>
+                <div style="border-bottom:1px solid #1e2b3d; margin-top:16px;"></div>
+            </div>
+            <nav style="padding:0 12px; flex:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto;">
                 <a href="{{ route('dashboard') }}" class="dk-sidebar-link {{ request()->routeIs('dashboard') && !request()->is('dashboard/*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     Overview
@@ -160,19 +177,14 @@
                 </a>
                 @endif
             </nav>
-            <div style="padding:16px; border-top:1px solid #1e2b3d;">
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div>
-                        <div style="font-size:14px; font-weight:600; color:#e2e8f0;">{{ auth()->user()->name }}</div>
-                        <div style="font-size:12px; color:#64748b;">{{ auth()->user()->email }}</div>
-                    </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" style="background:none; border:none; cursor:pointer; color:#64748b; padding:4px;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#64748b'">
-                            <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        </button>
-                    </form>
-                </div>
+            <div style="padding:12px 16px; border-top:1px solid #1e2b3d;">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="dk-sidebar-link" style="width:100%; color:#f87171;">
+                        <svg style="width:20px; height:20px; margin-right:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Keluar
+                    </button>
+                </form>
             </div>
         </aside>
 
