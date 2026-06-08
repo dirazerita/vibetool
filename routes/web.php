@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\PromoTemplateController as AdminPromoTemplateController;
 use App\Http\Controllers\Admin\SoftwareRequestController as AdminSoftwareRequestController;
 use App\Http\Controllers\Admin\VideoTutorialController;
 use App\Http\Controllers\Admin\WebhookDeliveryController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Dashboard\MessageController as DashboardMessageControll
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
+use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
 use App\Http\Controllers\Dashboard\SoftwareRequestController as DashboardSoftwareRequestController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
@@ -97,6 +99,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/messages', [DashboardMessageController::class, 'store'])->name('.messages.store');
         Route::get('/messages/{message}/attachment', [DashboardMessageController::class, 'attachment'])->name('.messages.attachment');
 
+        Route::get('/promo', [DashboardPromoController::class, 'index'])->name('.promo.index');
+
         Route::get('/software-requests', [DashboardSoftwareRequestController::class, 'index'])->name('.software-requests.index');
         Route::get('/software-requests/create', [DashboardSoftwareRequestController::class, 'create'])->name('.software-requests.create');
         Route::post('/software-requests', [DashboardSoftwareRequestController::class, 'store'])->name('.software-requests.store');
@@ -165,6 +169,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/messages/attachment/{message}', [AdminMessageController::class, 'attachment'])->name('messages.attachment');
         Route::get('/messages/{user}', [AdminMessageController::class, 'show'])->name('messages.show');
         Route::post('/messages/{user}', [AdminMessageController::class, 'store'])->name('messages.store');
+
+        Route::get('/promo-templates', [AdminPromoTemplateController::class, 'index'])->name('promo-templates.index');
+        Route::get('/promo-templates/create', [AdminPromoTemplateController::class, 'create'])->name('promo-templates.create');
+        Route::post('/promo-templates', [AdminPromoTemplateController::class, 'store'])->name('promo-templates.store');
+        Route::get('/promo-templates/{promoTemplate}/edit', [AdminPromoTemplateController::class, 'edit'])->name('promo-templates.edit');
+        Route::put('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'update'])->name('promo-templates.update');
+        Route::delete('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'destroy'])->name('promo-templates.destroy');
 
         Route::get('/software-requests', [AdminSoftwareRequestController::class, 'index'])->name('software-requests.index');
         Route::get('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'show'])->name('software-requests.show');

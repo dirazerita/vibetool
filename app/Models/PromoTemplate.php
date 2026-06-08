@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class PromoTemplate extends Model
+{
+    const CATEGORY_MEMBER = 'member';
+
+    const CATEGORY_PRODUCT = 'product';
+
+    const CATEGORIES = [
+        self::CATEGORY_MEMBER => 'Promo Member',
+        self::CATEGORY_PRODUCT => 'Promo Produk',
+    ];
+
+    /**
+     * Daftar placeholder yang didukung + deskripsi singkatnya. Ditampilkan di
+     * form admin sebagai bantuan saat menyusun body template.
+     */
+    const PLACEHOLDERS_MEMBER = [
+        '{nama_member}' => 'Nama member yang share',
+        '{kode_referral}' => 'Kode referral member',
+        '{link_referral}' => 'URL beranda + ?ref=KODE',
+    ];
+
+    const PLACEHOLDERS_PRODUCT = [
+        '{nama_member}' => 'Nama member yang share',
+        '{kode_referral}' => 'Kode referral member',
+        '{link_referral}' => 'URL beranda + ?ref=KODE',
+        '{nama_produk}' => 'Judul produk',
+        '{harga}' => 'Harga produk diformat (Rp xx)',
+        '{harga_coret}' => 'Harga coret kalau ada (Rp xx) / kosong',
+        '{link_produk}' => 'URL landing produk + ?ref=KODE',
+        '{deskripsi}' => 'Deskripsi produk (di-strip dari HTML)',
+    ];
+
+    protected $fillable = [
+        'title',
+        'category',
+        'product_id',
+        'body',
+        'is_active',
+        'order',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'order' => 'integer',
+    ];
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function categoryLabel(): string
+    {
+        return self::CATEGORIES[$this->category] ?? $this->category;
+    }
+
+    public function placeholders(): array
+    {
+        return $this->category === self::CATEGORY_PRODUCT
+            ? self::PLACEHOLDERS_PRODUCT
+            : self::PLACEHOLDERS_MEMBER;
+    }
+
+    /**
+     * Render template body dengan data member (dan produk kalau category=product).
+     * Selalu kembalikan string siap salin/share.
+     */
+    public function renderFor(User $member): string
+    {
+        $code = $member->referral_code ?? '';
+        $homeRef = $code ? rtrim(url('/'), '/').'?ref='.$code : url('/');
+
+        $vars = [
+            '{nama_member}' => (string) ($member->name ?? ''),
+            '{kode_referral}' => $code,
+            '{link_referral}' => $homeRef,
+        ];
+
+        if ($this->category === self::CATEGORY_PRODUCT && $this->product) {
+            $product = $this->product;
+            $productUrl = route('product.show', $product->slug);
+            if ($code) {
+                $productUrl .= '?ref='.$code;
+            }
+            $vars['{nama_produk}'] = (string) ($product->title ?? '');
+            $vars['{harga}'] = self::formatRupiah((float) ($product->price ?? 0));
+            $vars['{harga_coret}'] = $product->compare_at_price
+                ? self::formatRupiah((float) $product->compare_at_price)
+                : '';
+            $vars['{link_produk}'] = $productUrl;
+            $vars['{deskripsi}'] = self::stripDescription($product->description ?? '');
+        }
+
+        return strtr($this->body, $vars);
+    }
+
+    private static function formatRupiah(float $amount): string
+    {
+        return 'Rp '.number_format($amount, 0, ',', '.');
+    }
+
+    private static function stripDescription(string $html): string
+    {
+        $text = strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $html));
+
+        return trim(preg_replace("/\n{3,}/", "\n\n", $text));
+    }
+}
