@@ -55,6 +55,9 @@
                 @endif
                 <span class="pt-pill-status {{ $t->is_active ? 'on' : 'off' }}">{{ $t->is_active ? 'Aktif' : 'Nonaktif' }}</span>
                 <span style="color:#64748b; margin-left:6px;">· urutan {{ $t->order }}</span>
+                @if(($t->media_count ?? 0) > 0)
+                    <span style="color:#a5b4fc; margin-left:6px;">· {{ $t->media_count }} media</span>
+                @endif
             </div>
             <div class="body-snippet">{{ \Illuminate\Support\Str::limit(str_replace(["\r", "\n"], ' ', $t->body), 140) }}</div>
         </div>

@@ -19,6 +19,14 @@
     .promo-btn.copied { background:#16a34a; border-color:#16a34a; color:#fff; }
     .promo-btn svg { width:16px; height:16px; }
 
+    .promo-media { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-top:12px; }
+    .promo-media-item { position:relative; background:#0b1120; border:1px solid #2d3a4a; border-radius:10px; overflow:hidden; }
+    .promo-media-item img, .promo-media-item video { width:100%; height:140px; object-fit:cover; display:block; background:#000; }
+    .promo-media-item .dl { position:absolute; bottom:6px; right:6px; background:rgba(17,24,39,0.85); color:#fff; padding:5px 9px; border-radius:8px; font-size:11px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+    .promo-media-item .dl:hover { background:#4f46e5; }
+    .promo-media-item .dl svg { width:14px; height:14px; }
+    .promo-media-item .type-badge { position:absolute; top:6px; left:6px; background:rgba(17,24,39,0.85); color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:6px; letter-spacing:.5px; }
+
     .promo-empty { text-align:center; padding:48px 16px; color:#94a3b8; background:#151e2d; border:1px dashed #2d3a4a; border-radius:14px; font-size:14px; }
     .promo-help { background:rgba(79,70,229,0.08); border:1px solid rgba(79,70,229,0.25); border-radius:12px; padding:14px 16px; margin-bottom:18px; color:#cbd5e1; font-size:13px; line-height:1.6; }
 
@@ -65,16 +73,41 @@
                 @endif
             </div>
         </div>
+        @if(!empty($t['media']))
+            <div class="promo-media">
+                @foreach($t['media'] as $m)
+                    <div class="promo-media-item">
+                        <span class="type-badge">{{ strtoupper($m['type']) }}</span>
+                        @if($m['type'] === 'image')
+                            <a href="{{ $m['url'] }}" target="_blank" rel="noopener"><img src="{{ $m['url'] }}" alt="{{ $m['name'] }}" loading="lazy"></a>
+                        @else
+                            <video src="{{ $m['url'] }}" controls preload="metadata" playsinline></video>
+                        @endif
+                        <a href="{{ $m['url'] }}" download="{{ $m['name'] }}" class="dl" title="Download — {{ $m['size'] }}">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                            Download
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
         <div class="promo-body" id="promo-body-{{ $t['id'] }}">{{ $t['body'] }}</div>
         <div class="promo-actions">
             <button type="button" class="promo-btn primary copy-btn" data-target="promo-body-{{ $t['id'] }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h4a2 2 0 002-2M8 5a2 2 0 012-2h4a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                 Salin Teks
             </button>
-            <button type="button" class="promo-btn share-btn" data-target="promo-body-{{ $t['id'] }}">
+            @php($shareMedia = collect($t['media'])->map(fn ($m) => ['url' => $m['url'], 'name' => $m['name'], 'type' => $m['type'], 'mime' => $m['mime']])->values()->all())
+            <button type="button" class="promo-btn share-btn" data-target="promo-body-{{ $t['id'] }}" data-template-id="{{ $t['id'] }}" data-media='{{ json_encode($shareMedia, JSON_UNESCAPED_SLASHES) }}'>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                 Bagikan
             </button>
+            @if(!empty($t['media']))
+                <a href="{{ $t['media'][0]['url'] }}" download="{{ $t['media'][0]['name'] }}" class="promo-btn" title="Download media pertama">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                    Download Media
+                </a>
+            @endif
         </div>
     </div>
 @empty
@@ -113,6 +146,7 @@
                 Salin Saja
             </button>
         </div>
+        <p class="share-media-note" style="display:none; margin-top:12px; font-size:12px; color:#94a3b8; background:rgba(79,70,229,0.08); border:1px solid rgba(79,70,229,0.25); border-radius:8px; padding:8px 10px; line-height:1.5;"></p>
         <button type="button" class="share-close" onclick="document.getElementById('shareModal').classList.remove('open')">Tutup</button>
     </div>
 </div>
@@ -157,11 +191,48 @@
         });
     });
 
+    async function tryWebShare(text, mediaList) {
+        if (!navigator.share) return false;
+        // Coba share dengan file dulu (mobile Chrome/Safari), fallback ke text-only kalau gagal.
+        if (Array.isArray(mediaList) && mediaList.length > 0 && navigator.canShare) {
+            try {
+                const files = [];
+                for (const m of mediaList) {
+                    try {
+                        const resp = await fetch(m.url);
+                        if (!resp.ok) continue;
+                        const blob = await resp.blob();
+                        files.push(new File([blob], m.name || 'media', { type: m.mime || blob.type }));
+                    } catch (e) { /* skip file */ }
+                }
+                if (files.length > 0 && navigator.canShare({ files, text })) {
+                    await navigator.share({ files, text });
+                    return true;
+                }
+            } catch (e) {
+                if (e && e.name === 'AbortError') return true; // user batal — anggap done
+            }
+        }
+        try {
+            await navigator.share({ text });
+            return true;
+        } catch (e) {
+            if (e && e.name === 'AbortError') return true;
+            return false;
+        }
+    }
+
     document.querySelectorAll('.share-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             const target = document.getElementById(btn.dataset.target);
             if (!target) return;
             activeText = target.innerText;
+            let mediaList = [];
+            try { mediaList = JSON.parse(btn.dataset.media || '[]'); } catch (e) { mediaList = []; }
+            // Coba Web Share API dulu (HP modern: bisa kirim file + teks bareng ke WA/IG/dll)
+            const shared = await tryWebShare(activeText, mediaList);
+            if (shared) return;
+            // Fallback ke modal share text-only
             // Update share URLs
             const enc = encodeURIComponent(activeText);
             modal.querySelector('[data-platform=wa]').href = 'https://wa.me/?text=' + enc;
@@ -173,6 +244,16 @@
             modal.querySelector('[data-platform=tw]').href = 'https://twitter.com/intent/tweet?text=' + enc;
             modal.querySelector('[data-platform=email]').href = 'mailto:?subject=' + encodeURIComponent(@json(config('app.name')) + ' — Info Menarik') + '&body=' + enc;
             modal.classList.add('open');
+            // Simpan media list untuk catatan attach manual di modal (info-only)
+            const noteEl = modal.querySelector('.share-media-note');
+            if (noteEl) {
+                if (mediaList.length > 0) {
+                    noteEl.style.display = 'block';
+                    noteEl.textContent = 'Tip: untuk WA/IG di desktop, klik tombol Download Media dulu lalu attach manual setelah teks ter-paste.';
+                } else {
+                    noteEl.style.display = 'none';
+                }
+            }
         });
     });
 

@@ -13,8 +13,8 @@ use App\Http\Controllers\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
-use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\PromoTemplateController as AdminPromoTemplateController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\SoftwareRequestController as AdminSoftwareRequestController;
 use App\Http\Controllers\Admin\VideoTutorialController;
 use App\Http\Controllers\Admin\WebhookDeliveryController;
@@ -27,9 +27,9 @@ use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseControll
 use App\Http\Controllers\Dashboard\MemberProductController;
 use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
+use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
 use App\Http\Controllers\Dashboard\SettingController;
-use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
 use App\Http\Controllers\Dashboard\SoftwareRequestController as DashboardSoftwareRequestController;
 use App\Http\Controllers\Dashboard\TeamController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
@@ -176,6 +176,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/promo-templates/{promoTemplate}/edit', [AdminPromoTemplateController::class, 'edit'])->name('promo-templates.edit');
         Route::put('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'update'])->name('promo-templates.update');
         Route::delete('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'destroy'])->name('promo-templates.destroy');
+        Route::delete('/promo-templates/{promoTemplate}/media/{media}', [AdminPromoTemplateController::class, 'destroyMedia'])->name('promo-templates.media.destroy');
 
         Route::get('/software-requests', [AdminSoftwareRequestController::class, 'index'])->name('software-requests.index');
         Route::get('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'show'])->name('software-requests.show');
