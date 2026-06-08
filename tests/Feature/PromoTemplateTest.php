@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\PromoTemplate;
+use App\Models\PromoTemplateMedia;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PromoTemplateTest extends TestCase
@@ -224,6 +227,145 @@ class PromoTemplateTest extends TestCase
             ->get('/dashboard/promo')
             ->assertOk()
             ->assertDontSee('Hidden Template');
+    }
+
+    public function test_admin_can_upload_image_with_template(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $image = UploadedFile::fake()->image('promo.jpg', 800, 800)->size(300);
+
+        $this->actingAs($admin)->post('/admin/promo-templates', [
+            'title' => 'Promo dengan gambar',
+            'category' => 'member',
+            'body' => 'Body {nama_member}',
+            'is_active' => '1',
+            'images' => [$image],
+        ])->assertRedirect();
+
+        $template = PromoTemplate::firstWhere('title', 'Promo dengan gambar');
+        $this->assertNotNull($template);
+        $this->assertCount(1, $template->media);
+        $this->assertSame('image', $template->media->first()->type);
+        Storage::disk('public')->assertExists($template->media->first()->path);
+    }
+
+    public function test_admin_can_upload_video_with_template(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $video = UploadedFile::fake()->create('promo.mp4', 1024, 'video/mp4');
+
+        $this->actingAs($admin)->post('/admin/promo-templates', [
+            'title' => 'Promo dengan video',
+            'category' => 'member',
+            'body' => 'Body {nama_member}',
+            'is_active' => '1',
+            'videos' => [$video],
+        ])->assertRedirect();
+
+        $template = PromoTemplate::firstWhere('title', 'Promo dengan video');
+        $this->assertNotNull($template);
+        $this->assertCount(1, $template->media);
+        $this->assertSame('video', $template->media->first()->type);
+    }
+
+    public function test_admin_can_upload_multiple_files_on_update(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $template = PromoTemplate::create([
+            'title' => 'Multi', 'category' => 'member', 'body' => 'x', 'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)->put("/admin/promo-templates/{$template->id}", [
+            'title' => 'Multi', 'category' => 'member', 'body' => 'x', 'is_active' => '1',
+            'images' => [
+                UploadedFile::fake()->image('a.jpg')->size(100),
+                UploadedFile::fake()->image('b.png')->size(100),
+            ],
+            'videos' => [
+                UploadedFile::fake()->create('c.mp4', 500, 'video/mp4'),
+            ],
+        ])->assertRedirect();
+
+        $this->assertCount(3, $template->fresh()->media);
+    }
+
+    public function test_upload_rejects_invalid_image_mime(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $bad = UploadedFile::fake()->create('script.exe', 100, 'application/octet-stream');
+
+        $this->actingAs($admin)->post('/admin/promo-templates', [
+            'title' => 'Bad', 'category' => 'member', 'body' => 'b', 'is_active' => '1',
+            'images' => [$bad],
+        ])->assertSessionHasErrors('images.0');
+    }
+
+    public function test_admin_can_delete_individual_media_file(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $template = PromoTemplate::create([
+            'title' => 'X', 'category' => 'member', 'body' => 'x', 'is_active' => true,
+        ]);
+        $this->actingAs($admin)->put("/admin/promo-templates/{$template->id}", [
+            'title' => 'X', 'category' => 'member', 'body' => 'x', 'is_active' => '1',
+            'images' => [UploadedFile::fake()->image('one.jpg')->size(100)],
+        ]);
+        $media = $template->fresh()->media->first();
+        $path = $media->path;
+
+        $this->actingAs($admin)
+            ->delete("/admin/promo-templates/{$template->id}/media/{$media->id}")
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('promo_template_media', ['id' => $media->id]);
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    public function test_deleting_template_also_deletes_media_files(): void
+    {
+        Storage::fake('public');
+        $admin = $this->makeAdmin();
+        $template = PromoTemplate::create([
+            'title' => 'Y', 'category' => 'member', 'body' => 'y', 'is_active' => true,
+        ]);
+        $this->actingAs($admin)->put("/admin/promo-templates/{$template->id}", [
+            'title' => 'Y', 'category' => 'member', 'body' => 'y', 'is_active' => '1',
+            'images' => [UploadedFile::fake()->image('z.jpg')->size(100)],
+        ]);
+        $path = $template->fresh()->media->first()->path;
+
+        $template->fresh()->delete();
+
+        Storage::disk('public')->assertMissing($path);
+        $this->assertDatabaseMissing('promo_template_media', ['promo_template_id' => $template->id]);
+    }
+
+    public function test_member_view_shows_media_url_and_download_button(): void
+    {
+        Storage::fake('public');
+        $member = $this->makeMember();
+        $template = PromoTemplate::create([
+            'title' => 'Promo with image', 'category' => 'member', 'body' => 'b {nama_member}', 'is_active' => true,
+        ]);
+        $template->media()->create([
+            'type' => PromoTemplateMedia::TYPE_IMAGE,
+            'path' => 'promo-template-media/'.$template->id.'/test.jpg',
+            'original_name' => 'test.jpg',
+            'mime' => 'image/jpeg',
+            'size_bytes' => 1000,
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($member)
+            ->get('/dashboard/promo')
+            ->assertOk()
+            ->assertSee('Download Media')
+            ->assertSee('test.jpg');
     }
 
     public function test_render_substitutes_placeholders_correctly(): void

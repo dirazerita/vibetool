@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class PromoTemplate extends Model
 {
@@ -54,6 +56,25 @@ class PromoTemplate extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(PromoTemplateMedia::class, 'promo_template_id')->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Hapus semua file media dari storage saat template dihapus.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (PromoTemplate $template) {
+            foreach ($template->media as $media) {
+                if ($media->path) {
+                    Storage::disk('public')->delete($media->path);
+                }
+            }
+        });
     }
 
     public function categoryLabel(): string

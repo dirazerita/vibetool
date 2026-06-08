@@ -17,6 +17,14 @@
     .pt-placeholder-chip { display:inline-block; padding:4px 10px; background:#1e2b3d; border:1px solid #2d3a4a; border-radius:9999px; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#a5b4fc; cursor:pointer; margin:3px 4px 3px 0; }
     .pt-placeholder-chip:hover { background:#2d3a4a; }
     .pt-preview { background:#151e2d; border:1px solid #2d3a4a; border-radius:8px; padding:14px; white-space:pre-wrap; color:#e2e8f0; font-size:14px; line-height:1.6; min-height:140px; word-break:break-word; }
+    .pt-file-input { width:100%; background:#151e2d; border:1px dashed #2d3a4a; color:#cbd5e1; padding:10px 12px; border-radius:8px; font-size:13px; cursor:pointer; }
+    .pt-media-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
+    .pt-media-card { position:relative; background:#0b1120; border:1px solid #2d3a4a; border-radius:8px; overflow:hidden; }
+    .pt-media-thumb { width:100%; height:110px; object-fit:cover; display:block; background:#000; }
+    .pt-media-meta { padding:6px 8px; font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; gap:4px; }
+    .pt-media-delete { position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.92); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; font-weight:600; }
+    .pt-media-delete:hover { background:#dc2626; }
+    .pt-media-type-badge { position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.65); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; letter-spacing:.5px; }
     @media (max-width: 1024px) { .pt-form { grid-template-columns: 1fr; } }
 </style>
 
@@ -28,7 +36,7 @@
     <h1 class="text-2xl font-bold dk-heading">{{ $template->exists ? 'Edit Template Promo' : 'Buat Template Promo' }}</h1>
 </div>
 
-<form method="POST" action="{{ $template->exists ? route('admin.promo-templates.update', $template) : route('admin.promo-templates.store') }}" x-data="promoTemplateForm()">
+<form method="POST" action="{{ $template->exists ? route('admin.promo-templates.update', $template) : route('admin.promo-templates.store') }}" enctype="multipart/form-data" x-data="promoTemplateForm()">
     @csrf
     @if($template->exists) @method('PUT') @endif
 
@@ -70,6 +78,51 @@
                         <span class="pt-placeholder-chip" @click="insertPlaceholder(ph)" :title="desc" x-text="ph"></span>
                     </template>
                 </div>
+            </div>
+
+            <div class="pt-section">
+                <label class="pt-label">Lampiran Gambar &amp; Video</label>
+                <p class="pt-help" style="margin-bottom:10px;">Member bisa download &amp; share file ini bareng teks template. Maks {{ \App\Http\Controllers\Admin\PromoTemplateController::MAX_MEDIA_PER_TEMPLATE }} file total per template.</p>
+
+                @if($template->exists && $template->media->isNotEmpty())
+                    <div style="margin-bottom:14px;">
+                        <p style="font-size:12px; color:#94a3b8; font-weight:600; margin-bottom:6px;">File yang sudah diupload:</p>
+                        <div class="pt-media-grid">
+                            @foreach($template->media as $media)
+                                <div class="pt-media-card">
+                                    <span class="pt-media-type-badge">{{ strtoupper($media->type) }}</span>
+                                    @if($media->isImage())
+                                        <a href="{{ $media->url() }}" target="_blank" rel="noopener">
+                                            <img src="{{ $media->url() }}" alt="{{ $media->original_name }}" class="pt-media-thumb" loading="lazy">
+                                        </a>
+                                    @else
+                                        <video src="{{ $media->url() }}" class="pt-media-thumb" controls preload="metadata"></video>
+                                    @endif
+                                    <div class="pt-media-meta">
+                                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ $media->original_name }}">{{ $media->original_name }}</span>
+                                        <span>{{ $media->humanSize() }}</span>
+                                    </div>
+                                    <form method="POST" action="{{ route('admin.promo-templates.media.destroy', [$template, $media]) }}" onsubmit="return confirm('Hapus file ini?');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="pt-media-delete">Hapus</button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <label class="pt-label" for="images" style="margin-top:8px;">Tambah Gambar</label>
+                <input type="file" id="images" name="images[]" class="pt-file-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                <p class="pt-help">JPG/PNG/WebP/GIF, maks {{ (int) (\App\Http\Controllers\Admin\PromoTemplateController::MAX_IMAGE_KB / 1024) }} MB per file.</p>
+                @error('images') <p class="pt-error">{{ $message }}</p> @enderror
+                @error('images.*') <p class="pt-error">{{ $message }}</p> @enderror
+
+                <label class="pt-label" for="videos">Tambah Video</label>
+                <input type="file" id="videos" name="videos[]" class="pt-file-input" accept="video/mp4,video/webm,video/quicktime" multiple>
+                <p class="pt-help">MP4/WebM/MOV, maks {{ (int) (\App\Http\Controllers\Admin\PromoTemplateController::MAX_VIDEO_KB / 1024) }} MB per file.</p>
+                @error('videos') <p class="pt-error">{{ $message }}</p> @enderror
+                @error('videos.*') <p class="pt-error">{{ $message }}</p> @enderror
             </div>
         </div>
 

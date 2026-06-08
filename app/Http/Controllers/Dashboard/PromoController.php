@@ -21,7 +21,7 @@ class PromoController extends Controller
         $templates = PromoTemplate::query()
             ->where('is_active', true)
             ->where('category', $category)
-            ->with('product:id,title,slug,price,compare_at_price,description')
+            ->with(['product:id,title,slug,price,compare_at_price,description', 'media'])
             ->orderBy('order')
             ->orderByDesc('id')
             ->get();
@@ -33,6 +33,14 @@ class PromoController extends Controller
                 'category' => $t->category,
                 'product' => $t->product,
                 'body' => $t->renderFor($user),
+                'media' => $t->media->map(fn ($m) => [
+                    'id' => $m->id,
+                    'type' => $m->type,
+                    'url' => $m->url(),
+                    'name' => $m->original_name,
+                    'mime' => $m->mime,
+                    'size' => $m->humanSize(),
+                ])->values()->all(),
             ];
         });
 
