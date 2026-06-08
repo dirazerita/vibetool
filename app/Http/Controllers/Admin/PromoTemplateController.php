@@ -29,7 +29,7 @@ class PromoTemplateController extends Controller
 
     public function index(Request $request): View
     {
-        $query = PromoTemplate::query()->with('product:id,title,slug')->withCount('media');
+        $query = PromoTemplate::query()->with(['product:id,title,slug', 'creator:id,name,email'])->withCount('media');
 
         if ($category = $request->string('category')->toString()) {
             if (array_key_exists($category, PromoTemplate::CATEGORIES)) {
@@ -37,7 +37,21 @@ class PromoTemplateController extends Controller
             }
         }
 
-        $templates = $query->orderBy('category')
+        if ($status = $request->string('status')->toString()) {
+            if (array_key_exists($status, PromoTemplate::STATUSES)) {
+                $query->where('approval_status', $status);
+            }
+        }
+
+        $source = $request->string('source')->toString();
+        if ($source === 'member') {
+            $query->whereNotNull('created_by_user_id');
+        } elseif ($source === 'admin') {
+            $query->whereNull('created_by_user_id');
+        }
+
+        $templates = $query->orderByRaw("CASE WHEN approval_status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('category')
             ->orderBy('order')
             ->orderByDesc('id')
             ->paginate(20)
@@ -46,10 +60,14 @@ class PromoTemplateController extends Controller
         return view('admin.promo-templates.index', [
             'templates' => $templates,
             'category' => $category ?? '',
+            'status' => $status ?? '',
+            'source' => $source ?? '',
             'counts' => [
                 'all' => PromoTemplate::count(),
                 'member' => PromoTemplate::where('category', PromoTemplate::CATEGORY_MEMBER)->count(),
                 'product' => PromoTemplate::where('category', PromoTemplate::CATEGORY_PRODUCT)->count(),
+                'pending' => PromoTemplate::where('approval_status', PromoTemplate::STATUS_PENDING)->count(),
+                'member_submitted' => PromoTemplate::whereNotNull('created_by_user_id')->count(),
             ],
         ]);
     }
@@ -115,6 +133,36 @@ class PromoTemplateController extends Controller
 
         return redirect()->route('admin.promo-templates.edit', $promoTemplate)
             ->with('success', 'File media dihapus.');
+    }
+
+    public function approve(Request $request, PromoTemplate $promoTemplate): RedirectResponse
+    {
+        $promoTemplate->update([
+            'approval_status' => PromoTemplate::STATUS_APPROVED,
+            'rejection_reason' => null,
+            'reviewed_at' => now(),
+            'reviewed_by_user_id' => $request->user()->id,
+        ]);
+
+        return back()->with('success', 'Template disetujui dan akan tampil di halaman promo public.');
+    }
+
+    public function reject(Request $request, PromoTemplate $promoTemplate): RedirectResponse
+    {
+        $data = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ], [
+            'rejection_reason.required' => 'Alasan penolakan wajib diisi (member akan melihat ini).',
+        ]);
+
+        $promoTemplate->update([
+            'approval_status' => PromoTemplate::STATUS_REJECTED,
+            'rejection_reason' => $data['rejection_reason'],
+            'reviewed_at' => now(),
+            'reviewed_by_user_id' => $request->user()->id,
+        ]);
+
+        return back()->with('success', 'Template ditolak. Member akan melihat alasan penolakan.');
     }
 
     private function validateData(Request $request): array

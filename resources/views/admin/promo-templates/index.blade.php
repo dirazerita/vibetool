@@ -17,6 +17,11 @@
     .pt-pill-status { display:inline-block; font-size:11px; font-weight:600; padding:2px 10px; border-radius:9999px; margin-left:6px; }
     .pt-pill-status.on { background:rgba(16,185,129,0.18); color:#6ee7b7; }
     .pt-pill-status.off { background:rgba(100,116,139,0.18); color:#94a3b8; }
+    .pt-pill-approval { display:inline-block; font-size:11px; font-weight:600; padding:2px 10px; border-radius:9999px; margin-left:6px; }
+    .pt-pill-approval.pending { background:rgba(234,179,8,0.18); color:#fde047; }
+    .pt-pill-approval.approved { background:rgba(16,185,129,0.18); color:#6ee7b7; }
+    .pt-pill-approval.rejected { background:rgba(239,68,68,0.18); color:#fca5a5; }
+    .pt-pill-source { display:inline-block; font-size:11px; font-weight:600; padding:2px 10px; border-radius:9999px; margin-left:6px; background:rgba(168,85,247,0.18); color:#c4b5fd; }
     .pt-actions { display:flex; gap:8px; flex-shrink:0; }
     .pt-actions a, .pt-actions button { background:#1e2b3d; border:1px solid #2d3a4a; color:#cbd5e1; padding:6px 12px; border-radius:8px; font-size:12px; text-decoration:none; cursor:pointer; }
     .pt-actions a:hover, .pt-actions button:hover { border-color:#475569; }
@@ -39,9 +44,11 @@
 @endif
 
 <div class="pt-tabs">
-    <a href="{{ route('admin.promo-templates.index') }}" class="pt-tab {{ $category === '' ? 'active' : '' }}">Semua <span class="count">{{ $counts['all'] }}</span></a>
-    <a href="{{ route('admin.promo-templates.index', ['category' => 'member']) }}" class="pt-tab {{ $category === 'member' ? 'active' : '' }}">Promo Member <span class="count">{{ $counts['member'] }}</span></a>
-    <a href="{{ route('admin.promo-templates.index', ['category' => 'product']) }}" class="pt-tab {{ $category === 'product' ? 'active' : '' }}">Promo Produk <span class="count">{{ $counts['product'] }}</span></a>
+    <a href="{{ route('admin.promo-templates.index') }}" class="pt-tab {{ ($category ?? '') === '' && ($status ?? '') === '' && ($source ?? '') === '' ? 'active' : '' }}">Semua <span class="count">{{ $counts['all'] }}</span></a>
+    <a href="{{ route('admin.promo-templates.index', ['status' => 'pending']) }}" class="pt-tab {{ ($status ?? '') === 'pending' ? 'active' : '' }}" @if(($counts['pending'] ?? 0) > 0) style="border-color:rgba(234,179,8,0.6);" @endif>Menunggu Review <span class="count" style="background:rgba(234,179,8,0.5);">{{ $counts['pending'] ?? 0 }}</span></a>
+    <a href="{{ route('admin.promo-templates.index', ['source' => 'member']) }}" class="pt-tab {{ ($source ?? '') === 'member' ? 'active' : '' }}">Dari Member <span class="count">{{ $counts['member_submitted'] ?? 0 }}</span></a>
+    <a href="{{ route('admin.promo-templates.index', ['category' => 'member']) }}" class="pt-tab {{ ($category ?? '') === 'member' ? 'active' : '' }}">Promo Member <span class="count">{{ $counts['member'] }}</span></a>
+    <a href="{{ route('admin.promo-templates.index', ['category' => 'product']) }}" class="pt-tab {{ ($category ?? '') === 'product' ? 'active' : '' }}">Promo Produk <span class="count">{{ $counts['product'] }}</span></a>
 </div>
 
 @forelse($templates as $t)
@@ -53,6 +60,10 @@
                 @if($t->category === 'product' && $t->product)
                     <span style="color:#cbd5e1;">· {{ $t->product->title }}</span>
                 @endif
+                <span class="pt-pill-approval {{ $t->approval_status }}">{{ $t->statusLabel() }}</span>
+                @if($t->isMemberSubmitted())
+                    <span class="pt-pill-source" title="Dibuat oleh member: {{ $t->creator->name ?? '' }}">Dari Member: {{ $t->creator->name ?? 'Unknown' }}</span>
+                @endif
                 <span class="pt-pill-status {{ $t->is_active ? 'on' : 'off' }}">{{ $t->is_active ? 'Aktif' : 'Nonaktif' }}</span>
                 <span style="color:#64748b; margin-left:6px;">· urutan {{ $t->order }}</span>
                 @if(($t->media_count ?? 0) > 0)
@@ -60,8 +71,24 @@
                 @endif
             </div>
             <div class="body-snippet">{{ \Illuminate\Support\Str::limit(str_replace(["\r", "\n"], ' ', $t->body), 140) }}</div>
+            @if($t->approval_status === 'rejected' && $t->rejection_reason)
+                <div style="font-size:12px; color:#fca5a5; margin-top:6px;">Alasan ditolak: {{ $t->rejection_reason }}</div>
+            @endif
         </div>
         <div class="pt-actions">
+            @if($t->isPending() || $t->isRejected())
+                <form method="POST" action="{{ route('admin.promo-templates.approve', $t) }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" style="background:rgba(16,185,129,0.15); color:#6ee7b7; border-color:rgba(16,185,129,0.3);">Setujui</button>
+                </form>
+            @endif
+            @if($t->isPending() || $t->isApproved())
+                <button type="button" onclick="const r=prompt('Alasan penolakan (akan dikirim ke member):'); if(r){const f=document.getElementById('reject-form-{{ $t->id }}'); f.querySelector('input[name=rejection_reason]').value=r; f.submit();}" class="danger">Tolak</button>
+                <form id="reject-form-{{ $t->id }}" method="POST" action="{{ route('admin.promo-templates.reject', $t) }}" style="display:none;">
+                    @csrf
+                    <input type="hidden" name="rejection_reason" value="">
+                </form>
+            @endif
             <a href="{{ route('admin.promo-templates.edit', $t) }}">Edit</a>
             <form method="POST" action="{{ route('admin.promo-templates.destroy', $t) }}" onsubmit="return confirm('Hapus template ini?');" style="display:inline;">
                 @csrf @method('DELETE')
