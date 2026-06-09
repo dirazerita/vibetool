@@ -5,43 +5,48 @@
 <h1 class="text-2xl font-bold dk-heading mb-6">Dashboard</h1>
 
 <div class="dk-grid-4 gap-6 mb-8" style="display:grid;grid-template-columns:repeat(4,1fr)">
-    <div class="dk-stat-card">
+    <a href="{{ route('dashboard.balance') }}" class="dk-stat-card dk-stat-card--clickable" title="Lihat detail saldo">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(99,102,241,0.15);color:#818cf8;display:flex;align-items:center;justify-content:center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
         </div>
         <div class="min-w-0">
-            <div class="text-sm dk-text-muted mb-1">Saldo</div>
+            <div class="text-sm dk-text-muted mb-1 flex items-center gap-1">Saldo <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
             <div class="text-2xl font-bold" style="color:#818cf8">Rp {{ number_format($user->balance, 0, ',', '.') }}</div>
         </div>
-    </div>
-    <div class="dk-stat-card">
+    </a>
+    <a href="{{ route('dashboard.commissions') }}" class="dk-stat-card dk-stat-card--clickable" title="Lihat riwayat komisi">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(16,185,129,0.15);color:#6ee7b7;display:flex;align-items:center;justify-content:center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
         <div class="min-w-0">
-            <div class="text-sm dk-text-muted mb-1">Total Komisi</div>
+            <div class="text-sm dk-text-muted mb-1 flex items-center gap-1">Total Komisi <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
             <div class="text-2xl font-bold" style="color:#6ee7b7">Rp {{ number_format($totalCommissions, 0, ',', '.') }}</div>
         </div>
-    </div>
-    <div class="dk-stat-card">
+    </a>
+    <a href="{{ route('dashboard.sales') }}" class="dk-stat-card dk-stat-card--clickable" title="Lihat detail penjualan">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(96,165,250,0.15);color:#60a5fa;display:flex;align-items:center;justify-content:center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
         </div>
         <div class="min-w-0">
-            <div class="text-sm dk-text-muted mb-1">Total Penjualan</div>
+            <div class="text-sm dk-text-muted mb-1 flex items-center gap-1">Total Penjualan <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
             <div class="text-2xl font-bold" style="color:#60a5fa">{{ $totalOrders }}</div>
         </div>
-    </div>
-    <div class="dk-stat-card">
+    </a>
+    <a href="{{ route('dashboard.team') }}" class="dk-stat-card dk-stat-card--clickable" title="Lihat daftar downline">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(168,85,247,0.15);color:#c4b5fd;display:flex;align-items:center;justify-content:center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
         </div>
         <div class="min-w-0">
-            <div class="text-sm dk-text-muted mb-1">Total Downline</div>
+            <div class="text-sm dk-text-muted mb-1 flex items-center gap-1">Total Downline <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
             <div class="text-2xl font-bold" style="color:#c4b5fd">{{ $totalDownlines }}</div>
         </div>
-    </div>
+    </a>
 </div>
+
+<style>
+    .dk-stat-card--clickable { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease; text-decoration: none; }
+    .dk-stat-card--clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); background-color: rgba(255,255,255,0.02); }
+</style>
 
 <div class="dk-card" style="padding:24px;">
     <h2 class="text-lg font-semibold dk-heading mb-4">Kode Referral Anda</h2>

@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\VideoTutorialController;
 use App\Http\Controllers\Admin\WebhookDeliveryController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Dashboard\BalanceController as DashboardBalanceController;
 use App\Http\Controllers\Dashboard\CommissionController;
 use App\Http\Controllers\Dashboard\CouponController as DashboardCouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
@@ -28,7 +29,9 @@ use App\Http\Controllers\Dashboard\MemberProductController;
 use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
+use App\Http\Controllers\Dashboard\PromoTemplateController as DashboardPromoTemplateController;
 use App\Http\Controllers\Dashboard\PurchaseController as DashboardPurchaseController;
+use App\Http\Controllers\Dashboard\SalesController as DashboardSalesController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\SoftwareRequestController as DashboardSoftwareRequestController;
 use App\Http\Controllers\Dashboard\TeamController;
@@ -77,6 +80,8 @@ Route::middleware('auth')->group(function () {
     // Dashboard (member only, butuh akun aktif)
     Route::middleware('active')->prefix('dashboard')->name('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
+        Route::get('/balance', [DashboardBalanceController::class, 'index'])->name('.balance');
+        Route::get('/sales', [DashboardSalesController::class, 'index'])->name('.sales');
         Route::get('/products', [DashboardProductController::class, 'index'])->name('.products');
         Route::get('/purchases', [DashboardPurchaseController::class, 'index'])->name('.purchases');
         Route::get('/licenses', [DashboardLicenseController::class, 'index'])->name('.licenses');
@@ -100,6 +105,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/messages/{message}/attachment', [DashboardMessageController::class, 'attachment'])->name('.messages.attachment');
 
         Route::get('/promo', [DashboardPromoController::class, 'index'])->name('.promo.index');
+
+        // CRUD template promo untuk member yang bisa upload produk
+        Route::get('/promo-templates', [DashboardPromoTemplateController::class, 'index'])->name('.promo-templates.index');
+        Route::get('/promo-templates/create', [DashboardPromoTemplateController::class, 'create'])->name('.promo-templates.create');
+        Route::post('/promo-templates', [DashboardPromoTemplateController::class, 'store'])->name('.promo-templates.store');
+        Route::get('/promo-templates/{promoTemplate}/edit', [DashboardPromoTemplateController::class, 'edit'])->name('.promo-templates.edit');
+        Route::put('/promo-templates/{promoTemplate}', [DashboardPromoTemplateController::class, 'update'])->name('.promo-templates.update');
+        Route::delete('/promo-templates/{promoTemplate}', [DashboardPromoTemplateController::class, 'destroy'])->name('.promo-templates.destroy');
+        Route::delete('/promo-templates/{promoTemplate}/media/{media}', [DashboardPromoTemplateController::class, 'destroyMedia'])->name('.promo-templates.media.destroy');
 
         Route::get('/software-requests', [DashboardSoftwareRequestController::class, 'index'])->name('.software-requests.index');
         Route::get('/software-requests/create', [DashboardSoftwareRequestController::class, 'create'])->name('.software-requests.create');
@@ -177,6 +191,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'update'])->name('promo-templates.update');
         Route::delete('/promo-templates/{promoTemplate}', [AdminPromoTemplateController::class, 'destroy'])->name('promo-templates.destroy');
         Route::delete('/promo-templates/{promoTemplate}/media/{media}', [AdminPromoTemplateController::class, 'destroyMedia'])->name('promo-templates.media.destroy');
+        Route::post('/promo-templates/{promoTemplate}/approve', [AdminPromoTemplateController::class, 'approve'])->name('promo-templates.approve');
+        Route::post('/promo-templates/{promoTemplate}/reject', [AdminPromoTemplateController::class, 'reject'])->name('promo-templates.reject');
 
         Route::get('/software-requests', [AdminSoftwareRequestController::class, 'index'])->name('software-requests.index');
         Route::get('/software-requests/{softwareRequest}', [AdminSoftwareRequestController::class, 'show'])->name('software-requests.show');

@@ -18,6 +18,18 @@ class PromoTemplate extends Model
         self::CATEGORY_PRODUCT => 'Promo Produk',
     ];
 
+    const STATUS_PENDING = 'pending';
+
+    const STATUS_APPROVED = 'approved';
+
+    const STATUS_REJECTED = 'rejected';
+
+    const STATUSES = [
+        self::STATUS_PENDING => 'Menunggu Review',
+        self::STATUS_APPROVED => 'Disetujui',
+        self::STATUS_REJECTED => 'Ditolak',
+    ];
+
     /**
      * Daftar placeholder yang didukung + deskripsi singkatnya. Ditampilkan di
      * form admin sebagai bantuan saat menyusun body template.
@@ -43,6 +55,11 @@ class PromoTemplate extends Model
         'title',
         'category',
         'product_id',
+        'created_by_user_id',
+        'approval_status',
+        'rejection_reason',
+        'reviewed_at',
+        'reviewed_by_user_id',
         'body',
         'is_active',
         'order',
@@ -51,11 +68,47 @@ class PromoTemplate extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'order' => 'integer',
+        'reviewed_at' => 'datetime',
     ];
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_user_id');
+    }
+
+    public function isMemberSubmitted(): bool
+    {
+        return $this->created_by_user_id !== null;
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->approval_status === self::STATUS_APPROVED;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->approval_status === self::STATUS_PENDING;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->approval_status === self::STATUS_REJECTED;
+    }
+
+    public function statusLabel(): string
+    {
+        return self::STATUSES[$this->approval_status] ?? $this->approval_status;
     }
 
     public function media(): HasMany

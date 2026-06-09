@@ -20,6 +20,7 @@ class PromoController extends Controller
 
         $templates = PromoTemplate::query()
             ->where('is_active', true)
+            ->where('approval_status', PromoTemplate::STATUS_APPROVED)
             ->where('category', $category)
             ->with(['product:id,title,slug,price,compare_at_price,description', 'media'])
             ->orderBy('order')
@@ -49,9 +50,11 @@ class PromoController extends Controller
             'templates' => $rendered,
             'counts' => [
                 'member' => PromoTemplate::where('is_active', true)
+                    ->where('approval_status', PromoTemplate::STATUS_APPROVED)
                     ->where('category', PromoTemplate::CATEGORY_MEMBER)
                     ->count(),
                 'product' => PromoTemplate::where('is_active', true)
+                    ->where('approval_status', PromoTemplate::STATUS_APPROVED)
                     ->where('category', PromoTemplate::CATEGORY_PRODUCT)
                     ->count(),
             ],
