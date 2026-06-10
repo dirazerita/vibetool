@@ -24,6 +24,7 @@ use App\Http\Controllers\Dashboard\BalanceController as DashboardBalanceControll
 use App\Http\Controllers\Dashboard\CommissionController;
 use App\Http\Controllers\Dashboard\CouponController as DashboardCouponController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\EmailVerificationController;
 use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseController;
 use App\Http\Controllers\Dashboard\MemberProductController;
 use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
@@ -98,6 +99,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/member-products/{product}', [MemberProductController::class, 'destroy'])->name('.member-products.destroy');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
+        Route::get('/email-verification', [EmailVerificationController::class, 'show'])->name('.email-verification');
+        Route::post('/email-verification/send', [EmailVerificationController::class, 'sendCode'])->name('.email-verification.send');
+        Route::post('/email-verification/verify', [EmailVerificationController::class, 'verify'])->name('.email-verification.verify');
         Route::get('/settings', [SettingController::class, 'index'])->name('.settings');
         Route::put('/settings', [SettingController::class, 'update'])->name('.settings.update');
         Route::get('/messages', [DashboardMessageController::class, 'index'])->name('.messages');

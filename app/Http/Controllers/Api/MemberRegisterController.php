@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\PhoneNumber;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\RealisticEmail;
 use App\Services\TelegramService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -34,7 +35,7 @@ class MemberRegisterController extends Controller
             $request->all(),
             [
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new RealisticEmail],
                 'whatsapp_number' => [
                     'nullable',
                     'string',
