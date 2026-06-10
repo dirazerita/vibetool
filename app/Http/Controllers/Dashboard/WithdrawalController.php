@@ -28,11 +28,15 @@ class WithdrawalController extends Controller
 
         $user = $request->user();
 
+        if (! $user->email_verified_at) {
+            return back()->with('error', 'Verifikasi email Anda terlebih dulu sebelum bisa menarik komisi. Buka menu "Verifikasi Email" di sidebar.');
+        }
+
         if ($request->amount > $user->balance) {
             return back()->with('error', 'Saldo tidak mencukupi.');
         }
 
-        if (!$user->bank_name || !$user->bank_account) {
+        if (! $user->bank_name || ! $user->bank_account) {
             return back()->with('error', 'Lengkapi informasi bank di halaman pengaturan terlebih dahulu.');
         }
 
