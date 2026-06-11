@@ -166,6 +166,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="dk-divider pt-6">
+                    <h3 class="text-lg font-medium dk-heading mb-4">Privasi</h3>
+                    <label style="display:flex; align-items:flex-start; gap:12px; cursor:pointer;">
+                        <input type="checkbox" name="show_upline_info" value="1" {{ old('show_upline_info', $user->show_upline_info) ? 'checked' : '' }} style="margin-top:3px; accent-color:#4f46e5;">
+                        <span>
+                            <span class="block text-sm font-medium dk-heading">Tampilkan kontak saya ke downline</span>
+                            <span class="block text-xs dk-text-muted mt-0.5">Kalau diaktifkan, downline kamu bisa melihat kartu "Upline kamu" (nama, email, WhatsApp + tombol Hubungi Upline) di menu Produk mereka. Matikan kalau kamu tidak mau kontakmu ditampilkan ke downline.</span>
+                        </span>
+                    </label>
+                </div>
             </div>
 
             <div class="mt-6">

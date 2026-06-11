@@ -248,7 +248,7 @@
 @endif
 
 {{-- Upline Section --}}
-@if($user->upline)
+@if($user->upline && $user->upline->show_upline_info)
     @php
         $uplineWa = \App\Helpers\PhoneNumber::normalize($user->upline->whatsapp_number ?? null);
     @endphp
