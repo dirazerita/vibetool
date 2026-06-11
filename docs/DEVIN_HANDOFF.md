@@ -20,6 +20,7 @@ Read this top-to-bottom before doing anything on production. Skim the [Onboardin
 | Cron / Laravel scheduler | configured | runs every 30 min via Hostinger Cron Jobs |
 | Manual bank transfer payment | enabled | bank details stored in Settings, members upload proof, admin marks paid |
 | Telegram bot notifications | enabled | bot token + chat ID + webhook all configured by user via `/admin/settings` |
+| Email transaksional (SMTP) | LIVE | Hostinger SMTP via `noreply@vibetool.id` — kode verifikasi email member terkirim (see [Quirk #6](#6-email-service--hostinger-smtp-configured)) |
 | Admin Profil Saya (`/admin/profile`) | available | PR #68 — change own name/email/password from UI |
 | Git-pull production workflow | available | `bash ~/pull-vibetool.sh` on server (see [Git Workflow](#git-workflow-for-production-updates)) |
 | Xendit (online payment) | NOT used | user chose manual transfer instead |
@@ -133,7 +134,9 @@ DB_DATABASE=u295282884_vibetool
 DB_USERNAME=u295282884_rynz
 DB_PASSWORD=<see hPanel>
 
-MAIL_*=...   # not configured yet — emails won't send. Member activation/order flow uses WhatsApp + Telegram instead.
+MAIL_MAILER=smtp   # Hostinger SMTP — email transaksional AKTIF (lihat Quirk #6). Default repo 'log' TIDAK mengirim email.
+MAIL_HOST=smtp.hostinger.com
+MAIL_USERNAME=noreply@vibetool.id   # = MAIL_FROM_ADDRESS (wajib sama). MAIL_PASSWORD lihat hPanel > Emails.
 
 XENDIT_SECRET_KEY=  # blank — not used
 XENDIT_WEBHOOK_TOKEN=  # blank — not used
@@ -302,10 +305,24 @@ hPanel → Databases → MySQL Databases → phpMyAdmin (one-click). Database na
 ### 5. No Node.js on server (Vite build is local-only)
 - See [Asset builds](#asset-builds-vite--cssjs).
 
-### 6. No email service configured
-- `MAIL_*` env vars are blank. Password reset emails / email notifications WILL NOT send.
-- Member activation flow currently uses WhatsApp + Telegram instead.
-- If email is needed: configure SMTP (Hostinger has free SMTP) and set `MAIL_*` in `.env`.
+### 6. Email service — Hostinger SMTP (configured)
+- **Status:** email transaksional aktif via Hostinger SMTP (kode verifikasi email member sudah terkirim).
+- **Quirk penting:** default repo (`.env.example`) memakai `MAIL_MAILER=log`. Driver `log` **tidak mengirim email** — hanya menulis isinya ke `storage/logs/laravel-*.log` dan **tidak melempar error**, sehingga UI tetap menampilkan "kode terkirim" padahal email tak pernah keluar. Inilah jebakan: kalau production belum di-set ke `smtp`, fitur email "diam-diam" gagal.
+- **Konfigurasi production (`.env` di server):**
+  ```
+  MAIL_MAILER=smtp
+  MAIL_HOST=smtp.hostinger.com
+  MAIL_PORT=465
+  MAIL_USERNAME=noreply@vibetool.id      # mailbox dibuat di hPanel > Emails
+  MAIL_PASSWORD=<password mailbox>
+  MAIL_SCHEME=smtps                       # TLS implisit (port 465)
+  MAIL_FROM_ADDRESS="noreply@vibetool.id" # WAJIB sama dengan MAIL_USERNAME
+  MAIL_FROM_NAME="VibeTool"
+  ```
+- **`MAIL_FROM_ADDRESS` harus sama dengan `MAIL_USERNAME`** (mailbox terautentikasi). Kalau beda domain/mailbox, Hostinger menolak kirim.
+- Alternatif port: `587` dengan `MAIL_SCHEME` dikosongkan (STARTTLS).
+- **Setelah ubah `.env` WAJIB** `php artisan config:cache` (production pakai config cache, perubahan `.env` tidak terbaca tanpa rebuild).
+- **Cek kegagalan kirim:** `ls -lt storage/logs/` lalu `tail -n 60` file `laravel-YYYY-MM-DD.log` terbaru. `EmailVerificationController::sendCode()` mencatat `Email verification: send code failed` kalau SMTP error.
 
 ### 7. Settings form validation — Telegram checkbox requires complete config
 - If user checks "Aktifkan Notifikasi Telegram" without filling Bot Token + Chat ID, save will fail validation.
@@ -333,7 +350,7 @@ hPanel → Databases → MySQL Databases → phpMyAdmin (one-click). Database na
 ## Open Tasks (as of handoff)
 
 - [ ] **End-to-end test alur produksi** — register dummy member, activate, checkout manual, upload proof, verify Telegram notifications, admin marks paid, member gets product access. User wanted to do this themselves, may need Devin assist.
-- [ ] **Email service** — configure SMTP if needed for transactional emails (password reset, order confirmations).
+- [x] **Email service** — Hostinger SMTP terkonfigurasi & aktif (kode verifikasi email member terkirim). Detail di Quirk #6.
 - [ ] **Logo upgrade** — user skipped for now but may revisit.
 - [ ] **Migrations runner in pull script** — currently commented out for safety. Decide if it should auto-run (with backup) or require manual step.
 - [ ] **Backup strategy** — no automated DB backup configured yet. Hostinger has a daily backup plan, but not verified to be active.
