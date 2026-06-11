@@ -127,7 +127,13 @@ class EmailVerificationController extends Controller
             return 0;
         }
 
-        $diff = self::RESEND_COOLDOWN_SECONDS - now()->diffInSeconds($user->email_verification_last_sent_at);
+        // Carbon 3 mengembalikan diffInSeconds() bertanda (signed): karena
+        // last_sent_at di masa lalu, now()->diffInSeconds($last) bernilai
+        // NEGATIF, sehingga cooldown malah membesar dan tombol "Kirim Kode"
+        // tidak pernah aktif lagi. Hitung elapsed dari selisih timestamp
+        // supaya konsisten di Carbon 2 maupun 3.
+        $elapsed = now()->getTimestamp() - $user->email_verification_last_sent_at->getTimestamp();
+        $diff = self::RESEND_COOLDOWN_SECONDS - $elapsed;
 
         return max(0, (int) $diff);
     }

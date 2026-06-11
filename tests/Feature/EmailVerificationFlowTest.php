@@ -62,6 +62,40 @@ class EmailVerificationFlowTest extends TestCase
             ->assertSee('Belum Terverifikasi');
     }
 
+    public function test_cooldown_is_zero_when_last_code_sent_long_ago(): void
+    {
+        // Regression: Carbon 3 returns a SIGNED diffInSeconds(), so the old
+        // cooldown math produced an ever-growing positive number when
+        // last_sent_at was in the past, permanently disabling the
+        // "Kirim Kode" button. With a send 2 hours ago the cooldown must be 0.
+        $user = $this->activeUser([
+            'email_verification_last_sent_at' => now()->subHours(2),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard.email-verification'))
+            ->assertOk()
+            ->assertSee('{ cooldown: 0 }');
+    }
+
+    public function test_cooldown_is_within_window_for_recent_send(): void
+    {
+        // Sent 10s ago → remaining cooldown must be between 1 and 60 (never
+        // negative, never inflated).
+        $user = $this->activeUser([
+            'email_verification_last_sent_at' => now()->subSeconds(10),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('dashboard.email-verification'))
+            ->assertOk();
+
+        $this->assertMatchesRegularExpression(
+            '/\{ cooldown: (?:[1-9]|[1-5]\d|60) \}/',
+            $response->getContent(),
+        );
+    }
+
     public function test_send_code_dispatches_mailable_and_persists_hash(): void
     {
         Mail::fake();
