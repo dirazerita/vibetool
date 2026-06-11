@@ -30,11 +30,17 @@
             $uplinePercent = $hasCustomUpline
                 ? (float) $customCommission->upline_percent
                 : ($alreadyPaid ? (float) $product->upline_percent : (float) ($product->upline_percent_non_owner ?? $product->upline_percent));
-            $commissionAmount = $product->price * $commissionPercent / 100;
-            $uplineAmount = $product->price * $uplinePercent / 100;
+            // Kalau member punya kupon untuk produk ini, komisi dihitung dari
+            // harga SETELAH diskon kupon — konsisten dengan komisi yang benar-benar
+            // dibayar (OrderPaymentService memakai order.amount yang sudah didiskon).
+            $appliedCoupon = $promoProducts[$product->id]['coupon'] ?? null;
+            $couponDiscount = $appliedCoupon ? (float) $appliedCoupon->calculateDiscount((float) $product->price) : 0.0;
+            $commissionBasePrice = max(0, (float) $product->price - $couponDiscount);
+            $commissionAmount = $commissionBasePrice * $commissionPercent / 100;
+            $uplineAmount = $commissionBasePrice * $uplinePercent / 100;
             $isMyProduct = $product->created_by && (int) $product->created_by === (int) $user->id;
             $creatorSharePercent = (float) ($product->creator_share_percent ?? 0);
-            $creatorShareAmount = $product->price * $creatorSharePercent / 100;
+            $creatorShareAmount = $commissionBasePrice * $creatorSharePercent / 100;
             $productPackages = $product->activePackages;
             $productHasPackages = $productPackages->isNotEmpty();
             $startingPrice = $productHasPackages ? (float) $productPackages->min('price') : (float) $product->price;
@@ -70,6 +76,9 @@
                     </p>
                     <p class="text-sm text-green-600 font-medium">Komisi kamu: Rp {{ number_format($commissionAmount, 0, ',', '.') }} per penjualan <span class="text-xs dk-text-muted font-normal">({{ rtrim(rtrim(number_format($commissionPercent, 2, '.', ''), '0'), '.') }}%)</span></p>
                     <p class="text-xs text-purple-500">Bonus upline: Rp {{ number_format($uplineAmount, 0, ',', '.') }} per penjualan downline</p>
+                    @if($couponDiscount > 0)
+                        <p class="text-xs dk-text-muted mt-0.5">Dihitung dari harga setelah diskon kupon: Rp {{ number_format($commissionBasePrice, 0, ',', '.') }}</p>
+                    @endif
                     @if($isMyProduct && $creatorSharePercent > 0)
                         <p class="text-xs mt-1" style="color:#fbbf24">
                             <svg class="inline w-3.5 h-3.5 mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
