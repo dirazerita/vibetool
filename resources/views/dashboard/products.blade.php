@@ -18,8 +18,18 @@
             $status = $purchaseStatus[$product->id] ?? null;
             $alreadyPaid = $status['paid'] ?? false;
             $pendingOrder = $status['pending_order'] ?? null;
-            $commissionPercent = $alreadyPaid ? (float) $product->commission_percent : (float) ($product->commission_percent_non_owner ?? $product->commission_percent);
-            $uplinePercent = $alreadyPaid ? (float) $product->upline_percent : (float) ($product->upline_percent_non_owner ?? $product->upline_percent);
+            // Komisi khusus per-produk yang di-set admin untuk member ini (kalau ada).
+            // Prioritas mengikuti Product::commissionPercentFor(): custom > owner > non-owner,
+            // supaya tampilan konsisten dengan tarif yang benar-benar dibayar.
+            $customCommission = $memberCommissions[$product->id] ?? null;
+            $hasCustomCommission = $customCommission && $customCommission->commission_percent !== null;
+            $hasCustomUpline = $customCommission && $customCommission->upline_percent !== null;
+            $commissionPercent = $hasCustomCommission
+                ? (float) $customCommission->commission_percent
+                : ($alreadyPaid ? (float) $product->commission_percent : (float) ($product->commission_percent_non_owner ?? $product->commission_percent));
+            $uplinePercent = $hasCustomUpline
+                ? (float) $customCommission->upline_percent
+                : ($alreadyPaid ? (float) $product->upline_percent : (float) ($product->upline_percent_non_owner ?? $product->upline_percent));
             $commissionAmount = $product->price * $commissionPercent / 100;
             $uplineAmount = $product->price * $uplinePercent / 100;
             $isMyProduct = $product->created_by && (int) $product->created_by === (int) $user->id;
@@ -71,7 +81,7 @@
                             Bagian Pembuat: belum diatur admin
                         </p>
                     @endif
-                    @if(!$alreadyPaid && !$isMyProduct && ($product->commission_percent_non_owner ?? $product->commission_percent) != $product->commission_percent)
+                    @if(!$alreadyPaid && !$isMyProduct && !$hasCustomCommission && ($product->commission_percent_non_owner ?? $product->commission_percent) != $product->commission_percent)
                         <p class="text-xs text-amber-600 mt-1 mb-3"><svg class="inline w-3.5 h-3.5 mr-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Beli produk ini untuk dapat komisi lebih besar ({{ rtrim(rtrim(number_format((float) $product->commission_percent, 2, '.', ''), '0'), '.') }}%)</p>
                     @else
                         <div class="mb-3"></div>

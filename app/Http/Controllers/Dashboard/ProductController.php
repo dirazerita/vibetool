@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\MemberCommission;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -14,6 +15,14 @@ class ProductController extends Controller
         $products = Product::with(['landingPage', 'activePackages'])->where('is_active', true)->get();
         $user = $request->user()->load('upline');
         $downlines = $user->downlines()->select('id', 'name')->get();
+
+        // Komisi khusus per-produk yang di-set admin untuk member ini.
+        // Dipreload sekali (keyed by product_id) supaya view bisa menampilkan
+        // tarif khusus tanpa N+1 query, dan tampilannya konsisten dengan tarif
+        // yang benar-benar dibayar di OrderPaymentService.
+        $memberCommissions = MemberCommission::where('user_id', $user->id)
+            ->get()
+            ->keyBy('product_id');
 
         $userOrders = Order::where('user_id', $user->id)
             ->whereIn('status', ['paid', 'pending'])
@@ -69,6 +78,6 @@ class ProductController extends Controller
             }
         }
 
-        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus'));
+        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus', 'memberCommissions'));
     }
 }
