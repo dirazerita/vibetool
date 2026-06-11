@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Coupon;
 use App\Models\MemberCommission;
 use App\Models\Product;
 use App\Models\User;
@@ -108,5 +109,52 @@ class DashboardProductCommissionDisplayTest extends TestCase
         $response->assertSee('(50%)');
         // Upline tetap default non-owner 5% = 5.000
         $response->assertSee('Rp 5.000');
+    }
+
+    public function test_commission_is_computed_from_price_after_coupon_discount(): void
+    {
+        // Contoh dari kebutuhan: kupon 20%, komisi 50%, harga 199.000.
+        // Komisi = 50% x (199.000 - 20%*199.000) = 50% x 159.200 = 79.600.
+        $member = $this->makeMember();
+
+        $product = Product::create([
+            'title' => 'Produk Kupon',
+            'slug' => 'produk-kupon-'.Str::lower(Str::random(6)),
+            'description' => 'desc',
+            'price' => 199000,
+            'commission_percent' => 50,
+            'commission_percent_non_owner' => 50,
+            'upline_percent' => 10,
+            'upline_percent_non_owner' => 10,
+            'creator_share_percent' => 0,
+            'product_type' => 'digital',
+            'license_duration' => 'lifetime',
+            'is_active' => true,
+            'approval_status' => 'approved',
+        ]);
+
+        $coupon = Coupon::create([
+            'code' => 'DISKON20-'.Str::upper(Str::random(4)),
+            'name' => 'Diskon 20%',
+            'discount_type' => 'percent',
+            'discount_value' => 20,
+            'min_purchase' => 0,
+            'is_active' => true,
+        ]);
+        // Kupon dimiliki member ini (lewat pivot coupon_members).
+        $member->coupons()->attach($coupon->id);
+
+        $response = $this->actingAs($member)
+            ->get('/dashboard/products')
+            ->assertOk();
+
+        // Komisi 50% dari harga diskon (159.200) = 79.600
+        $response->assertSee('Rp 79.600');
+        // Bonus upline 10% dari 159.200 = 15.920
+        $response->assertSee('Rp 15.920');
+        // Keterangan basis harga diskon muncul.
+        $response->assertSee('setelah diskon kupon');
+        // Komisi dari harga penuh (50% x 199.000 = 99.500) TIDAK boleh muncul.
+        $response->assertDontSee('Rp 99.500');
     }
 }
