@@ -28,6 +28,7 @@ class SettingController extends Controller
             'pakasirEnabled' => Setting::get('pakasir_enabled') === '1',
             'pakasirSlug' => Setting::get('pakasir_slug', ''),
             'pakasirApiKey' => Setting::get('pakasir_api_key', ''),
+            'showUplineInfo' => Setting::get('show_upline_info', '1') === '1',
         ]);
     }
 
@@ -51,6 +52,7 @@ class SettingController extends Controller
                 'telegram_enabled' => ['nullable'],
                 'telegram_bot_token' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'telegram_chat_id' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:50'],
+                'show_upline_info' => ['nullable'],
             ],
             [
                 'whatsapp_admin.required' => 'Nomor WhatsApp admin wajib diisi.',
@@ -81,6 +83,8 @@ class SettingController extends Controller
         Setting::set('telegram_enabled', $telegramEnabled ? '1' : '0');
         Setting::set('telegram_bot_token', trim((string) $request->input('telegram_bot_token')));
         Setting::set('telegram_chat_id', trim((string) $request->input('telegram_chat_id')));
+
+        Setting::set('show_upline_info', $request->boolean('show_upline_info') ? '1' : '0');
 
         if (empty(Setting::get('telegram_webhook_secret'))) {
             Setting::set('telegram_webhook_secret', Str::random(40));
