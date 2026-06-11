@@ -43,6 +43,25 @@ class EmailVerificationFlowTest extends TestCase
             ->assertSee('Terverifikasi');
     }
 
+    public function test_verification_page_renders_when_code_already_sent(): void
+    {
+        // Regression: last_sent_at / expires_at must be cast to Carbon so the
+        // view can call ->diffForHumans() / ->isFuture() on them. Without the
+        // cast these are plain strings and the page 500s once a code has been
+        // sent (reproduces the production-only error).
+        $user = $this->activeUser([
+            'email_verification_code_hash' => Hash::make('123456'),
+            'email_verification_expires_at' => now()->addMinutes(10),
+            'email_verification_last_sent_at' => now()->subSeconds(120),
+            'email_verification_attempts' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard.email-verification'))
+            ->assertOk()
+            ->assertSee('Belum Terverifikasi');
+    }
+
     public function test_send_code_dispatches_mailable_and_persists_hash(): void
     {
         Mail::fake();
