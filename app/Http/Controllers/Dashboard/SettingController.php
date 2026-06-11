@@ -42,6 +42,7 @@ class SettingController extends Controller
             'social_tiktok' => 'nullable|string|max:255',
             'social_youtube' => 'nullable|string|max:255',
             'social_website' => 'nullable|url|max:255',
+            'show_upline_info' => 'nullable',
         ], [
             'referral_code.regex' => 'Kode referral hanya boleh berisi huruf (A-Z) dan angka (0-9).',
             'referral_code.unique' => 'Kode referral ini sudah dipakai member lain. Pilih kode lain.',
@@ -67,6 +68,7 @@ class SettingController extends Controller
             'social_tiktok' => $validated['social_tiktok'] ?? null,
             'social_youtube' => $validated['social_youtube'] ?? null,
             'social_website' => $validated['social_website'] ?? null,
+            'show_upline_info' => $request->boolean('show_upline_info'),
         ];
 
         if ($request->hasFile('profile_photo')) {

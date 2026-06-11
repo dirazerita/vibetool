@@ -149,18 +149,6 @@
             </div>
         </div>
 
-        <div class="dk-card" style="padding:24px; margin-bottom:24px;">
-            <h2 class="text-lg font-semibold dk-heading mb-4">Tampilan Member Area</h2>
-
-            <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" name="show_upline_info" value="1" {{ old('show_upline_info', $showUplineInfo) ? 'checked' : '' }} class="dk-checkbox">
-                <span>
-                    <span class="block text-sm font-medium dk-heading">Tampilkan Info "Upline Kamu" di Menu Produk</span>
-                    <span class="block text-xs dk-text-muted mt-0.5">Kalau diaktifkan, di menu Produk member akan muncul kartu "Upline kamu" (nama, email, WhatsApp + tombol Hubungi Upline). Kalau dimatikan, kartu ini disembunyikan dari semua member.</span>
-                </span>
-            </label>
-        </div>
-
         <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
                     class="px-6 py-2.5 rounded-lg font-medium"

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\MemberCommission;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -79,10 +78,6 @@ class ProductController extends Controller
             }
         }
 
-        // Toggle admin: tampilkan kartu "Upline kamu" di menu produk atau tidak.
-        // Default '1' (tampil) supaya perilaku lama tetap sama.
-        $showUplineInfo = Setting::get('show_upline_info', '1') === '1';
-
-        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus', 'memberCommissions', 'showUplineInfo'));
+        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus', 'memberCommissions'));
     }
 }

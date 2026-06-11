@@ -36,6 +36,7 @@ class User extends Authenticatable
         'role',
         'status',
         'can_upload_product',
+        'show_upline_info',
     ];
 
     protected $hidden = [
@@ -52,6 +53,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'balance' => 'decimal:2',
             'can_upload_product' => 'boolean',
+            'show_upline_info' => 'boolean',
         ];
     }
 
