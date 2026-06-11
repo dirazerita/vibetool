@@ -47,6 +47,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_verification_expires_at' => 'datetime',
+            'email_verification_last_sent_at' => 'datetime',
             'password' => 'hashed',
             'balance' => 'decimal:2',
             'can_upload_product' => 'boolean',
