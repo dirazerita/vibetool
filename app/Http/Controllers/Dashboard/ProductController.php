@@ -78,6 +78,55 @@ class ProductController extends Controller
             }
         }
 
-        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus', 'memberCommissions'));
+        // Kupon milik upline yang aktif & valid — dipakai sebagai fallback untuk
+        // ditampilkan di kartu produk downline. Saat downline checkout, kupon upline
+        // ini memang otomatis diterapkan (CheckoutController::ensureAutoCouponSession),
+        // jadi tampilan harga & komisi setelah diskon di sini konsisten dengan yang
+        // benar-benar terjadi saat pembelian.
+        $uplineCoupons = collect();
+        if ($user->upline) {
+            $uplineCoupons = $user->upline->coupons()
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('expired_at')
+                        ->orWhere('expired_at', '>', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('max_uses')
+                        ->orWhereColumn('used_count', '<', 'max_uses');
+                })
+                ->with('products')
+                ->get();
+        }
+
+        // Kupon efektif yang ditampilkan di kartu tiap produk. Prioritas: kupon
+        // milik member sendiri, lalu fallback ke kupon upline. Sumbernya ('self'
+        // / 'upline') ikut dikirim supaya view bisa beri label yang tepat.
+        $cardCoupons = [];
+        foreach ($products as $product) {
+            if (isset($promoProducts[$product->id])) {
+                $cardCoupons[$product->id] = [
+                    'coupon' => $promoProducts[$product->id]['coupon'],
+                    'source' => 'self',
+                ];
+
+                continue;
+            }
+
+            foreach ($uplineCoupons as $coupon) {
+                // Cocokkan dengan logika auto-apply di checkout: kupon valid untuk
+                // produk DAN harga produk memenuhi minimal pembelian kupon.
+                if ($coupon->isValidForProduct($product) && (float) $product->price >= (float) $coupon->min_purchase) {
+                    $cardCoupons[$product->id] = [
+                        'coupon' => $coupon,
+                        'source' => 'upline',
+                        'upline_name' => $user->upline->name,
+                    ];
+                    break;
+                }
+            }
+        }
+
+        return view('dashboard.products', compact('products', 'user', 'downlines', 'promoProducts', 'purchaseStatus', 'memberCommissions', 'cardCoupons'));
     }
 }
