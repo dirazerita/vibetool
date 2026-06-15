@@ -170,21 +170,10 @@ class CheckoutController extends Controller
             }
         }
 
-        // Pembuat produk tidak boleh jadi affiliate/upline untuk produknya sendiri.
-        // Kalau ada referral yang nge-resolve ke pembuat → abaikan (anggap no ref).
-        if ($product->created_by) {
-            $creatorId = (int) $product->created_by;
-            if ($affiliateId === $creatorId) {
-                $affiliateId = null;
-            }
-            if ($uplineId === $creatorId) {
-                $uplineId = null;
-            }
-        }
-
         $amount = $basePrice;
         $couponCode = null;
         $discountAmount = 0;
+        $appliedCoupon = null;
 
         $couponInput = $request->input('coupon_code') ?: session('auto_coupon');
         if ($couponInput) {
@@ -198,8 +187,52 @@ class CheckoutController extends Controller
                 $discountAmount = $coupon->calculateDiscount($basePrice);
                 $amount = $basePrice - $discountAmount;
                 $couponCode = $coupon->code;
+                $appliedCoupon = $coupon;
 
                 $coupon->increment('used_count');
+            }
+        }
+
+        // Fallback atribusi komisi.
+        // Bila tidak ada ref link/cookie yang me-resolve affiliate, TAPI pembeli
+        // memakai kupon milik member lain (mis. kupon upline-nya), komisi harus
+        // tetap masuk ke PEMILIK KUPON sebagai affiliate, dan upline pemilik
+        // kupon dapat bonus upline. Ini menyamakan atribusi komisi dengan logika
+        // diskon kupon (resolveReferrer / isCouponAccessible) yang sudah memakai
+        // relasi upline + kepemilikan kupon. Tanpa ini, kupon upline yang dipakai
+        // downline tanpa klik link ?ref= akan "kehilangan" komisinya.
+        if (! $affiliateId && $appliedCoupon) {
+            $couponOwner = null;
+
+            // Prioritaskan referrer (ref_code / upline_id / auto_coupon_member_id)
+            // bila dia memang salah satu pemilik kupon. Kalau tidak, ambil member
+            // pemilik kupon mana pun selain pembeli sendiri.
+            if ($referrer
+                && $referrer->id !== $user->id
+                && $appliedCoupon->members()->where('users.id', $referrer->id)->exists()
+            ) {
+                $couponOwner = $referrer;
+            } else {
+                $couponOwner = $appliedCoupon->members()
+                    ->where('users.id', '!=', $user->id)
+                    ->first();
+            }
+
+            if ($couponOwner) {
+                $affiliateId = $couponOwner->id;
+                $uplineId = $couponOwner->upline_id;
+            }
+        }
+
+        // Pembuat produk tidak boleh jadi affiliate/upline untuk produknya sendiri.
+        // Kalau atribusi (dari ref ATAU kupon) nge-resolve ke pembuat → abaikan.
+        if ($product->created_by) {
+            $creatorId = (int) $product->created_by;
+            if ((int) $affiliateId === $creatorId) {
+                $affiliateId = null;
+            }
+            if ((int) $uplineId === $creatorId) {
+                $uplineId = null;
             }
         }
 
