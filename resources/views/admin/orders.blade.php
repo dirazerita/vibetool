@@ -3,6 +3,7 @@
 
 @section('content')
 <style>
+    [x-cloak] { display: none !important; }
     @media (max-width: 768px) {
         /* Ubah tabel pesanan jadi kartu bertumpuk di layar kecil */
         .orders-table-wrap { background: transparent !important; border: none !important; border-radius: 0 !important; overflow: visible !important; }
@@ -62,7 +63,46 @@
                     @endif
                 </td>
                 <td class="px-6 py-4 text-sm" data-label="Produk" style="color:#94a3b8">{{ $order->product->title ?? '-' }}</td>
-                <td class="px-6 py-4 text-sm" data-label="Affiliator" style="color:#94a3b8">{{ $order->affiliate->name ?? '-' }}</td>
+                <td class="px-6 py-4 text-sm" data-label="Affiliator" style="color:#94a3b8">
+                    <div x-data="{ open: false }" class="flex flex-col items-end md:items-start gap-1">
+                        <div class="flex items-center gap-2">
+                            <span style="color:#e2e8f0">{{ $order->affiliate->name ?? '—' }}</span>
+                            <button type="button" @click="open = true" class="text-xs font-medium" style="color:#818cf8" title="Ubah affiliator">Ubah</button>
+                        </div>
+                        @if($order->upline_id)
+                            <div class="text-[11px] dk-text-muted">Upline: {{ $order->uplineUser->name ?? '-' }}</div>
+                        @endif
+
+                        <div x-show="open" x-cloak @keydown.escape.window="open = false"
+                             class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                             style="background:rgba(0,0,0,0.6)">
+                            <div @click.outside="open = false" class="w-full max-w-md rounded-xl p-5" style="background:#1a2332;border:1px solid #2d3a4a">
+                                <h3 class="text-base font-semibold mb-1 dk-heading">Ubah Affiliator — Pesanan #{{ $order->id }}</h3>
+                                <p class="text-xs dk-text-muted mb-3">Upline akan otomatis di-set dari upline affiliator yang dipilih. @if($order->status === 'paid')Komisi akan dihitung ulang.@endif</p>
+                                <form method="POST" action="{{ route('admin.orders.update-affiliate', $order->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <select name="affiliate_id" size="8" class="w-full mb-3 rounded-md text-sm" style="background:#0f1623;border:1px solid #2d3a4a;color:#e2e8f0">
+                                        <option value="">— Tanpa affiliator —</option>
+                                        @foreach($members as $member)
+                                            @if($member->id !== $order->user_id)
+                                                <option value="{{ $member->id }}"
+                                                        {{ (int) $order->affiliate_id === (int) $member->id ? 'selected' : '' }}>
+                                                    {{ $member->name }} ({{ $member->email }})
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                    <p class="text-[11px] dk-text-muted mb-3">Tip: klik daftar lalu ketik huruf awal nama untuk lompat ke member.</p>
+                                    <div class="flex justify-end gap-2">
+                                        <button type="button" @click="open = false" class="px-3 py-1.5 rounded-md text-xs font-medium" style="background:#2d3a4a;color:#cbd5e1">Batal</button>
+                                        <button type="submit" class="px-3 py-1.5 rounded-md text-xs font-medium" style="background:#16a34a;color:#fff">Simpan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </td>
                 <td class="px-6 py-4 text-sm" data-label="Kupon">
                     @if($order->coupon_code)
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">{{ $order->coupon_code }}</span>

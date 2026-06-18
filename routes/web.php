@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/products/{product}/video-tutorials/reorder', [VideoTutorialController::class, 'reorder'])->name('products.video-tutorials.reorder');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::post('/orders/{order}/mark-paid', [OrderController::class, 'markPaid'])->name('orders.mark-paid');
+        Route::put('/orders/{order}/affiliate', [OrderController::class, 'updateAffiliate'])->name('orders.update-affiliate');
         Route::get('/members', [MemberController::class, 'index'])->name('members');
         Route::get('/members/{user}/edit', [MemberController::class, 'edit'])->name('members.edit');
         Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');
