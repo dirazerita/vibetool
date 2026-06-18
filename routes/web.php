@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/coupons', [DashboardCouponController::class, 'index'])->name('.coupons');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
+        Route::get('/team/{member}', [TeamController::class, 'show'])->name('.team.show');
         Route::get('/video-tutorials', [DashboardVideoTutorialController::class, 'index'])->name('.video-tutorials');
         Route::get('/video-tutorials/{product}', [DashboardVideoTutorialController::class, 'show'])->name('.video-tutorials.show');
         Route::get('/member-products', [MemberProductController::class, 'index'])->name('.member-products');

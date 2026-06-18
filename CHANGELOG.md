@@ -2,6 +2,36 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: node Tim/Downline klikable + halaman detail member tim
+
+**Kebutuhan:** Item member di pohon Tim/Downline (member area) dibuat klikable;
+saat diklik menampilkan detail member tersebut.
+
+**Implementasi:**
+- **Node klikable**: node level 2 (tim langsung) & level 3 (downline tim) di
+  `dashboard/team.blade.php` kini berupa link ke halaman detail, dengan efek
+  hover.
+- **Halaman detail** (`/dashboard/team/{member}`, `dashboard.team.show`):
+  - Header: nama, email, tanggal gabung, badge Tim Langsung / Downline Tim, dan
+    tombol **Hubungi via WhatsApp** (bila nomor ada).
+  - Ringkasan: jumlah penjualan (sebagai affiliator) + omzet, jumlah produk yang
+    dibeli, dan **komisi yang dihasilkan untuk viewer** dari pembelian member ini.
+  - Tabel produk yang dibeli member (tanggal, produk, jumlah, komisi untuk viewer).
+  - Daftar sub-downline member, masing-masing bisa diklik untuk drill-down.
+- **Otorisasi**: hanya boleh melihat member yang merupakan keturunan (downline
+  langsung/tidak langsung) dari user yang login. Akses ke diri sendiri, upline,
+  atau member di luar tim → 403. Penelusuran rantai upline dibatasi kedalaman 50.
+
+**File:**
+- `app/Http/Controllers/Dashboard/TeamController.php` — method `show()` + guard
+  `isDescendantOf()`.
+- `routes/web.php` — route `dashboard.team.show`.
+- `resources/views/dashboard/team.blade.php` — node jadi link.
+- `resources/views/dashboard/team-show.blade.php` (baru).
+- `tests/Feature/TeamMemberDetailTest.php` (baru).
+
+**Deploy:** Tidak ada migration, tidak ada perubahan aset; cukup pull biasa.
+
 ## 2026-06-18 — feat: koreksi komisi pesanan lama (saran pemilik kupon, filter, guard saldo, dropdown lazy)
 
 Penyempurnaan fitur "ganti affiliator pesanan" (lihat entri 2026-06-15) untuk
