@@ -53,10 +53,18 @@ class OrderPaymentService
      * 3. Update kolom affiliate_id & upline_id di order.
      * 4. Bila order sudah 'paid', hitung ulang & kreditkan komisi baru.
      *    Bila masih 'pending', komisi akan dihitung nanti saat markAsPaid().
+     *
+     * Mengembalikan array berisi pesan peringatan (mis. saldo penerima lama
+     * tidak cukup saat reversal karena komisi sudah ditarik) untuk ditampilkan
+     * ke admin. Array kosong berarti tidak ada peringatan.
+     *
+     * @return string[]
      */
-    public function reassignAffiliate(Order $order, ?int $affiliateId): void
+    public function reassignAffiliate(Order $order, ?int $affiliateId): array
     {
-        DB::transaction(function () use ($order, $affiliateId) {
+        return DB::transaction(function () use ($order, $affiliateId) {
+            $warnings = [];
+
             $product = $order->product;
             $creatorId = $product && $product->created_by ? (int) $product->created_by : null;
 
@@ -88,7 +96,25 @@ class OrderPaymentService
             foreach ($existing as $commission) {
                 $recipient = User::find($commission->user_id);
                 if ($recipient) {
-                    $recipient->decrement('balance', $commission->amount);
+                    $currentBalance = (float) $recipient->balance;
+                    $reverseAmount = (float) $commission->amount;
+
+                    // Bila saldo penerima lama tidak cukup untuk dibalik penuh,
+                    // berarti sebagian/seluruh komisi itu sudah ditarik/dipakai.
+                    // Jangan biarkan saldo jadi negatif (uang yang sudah cair
+                    // tidak bisa "ditarik balik" lewat saldo). Floor di 0 dan
+                    // laporkan selisihnya ke admin agar bisa direkonsiliasi.
+                    if ($reverseAmount > $currentBalance) {
+                        $shortfall = $reverseAmount - $currentBalance;
+                        $recipient->update(['balance' => 0]);
+                        $warnings[] = 'Komisi Rp ' . number_format($reverseAmount, 0, ',', '.')
+                            . ' dari "' . $recipient->name . '" ditarik kembali, tetapi saldonya hanya Rp '
+                            . number_format($currentBalance, 0, ',', '.')
+                            . ' (kemungkinan sudah ditarik). Saldo disetel ke 0; selisih Rp '
+                            . number_format($shortfall, 0, ',', '.') . ' perlu direkonsiliasi manual.';
+                    } else {
+                        $recipient->decrement('balance', $reverseAmount);
+                    }
                 }
                 $commission->delete();
             }
@@ -103,6 +129,8 @@ class OrderPaymentService
             if ($order->status === 'paid') {
                 $this->processAffiliateCommissions($order->fresh());
             }
+
+            return $warnings;
         });
     }
 

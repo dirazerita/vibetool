@@ -31,6 +31,31 @@
 @if(session('error'))
     <div class="dk-alert-error">{{ session('error') }}</div>
 @endif
+@if(session('warning'))
+    <div class="dk-alert-error" style="background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.35);color:#fde047">{{ session('warning') }}</div>
+@endif
+
+<div class="flex flex-wrap items-center gap-2 mb-4">
+    <a href="{{ route('admin.orders') }}"
+       class="px-3 py-1.5 rounded-md text-xs font-medium"
+       style="{{ empty($filter) ? 'background:#4f46e5;color:#fff' : 'background:#1a2332;color:#94a3b8;border:1px solid #2d3a4a' }}">
+        Semua Pesanan
+    </a>
+    <a href="{{ route('admin.orders', ['filter' => 'needs_attribution']) }}"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
+       style="{{ $filter === 'needs_attribution' ? 'background:#b45309;color:#fff' : 'background:#1a2332;color:#94a3b8;border:1px solid #2d3a4a' }}">
+        Perlu Koreksi Komisi
+        @if($needsAttributionCount > 0)
+            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold" style="background:rgba(234,179,8,0.25);color:#fde047">{{ $needsAttributionCount }}</span>
+        @endif
+    </a>
+</div>
+
+@if($filter === 'needs_attribution')
+    <div class="mb-4 text-xs dk-text-muted" style="background:#1a2332;border:1px solid #2d3a4a;border-radius:10px;padding:10px 14px">
+        Menampilkan pesanan lunas yang memakai kupon tetapi belum punya affiliator. Klik <strong style="color:#fde047">Tetapkan pemilik kupon</strong> untuk mencairkan komisi pemilik kupon &amp; bonus upline-nya.
+    </div>
+@endif
 
 <div class="dk-table orders-table-wrap">
     <div class="overflow-x-auto">
@@ -64,13 +89,32 @@
                 </td>
                 <td class="px-6 py-4 text-sm" data-label="Produk" style="color:#94a3b8">{{ $order->product->title ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm" data-label="Affiliator" style="color:#94a3b8">
-                    <div x-data="{ open: false }" class="flex flex-col items-end md:items-start gap-1">
+                    @php $suggestedOwner = $couponSuggestions[$order->id] ?? null; @endphp
+                    <div x-data="affiliatePicker({
+                            orderId: {{ $order->id }},
+                            current: {{ $order->affiliate_id ?? 'null' }},
+                            searchUrl: '{{ route('admin.orders.members.search') }}',
+                            excludeId: {{ $order->user_id }}
+                         })" class="flex flex-col items-end md:items-start gap-1">
                         <div class="flex items-center gap-2">
                             <span style="color:#e2e8f0">{{ $order->affiliate->name ?? '—' }}</span>
-                            <button type="button" @click="open = true" class="text-xs font-medium" style="color:#818cf8" title="Ubah affiliator">Ubah</button>
+                            <button type="button" @click="openModal()" class="text-xs font-medium" style="color:#818cf8" title="Ubah affiliator">Ubah</button>
                         </div>
                         @if($order->upline_id)
                             <div class="text-[11px] dk-text-muted">Upline: {{ $order->uplineUser->name ?? '-' }}</div>
+                        @endif
+
+                        @if($suggestedOwner)
+                            <form method="POST" action="{{ route('admin.orders.assign-coupon-owner', $order->id) }}" class="mt-1"
+                                  onsubmit="return confirm('Tetapkan {{ addslashes($suggestedOwner->name) }} (pemilik kupon {{ $order->coupon_code }}) sebagai affiliator pesanan #{{ $order->id }}? Komisi & bonus upline akan dicairkan.');">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium"
+                                        style="background:rgba(234,179,8,0.15);color:#fde047;border:1px solid rgba(234,179,8,0.35)"
+                                        title="Pemilik kupon {{ $order->coupon_code }}">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Tetapkan pemilik kupon: {{ $suggestedOwner->name }}
+                                </button>
+                            </form>
                         @endif
 
                         <div x-show="open" x-cloak @keydown.escape.window="open = false"
@@ -82,18 +126,16 @@
                                 <form method="POST" action="{{ route('admin.orders.update-affiliate', $order->id) }}">
                                     @csrf
                                     @method('PUT')
-                                    <select name="affiliate_id" size="8" class="w-full mb-3 rounded-md text-sm" style="background:#0f1623;border:1px solid #2d3a4a;color:#e2e8f0">
+                                    <input type="text" x-model="query" @input.debounce.300ms="search()" placeholder="Cari nama / email member..."
+                                           class="w-full mb-2 px-3 py-2 rounded-md text-sm" style="background:#0f1623;border:1px solid #2d3a4a;color:#e2e8f0">
+                                    <select name="affiliate_id" size="8" class="w-full mb-2 rounded-md text-sm" style="background:#0f1623;border:1px solid #2d3a4a;color:#e2e8f0">
                                         <option value="">— Tanpa affiliator —</option>
-                                        @foreach($members as $member)
-                                            @if($member->id !== $order->user_id)
-                                                <option value="{{ $member->id }}"
-                                                        {{ (int) $order->affiliate_id === (int) $member->id ? 'selected' : '' }}>
-                                                    {{ $member->name }} ({{ $member->email }})
-                                                </option>
-                                            @endif
-                                        @endforeach
+                                        <template x-for="m in members" :key="m.id">
+                                            <option :value="m.id" :selected="m.id === current" x-text="m.name + ' (' + m.email + ')'"></option>
+                                        </template>
                                     </select>
-                                    <p class="text-[11px] dk-text-muted mb-3">Tip: klik daftar lalu ketik huruf awal nama untuk lompat ke member.</p>
+                                    <p class="text-[11px] dk-text-muted mb-3" x-show="loading">Memuat…</p>
+                                    <p class="text-[11px] dk-text-muted mb-3" x-show="!loading && members.length === 0">Tidak ada member yang cocok.</p>
                                     <div class="flex justify-end gap-2">
                                         <button type="button" @click="open = false" class="px-3 py-1.5 rounded-md text-xs font-medium" style="background:#2d3a4a;color:#cbd5e1">Batal</button>
                                         <button type="submit" class="px-3 py-1.5 rounded-md text-xs font-medium" style="background:#16a34a;color:#fff">Simpan</button>
@@ -174,4 +216,43 @@
     </div>
 </div>
 <div class="mt-4">{{ $orders->links() }}</div>
+
+<script>
+    // Komponen Alpine untuk dropdown affiliator yang dimuat lazy (search).
+    // Didefinisikan sebagai fungsi global agar bisa dipakai langsung di x-data.
+    // Script inline ini jalan saat parsing, sebelum modul Alpine (deferred) start.
+    function affiliatePicker(config) {
+        return {
+            open: false,
+            query: '',
+            members: [],
+            loading: false,
+            current: config.current,
+            searchUrl: config.searchUrl,
+            excludeId: config.excludeId,
+            openModal() {
+                this.open = true;
+                if (this.members.length === 0) {
+                    this.search();
+                }
+            },
+            async search() {
+                this.loading = true;
+                try {
+                    const url = new URL(this.searchUrl, window.location.origin);
+                    url.searchParams.set('q', this.query);
+                    url.searchParams.set('exclude', this.excludeId);
+                    const res = await fetch(url.toString(), {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    this.members = res.ok ? await res.json() : [];
+                } catch (e) {
+                    this.members = [];
+                } finally {
+                    this.loading = false;
+                }
+            },
+        };
+    }
+</script>
 @endsection

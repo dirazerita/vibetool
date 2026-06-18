@@ -2,6 +2,53 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: koreksi komisi pesanan lama (saran pemilik kupon, filter, guard saldo, dropdown lazy)
+
+Penyempurnaan fitur "ganti affiliator pesanan" (lihat entri 2026-06-15) untuk
+mengoreksi pesanan **lama** yang memakai kupon upline tetapi affiliatornya tidak
+terekam — kasus yang dilaporkan upline karena komisinya tidak masuk.
+
+**1. Saran pemilik kupon (1-klik):**
+- Untuk pesanan berkupon tanpa affiliator, muncul tombol **"Tetapkan pemilik
+  kupon: <nama>"** di kolom Affiliator. Sekali klik, affiliator di-set ke pemilik
+  kupon dan upline-nya otomatis dapat bonus upline; komisi langsung dicairkan.
+- Resolusi pemilik kupon deterministik: utamakan upline pembeli bila dia pemilik
+  kupon, jika tidak ambil pemilik kupon dengan id terkecil; pembeli & pembuat
+  produk selalu dikecualikan. Di-batch (eager-load `members`) agar tidak N+1.
+- Route: `POST /admin/orders/{order}/assign-coupon-owner`
+  (`admin.orders.assign-coupon-owner`) + `OrderController::assignCouponOwner()`.
+
+**2. Filter "Perlu Koreksi Komisi":**
+- Tab filter di `/admin/orders` (`?filter=needs_attribution`) menampilkan hanya
+  pesanan **lunas + berkupon + tanpa affiliator**, lengkap dengan badge jumlah.
+  Memudahkan admin menemukan semua pesanan bermasalah sekaligus.
+
+**3. Guard saldo negatif (review fix):**
+- `reassignAffiliate()` kini mengembalikan array peringatan. Saat reversal komisi
+  yang ternyata sudah ditarik, saldo penerima lama di-floor ke 0 (tidak negatif)
+  dan selisihnya dilaporkan ke admin (flash `warning`) untuk rekonsiliasi manual.
+
+**4. Dropdown member lazy-load (review fix performa):**
+- Daftar member tidak lagi dirender penuh per baris (sebelumnya 15×N `<option>`).
+  Modal kini memuat member via endpoint pencarian `GET
+  /admin/orders/members/search` (limit 30, filter nama/email) saat dibuka,
+  dengan komponen Alpine `affiliatePicker`.
+
+**File:**
+- `app/Http/Controllers/Admin/OrderController.php` — `assignCouponOwner()`,
+  `searchMembers()`, filter di `index()`, resolusi pemilik kupon, handle warning.
+- `app/Services/OrderPaymentService.php` — `reassignAffiliate()` guard saldo
+  negatif + return warnings.
+- `routes/web.php` — route search members & assign-coupon-owner.
+- `resources/views/admin/orders.blade.php` — tab filter, tombol saran kupon,
+  dropdown lazy (Alpine), flash warning.
+- `tests/Feature/OrderAffiliateReassignTest.php` — test tambahan (saran kupon,
+  prioritas upline, guard saldo negatif, endpoint search, filter).
+
+**Catatan:** Tidak ada migration. Blade memuat komponen Alpine `affiliatePicker`
+via `<script>` inline (Alpine sudah di-bundle Vite); tidak ada perubahan
+`resources/js`/`resources/css` sehingga tidak perlu rebuild aset.
+
 ## 2026-06-15 — feat: admin bisa ganti affiliator pesanan + auto-set upline & hitung ulang komisi
 
 **Kebutuhan:** Admin perlu bisa mengubah affiliator sebuah pesanan dari halaman

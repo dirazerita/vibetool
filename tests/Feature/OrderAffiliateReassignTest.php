@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Commission;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -225,5 +226,177 @@ class OrderAffiliateReassignTest extends TestCase
         $this->svc->markAsPaid($order->fresh());
         $this->assertEquals(30000, (int) $affiliate->fresh()->balance);
         $this->assertEquals(10000, (int) $upline->fresh()->balance);
+    }
+
+    private function makeCoupon(): Coupon
+    {
+        return Coupon::create([
+            'code' => 'KUPON-'.Str::upper(Str::random(5)),
+            'name' => 'Kupon Uji',
+            'discount_type' => 'percent',
+            'discount_value' => 10,
+            'min_purchase' => 0,
+            'is_active' => true,
+        ]);
+    }
+
+    public function test_assign_coupon_owner_credits_owner_and_upline(): void
+    {
+        // rynz (upline) -> OmBags (pemilik kupon) -> buyer (downline)
+        $topUpline = $this->makeMember();
+        $ombags = $this->makeMember($topUpline->id);
+        $buyer = $this->makeMember($ombags->id);
+        $product = $this->makeProduct();
+
+        $coupon = $this->makeCoupon();
+        $ombags->coupons()->attach($coupon->id);
+
+        // Order lama: pakai kupon, sudah lunas, TAPI affiliator kosong (bug lama).
+        $order = Order::create([
+            'user_id' => $buyer->id,
+            'product_id' => $product->id,
+            'amount' => $product->price,
+            'coupon_code' => $coupon->code,
+            'status' => 'pending',
+            'payment_method' => 'manual',
+            'download_token' => Str::uuid()->toString(),
+        ]);
+        $this->svc->markAsPaid($order->fresh());
+        $order->refresh();
+        $this->assertNull($order->affiliate_id);
+        $this->assertEquals(0, Commission::where('order_id', $order->id)->count());
+
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->post('/admin/orders/'.$order->id.'/assign-coupon-owner')
+            ->assertRedirect();
+
+        $order->refresh();
+        $this->assertEquals($ombags->id, $order->affiliate_id, 'Pemilik kupon harus jadi affiliator.');
+        $this->assertEquals($topUpline->id, $order->upline_id, 'Upline pemilik kupon dapat bonus upline.');
+        $this->assertEquals(30000, (int) $ombags->fresh()->balance);
+        $this->assertEquals(10000, (int) $topUpline->fresh()->balance);
+    }
+
+    public function test_assign_coupon_owner_prefers_buyer_upline_when_multiple_owners(): void
+    {
+        $buyerUpline = $this->makeMember();
+        $buyer = $this->makeMember($buyerUpline->id);
+        $otherOwner = $this->makeMember();
+        $product = $this->makeProduct();
+
+        $coupon = $this->makeCoupon();
+        // Kupon dimiliki dua member: upline pembeli + member lain.
+        $coupon->members()->attach([$buyerUpline->id, $otherOwner->id]);
+
+        $order = Order::create([
+            'user_id' => $buyer->id,
+            'product_id' => $product->id,
+            'amount' => $product->price,
+            'coupon_code' => $coupon->code,
+            'status' => 'paid',
+            'paid_at' => now(),
+            'payment_method' => 'manual',
+            'download_token' => Str::uuid()->toString(),
+        ]);
+
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->post('/admin/orders/'.$order->id.'/assign-coupon-owner')
+            ->assertRedirect();
+
+        $order->refresh();
+        $this->assertEquals($buyerUpline->id, $order->affiliate_id, 'Upline pembeli diutamakan saat kupon punya banyak pemilik.');
+    }
+
+    public function test_assign_coupon_owner_fails_without_coupon(): void
+    {
+        $buyer = $this->makeMember();
+        $product = $this->makeProduct();
+        $order = $this->makePaidOrder($buyer, $product);
+
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->post('/admin/orders/'.$order->id.'/assign-coupon-owner')
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertNull($order->fresh()->affiliate_id);
+    }
+
+    public function test_reassign_does_not_make_balance_negative_when_commission_withdrawn(): void
+    {
+        $oldAffiliate = $this->makeMember();
+        $newAffiliate = $this->makeMember();
+        $buyer = $this->makeMember();
+        $product = $this->makeProduct();
+
+        $order = $this->makePaidOrder($buyer, $product, $oldAffiliate);
+        $this->assertEquals(30000, (int) $oldAffiliate->fresh()->balance);
+
+        // Simulasikan affiliator lama sudah menarik seluruh komisinya.
+        $oldAffiliate->update(['balance' => 0]);
+
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->put('/admin/orders/'.$order->id.'/affiliate', [
+                'affiliate_id' => $newAffiliate->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('warning');
+
+        // Saldo affiliator lama tidak boleh negatif; tetap 0 (di-floor).
+        $this->assertEquals(0, (int) $oldAffiliate->fresh()->balance);
+        // Affiliator baru tetap dapat komisi.
+        $this->assertEquals(30000, (int) $newAffiliate->fresh()->balance);
+    }
+
+    public function test_member_search_endpoint_filters_and_excludes(): void
+    {
+        $admin = $this->makeAdmin();
+        $alice = User::factory()->create(['role' => 'member', 'name' => 'Alice Wonderland', 'email' => 'alice@example.com', 'referral_code' => 'U'.Str::upper(Str::random(6))]);
+        $bob = User::factory()->create(['role' => 'member', 'name' => 'Bob Builder', 'email' => 'bob@example.com', 'referral_code' => 'U'.Str::upper(Str::random(6))]);
+
+        $response = $this->actingAs($admin)
+            ->getJson('/admin/orders/members/search?q=alice&exclude='.$bob->id)
+            ->assertOk();
+
+        $data = $response->json();
+        $ids = collect($data)->pluck('id')->all();
+        $this->assertContains($alice->id, $ids);
+        $this->assertNotContains($bob->id, $ids);
+        // Admin tidak boleh muncul sebagai kandidat affiliator.
+        $this->assertNotContains($admin->id, $ids);
+    }
+
+    public function test_needs_attribution_filter_shows_only_problem_orders(): void
+    {
+        $buyer = $this->makeMember();
+        $affiliate = $this->makeMember();
+        $product = $this->makeProduct();
+        $coupon = $this->makeCoupon();
+
+        // Order bermasalah: paid + berkupon + tanpa affiliator.
+        $problem = Order::create([
+            'user_id' => $buyer->id,
+            'product_id' => $product->id,
+            'amount' => $product->price,
+            'coupon_code' => $coupon->code,
+            'status' => 'paid',
+            'paid_at' => now(),
+            'payment_method' => 'manual',
+            'download_token' => Str::uuid()->toString(),
+        ]);
+
+        // Order normal: sudah punya affiliator.
+        $normal = $this->makePaidOrder($this->makeMember(), $product, $affiliate);
+
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)
+            ->get('/admin/orders?filter=needs_attribution')
+            ->assertOk();
+
+        $response->assertSee('#'.$problem->id);
+        $response->assertDontSee('#'.$normal->id);
     }
 }
