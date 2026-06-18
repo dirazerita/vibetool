@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
     <div class="dk-card p-5">
         <div class="text-xs dk-text-muted uppercase">Total Komisi</div>
         <div class="text-2xl font-bold" style="color:#818cf8 mt-1">Rp {{ number_format($stats['total'], 0, ',', '.') }}</div>
@@ -28,12 +28,66 @@
         <div class="text-2xl font-bold mt-1" style="color:#fbbf24">Rp {{ number_format($stats['creator'] ?? 0, 0, ',', '.') }}</div>
     </div>
     <div class="dk-card p-5">
+        <div class="text-xs dk-text-muted uppercase">Dibayarkan</div>
+        <div class="text-2xl font-bold mt-1" style="color:#6ee7b7">Rp {{ number_format($stats['paid_out'] ?? 0, 0, ',', '.') }}</div>
+        @if(($stats['pending_payout'] ?? 0) > 0)
+            <div class="text-[11px] dk-text-muted mt-0.5">Menunggu: Rp {{ number_format($stats['pending_payout'], 0, ',', '.') }}</div>
+        @endif
+    </div>
+    <div class="dk-card p-5">
         <div class="text-xs dk-text-muted uppercase">Jumlah Transaksi</div>
         <div class="text-2xl font-bold dk-heading mt-1">{{ number_format($stats['count']) }}</div>
     </div>
 </div>
 
+{{-- Riwayat pembayaran komisi (penarikan) ke member ini --}}
+<div class="dk-table mb-8">
+    <div style="padding:16px 24px;border-bottom:1px solid #2d3a4a">
+        <h2 class="text-base font-semibold dk-heading">Riwayat Pembayaran Komisi</h2>
+        <p class="text-xs dk-text-muted mt-0.5">Pencairan komisi ke rekening member via penarikan. "Disetujui" = sudah dibayarkan.</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead>
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Tanggal</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Nominal</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Rekening Tujuan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Catatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($payouts as $payout)
+                <tr>
+                    <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $payout->created_at->format('d M Y H:i') }}</td>
+                    <td class="px-6 py-4 text-sm text-right font-semibold" style="color:#6ee7b7">Rp {{ number_format((float) $payout->amount, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $payout->bank_name }} &middot; {{ $payout->bank_account }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        @if($payout->status === 'approved')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7">Disetujui (Dibayarkan)</span>
+                        @elseif($payout->status === 'pending')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(234,179,8,0.15);color:#fde047">Menunggu</span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5">Ditolak</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $payout->note ?? '-' }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center" style="color:#64748b">Belum ada pembayaran/penarikan komisi.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="dk-table">
+    <div style="padding:16px 24px;border-bottom:1px solid #2d3a4a">
+        <h2 class="text-base font-semibold dk-heading">Rincian Komisi</h2>
+    </div>
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead>

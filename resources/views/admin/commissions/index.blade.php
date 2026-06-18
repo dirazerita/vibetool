@@ -4,7 +4,7 @@
 @section('content')
 <h1 class="text-2xl font-bold dk-heading mb-6">Komisi Member</h1>
 
-<div class="dk-grid-5 gap-6 mb-8" style="display:grid;grid-template-columns:repeat(5,1fr)">
+<div class="dk-grid-5 gap-6 mb-8" style="display:grid;grid-template-columns:repeat(6,1fr)">
     <div class="dk-stat-card">
         <div class="flex-shrink-0 w-12 h-12 rounded-xl " style="background:#151e2d dk-text flex items-center justify-center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -50,6 +50,18 @@
             <div class="text-2xl font-bold" style="color:#fbbf24">Rp {{ number_format($summary['total_creator'] ?? 0, 0, ',', '.') }}</div>
         </div>
     </div>
+    <div class="dk-stat-card">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl" style="background:rgba(16,185,129,0.15);color:#6ee7b7;display:flex;align-items:center;justify-content:center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+        </div>
+        <div class="min-w-0">
+            <div class="text-sm dk-text-muted mb-1">Komisi Dibayarkan</div>
+            <div class="text-2xl font-bold" style="color:#6ee7b7">Rp {{ number_format($summary['total_paid_out'] ?? 0, 0, ',', '.') }}</div>
+            @if(($summary['total_pending_payout'] ?? 0) > 0)
+                <div class="text-[11px] dk-text-muted mt-0.5">Menunggu: Rp {{ number_format($summary['total_pending_payout'], 0, ',', '.') }}</div>
+            @endif
+        </div>
+    </div>
 </div>
 
 <div class="dk-table">
@@ -64,6 +76,7 @@
                     <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Bonus Upline</th>
                     <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Bagian Pembuat</th>
                     <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Total Komisi</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Dibayarkan</th>
                     <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase"># Transaksi</th>
                     <th class="px-6 py-3 text-right text-xs font-medium dk-text-muted uppercase">Saldo</th>
                     <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Aksi</th>
@@ -79,6 +92,7 @@
                     <td class="px-6 py-4 text-sm text-right text-purple-700">Rp {{ number_format((float) $member->upline_commission, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-sm text-right" style="color:#fbbf24">Rp {{ number_format((float) ($member->creator_commission ?? 0), 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-sm text-right font-semibold text-indigo-700">Rp {{ number_format((float) $member->total_commission, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4 text-sm text-right" style="color:#6ee7b7">Rp {{ number_format((float) ($member->paid_out ?? 0), 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-sm text-right dk-text">{{ $member->commissions_count }}</td>
                     <td class="px-6 py-4 text-sm text-right dk-heading">Rp {{ number_format($member->balance, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-sm">
@@ -87,7 +101,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" class="px-6 py-8 text-center" style="color:#64748b">Belum ada member yang menerima komisi.</td>
+                    <td colspan="11" class="px-6 py-8 text-center" style="color:#64748b">Belum ada member yang menerima komisi.</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -2,6 +2,35 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: komisi dibayarkan di halaman komisi admin
+
+**Kebutuhan:** Admin perlu tahu berapa komisi yang sudah dibayarkan ke member,
+beserta detail untuk member mana.
+
+**Konsep:** "Komisi dibayarkan" = total penarikan (withdrawal) yang sudah
+DISETUJUI admin — yaitu uang yang benar-benar cair ke rekening member. (Kolom
+`commission.status` tidak dipakai untuk ini karena komisi selalu `approved` saat
+dikreditkan ke saldo; pembayaran nyata terjadi lewat penarikan.)
+
+**Implementasi:**
+- **Halaman daftar komisi** (`/admin/commissions`):
+  - Kartu summary baru **"Komisi Dibayarkan"** (total penarikan disetujui) +
+    info "Menunggu" (penarikan pending).
+  - Kolom **"Dibayarkan"** per member di tabel.
+- **Halaman detail member** (`/admin/commissions/{user}`):
+  - Stat **"Dibayarkan"** (+ menunggu).
+  - Tabel baru **"Riwayat Pembayaran Komisi"**: tanggal, nominal, rekening tujuan,
+    status (Disetujui/Dibayarkan, Menunggu, Ditolak), catatan.
+
+**File:**
+- `app/Http/Controllers/Admin/CommissionController.php` — agregat `paid_out`/
+  `pending_payout` di index & show + data `payouts`.
+- `resources/views/admin/commissions/index.blade.php` — kartu + kolom.
+- `resources/views/admin/commissions/show.blade.php` — stat + tabel pembayaran.
+- `tests/Feature/AdminCommissionPaidOutTest.php` (baru).
+
+**Deploy:** Tidak ada migration, tidak ada perubahan aset; cukup pull biasa.
+
 ## 2026-06-18 — feat: status verifikasi email member di admin + filter
 
 **Kebutuhan:** Admin perlu tahu member mana yang sudah/belum memverifikasi email.
