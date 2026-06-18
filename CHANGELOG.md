@@ -2,6 +2,43 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: upload bukti transfer di penarikan komisi
+
+**Kebutuhan:** Saat memproses pembayaran komisi (penarikan), admin bisa
+mengunggah foto bukti transfer, sehingga member yang menarik komisinya bisa
+melihat bukti transfer dari admin.
+
+**Implementasi:**
+- **Migration**: kolom baru `transfer_proof` (nullable) di tabel `withdrawals`.
+- **Model `Withdrawal`**: `transfer_proof` di fillable + helper `hasTransferProof()`
+  dan `transferProofUrl()`.
+- **Admin** (`/admin/withdrawals`):
+  - Form "Setujui" kini punya input file bukti transfer (opsional) — sekali klik
+    menyetujui + menyimpan bukti.
+  - Untuk penarikan yang sudah disetujui, ada form **Upload / Ganti bukti
+    transfer** (jika admin lupa unggah saat approve).
+  - Kolom "Bukti Transfer" dengan link "Lihat".
+  - Endpoint baru `POST /admin/withdrawals/{withdrawal}/upload-proof`.
+  - Validasi: image (jpg/jpeg/png/webp), maksimal 4MB. Disimpan di disk `public`
+    (`storage/app/public/transfer-proofs`).
+- **Member** (`/dashboard/withdrawals`): kolom "Bukti Transfer" — tombol **Lihat
+  Bukti** bila sudah ada, atau info "Menunggu bukti dari admin" untuk penarikan
+  yang sudah disetujui tapi buktinya belum diunggah.
+
+**File:**
+- `database/migrations/2026_06_18_150000_add_transfer_proof_to_withdrawals.php` (baru).
+- `app/Models/Withdrawal.php` — fillable + helper.
+- `app/Http/Controllers/Admin/WithdrawalController.php` — `approve()` terima
+  upload + method `uploadProof()`.
+- `routes/web.php` — route upload-proof.
+- `resources/views/admin/withdrawals.blade.php` — form upload + kolom bukti.
+- `resources/views/dashboard/withdrawals.blade.php` — kolom bukti untuk member.
+- `tests/Feature/WithdrawalTransferProofTest.php` (baru).
+
+**Deploy:** ADA migration — setelah pull jalankan `php artisan migrate --force`.
+Pastikan symlink storage aktif (`php artisan storage:link`) agar bukti transfer
+bisa diakses publik. Tidak ada perubahan `resources/js`/`resources/css`.
+
 ## 2026-06-18 — feat: komisi dibayarkan di halaman komisi admin
 
 **Kebutuhan:** Admin perlu tahu berapa komisi yang sudah dibayarkan ke member,

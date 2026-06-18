@@ -17,6 +17,7 @@ class Withdrawal extends Model
         'bank_account',
         'status',
         'note',
+        'transfer_proof',
     ];
 
     protected function casts(): array
@@ -29,5 +30,15 @@ class Withdrawal extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function hasTransferProof(): bool
+    {
+        return ! empty($this->transfer_proof);
+    }
+
+    public function transferProofUrl(): ?string
+    {
+        return $this->transfer_proof ? asset('storage/'.$this->transfer_proof) : null;
     }
 }
