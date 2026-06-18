@@ -23,10 +23,17 @@ terekam — kasus yang dilaporkan upline karena komisinya tidak masuk.
   pesanan **lunas + berkupon + tanpa affiliator**, lengkap dengan badge jumlah.
   Memudahkan admin menemukan semua pesanan bermasalah sekaligus.
 
-**3. Guard saldo negatif (review fix):**
-- `reassignAffiliate()` kini mengembalikan array peringatan. Saat reversal komisi
-  yang ternyata sudah ditarik, saldo penerima lama di-floor ke 0 (tidak negatif)
-  dan selisihnya dilaporkan ke admin (flash `warning`) untuk rekonsiliasi manual.
+**3. Guard reversal komisi (review fix):**
+- `reassignAffiliate()` kini mengembalikan array peringatan. Saat reversal,
+  saldo penerima lama dikurangi PERSIS sebesar komisi yang dibalik (bukan
+  di-floor ke 0, karena flooring akan menghapus earning sah dari order lain).
+  Bila komisi sudah ditarik, saldo bisa minus — itu benar secara akuntansi
+  (mewakili hutang ke platform, terbayar otomatis dari komisi berikutnya;
+  `WithdrawalController` memblokir penarikan saat jumlah > saldo). Selisihnya
+  dilaporkan ke admin (flash `warning`) untuk rekonsiliasi manual.
+- `assignCouponOwner()` menolak order yang **sudah** punya affiliator (cegah
+  double-submit / POST langsung yang tak sengaja membalik komisi yang benar);
+  penggantian eksplisit tetap lewat tombol "Ubah".
 
 **4. Dropdown member lazy-load (review fix performa):**
 - Daftar member tidak lagi dirender penuh per baris (sebelumnya 15×N `<option>`).

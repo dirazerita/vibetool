@@ -324,7 +324,7 @@ class OrderAffiliateReassignTest extends TestCase
         $this->assertNull($order->fresh()->affiliate_id);
     }
 
-    public function test_reassign_does_not_make_balance_negative_when_commission_withdrawn(): void
+    public function test_reassign_when_commission_withdrawn_records_debt_and_keeps_unrelated_balance(): void
     {
         $oldAffiliate = $this->makeMember();
         $newAffiliate = $this->makeMember();
@@ -334,8 +334,9 @@ class OrderAffiliateReassignTest extends TestCase
         $order = $this->makePaidOrder($buyer, $product, $oldAffiliate);
         $this->assertEquals(30000, (int) $oldAffiliate->fresh()->balance);
 
-        // Simulasikan affiliator lama sudah menarik seluruh komisinya.
-        $oldAffiliate->update(['balance' => 0]);
+        // Simulasikan affiliator lama sudah menarik komisi 30k, lalu mendapat
+        // 5k earning SAH dari order lain → saldo sekarang 5k.
+        $oldAffiliate->update(['balance' => 5000]);
 
         $admin = $this->makeAdmin();
         $this->actingAs($admin)
@@ -345,10 +346,44 @@ class OrderAffiliateReassignTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('warning');
 
-        // Saldo affiliator lama tidak boleh negatif; tetap 0 (di-floor).
-        $this->assertEquals(0, (int) $oldAffiliate->fresh()->balance);
+        // Reversal mengurangi PERSIS 30k: 5000 - 30000 = -25000.
+        // Saldo sah 5k yang tidak terkait tidak boleh hilang begitu saja;
+        // selisih 25k tercatat sebagai hutang (saldo minus).
+        $this->assertEquals(-25000, (int) $oldAffiliate->fresh()->balance);
         // Affiliator baru tetap dapat komisi.
         $this->assertEquals(30000, (int) $newAffiliate->fresh()->balance);
+    }
+
+    public function test_assign_coupon_owner_rejected_when_order_already_has_affiliate(): void
+    {
+        $existingAffiliate = $this->makeMember();
+        $buyer = $this->makeMember();
+        $product = $this->makeProduct();
+        $coupon = $this->makeCoupon();
+        $couponOwner = $this->makeMember();
+        $couponOwner->coupons()->attach($coupon->id);
+
+        // Order sudah punya affiliator + pakai kupon.
+        $order = Order::create([
+            'user_id' => $buyer->id,
+            'product_id' => $product->id,
+            'affiliate_id' => $existingAffiliate->id,
+            'amount' => $product->price,
+            'coupon_code' => $coupon->code,
+            'status' => 'paid',
+            'paid_at' => now(),
+            'payment_method' => 'manual',
+            'download_token' => Str::uuid()->toString(),
+        ]);
+
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)
+            ->post('/admin/orders/'.$order->id.'/assign-coupon-owner')
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        // Affiliator tidak berubah.
+        $this->assertEquals($existingAffiliate->id, $order->fresh()->affiliate_id);
     }
 
     public function test_member_search_endpoint_filters_and_excludes(): void

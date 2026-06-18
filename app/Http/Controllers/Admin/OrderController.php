@@ -150,6 +150,15 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini tidak memakai kupon.');
         }
 
+        // Endpoint ini khusus untuk MENGOREKSI pesanan yang belum punya
+        // affiliator. Bila sudah ada affiliator, jangan diam-diam membalik
+        // komisinya — admin harus pakai menu "Ubah" (updateAffiliate) yang
+        // eksplisit. Mencegah double-submit / tab basi / POST langsung yang
+        // tidak sengaja mengganti atribusi yang sudah benar.
+        if ($order->affiliate_id) {
+            return back()->with('error', 'Pesanan ini sudah punya affiliator. Gunakan tombol "Ubah" untuk menggantinya.');
+        }
+
         $coupon = Coupon::where('code', strtoupper($order->coupon_code))->with('members')->first();
         if (! $coupon) {
             return back()->with('error', 'Kupon "' . $order->coupon_code . '" tidak ditemukan, tidak bisa menentukan pemilik kupon.');

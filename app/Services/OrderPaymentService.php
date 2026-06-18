@@ -99,21 +99,27 @@ class OrderPaymentService
                     $currentBalance = (float) $recipient->balance;
                     $reverseAmount = (float) $commission->amount;
 
-                    // Bila saldo penerima lama tidak cukup untuk dibalik penuh,
-                    // berarti sebagian/seluruh komisi itu sudah ditarik/dipakai.
-                    // Jangan biarkan saldo jadi negatif (uang yang sudah cair
-                    // tidak bisa "ditarik balik" lewat saldo). Floor di 0 dan
-                    // laporkan selisihnya ke admin agar bisa direkonsiliasi.
+                    // Selalu kurangi saldo PERSIS sebesar komisi yang dibalik.
+                    // Jangan di-floor ke 0: saldo penerima bisa memuat earning
+                    // SAH dari order lain, dan flooring akan menghapusnya.
+                    //
+                    // Bila komisi ini sudah (sebagian) ditarik, hasilnya bisa
+                    // negatif — itu benar secara akuntansi: penerima berhutang
+                    // ke platform karena uangnya sudah cair, dan hutang itu akan
+                    // otomatis terbayar dari komisi berikutnya. WithdrawalController
+                    // memblokir penarikan saat jumlah > saldo, sehingga saldo
+                    // negatif tidak bisa ditarik. Admin tetap diberi peringatan
+                    // untuk rekonsiliasi manual bila perlu.
+                    $recipient->decrement('balance', $reverseAmount);
+
                     if ($reverseAmount > $currentBalance) {
-                        $shortfall = $reverseAmount - $currentBalance;
-                        $recipient->update(['balance' => 0]);
+                        $deficit = $reverseAmount - $currentBalance;
                         $warnings[] = 'Komisi Rp ' . number_format($reverseAmount, 0, ',', '.')
-                            . ' dari "' . $recipient->name . '" ditarik kembali, tetapi saldonya hanya Rp '
+                            . ' dari "' . $recipient->name . '" ditarik kembali, tetapi saldonya saat itu hanya Rp '
                             . number_format($currentBalance, 0, ',', '.')
-                            . ' (kemungkinan sudah ditarik). Saldo disetel ke 0; selisih Rp '
-                            . number_format($shortfall, 0, ',', '.') . ' perlu direkonsiliasi manual.';
-                    } else {
-                        $recipient->decrement('balance', $reverseAmount);
+                            . ' (kemungkinan sudah ditarik). Saldo penerima kini minus Rp '
+                            . number_format($deficit, 0, ',', '.')
+                            . ' (mewakili hutang ke platform) dan perlu direkonsiliasi manual.';
                     }
                 }
                 $commission->delete();
