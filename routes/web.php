@@ -183,6 +183,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/coupons/generate-code', [CouponController::class, 'generateCode'])->name('coupons.generate-code');
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
+        Route::post('/withdrawals/{withdrawal}/upload-proof', [AdminWithdrawalController::class, 'uploadProof'])->name('withdrawals.upload-proof');
         Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings');
         Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
