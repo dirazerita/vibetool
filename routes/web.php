@@ -36,6 +36,7 @@ use App\Http\Controllers\Dashboard\SalesController as DashboardSalesController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\SoftwareRequestController as DashboardSoftwareRequestController;
 use App\Http\Controllers\Dashboard\TeamController;
+use App\Http\Controllers\Dashboard\TeamPurchaseController;
 use App\Http\Controllers\Dashboard\VideoTutorialController as DashboardVideoTutorialController;
 use App\Http\Controllers\Dashboard\WithdrawalController as DashboardWithdrawalController;
 use App\Http\Controllers\DownloadController;
@@ -89,6 +90,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/coupons', [DashboardCouponController::class, 'index'])->name('.coupons');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
+        Route::get('/team-purchases', [TeamPurchaseController::class, 'index'])->name('.team-purchases');
         Route::get('/video-tutorials', [DashboardVideoTutorialController::class, 'index'])->name('.video-tutorials');
         Route::get('/video-tutorials/{product}', [DashboardVideoTutorialController::class, 'show'])->name('.video-tutorials.show');
         Route::get('/member-products', [MemberProductController::class, 'index'])->name('.member-products');

@@ -2,6 +2,42 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: halaman "Pembelian Tim" di member area (analisa downline + follow-up)
+
+**Kebutuhan:** Member/upline ingin tahu downline mana yang sudah membeli, produk
+apa yang mereka beli, dan berapa komisi yang dihasilkan untuk dia — serta downline
+mana yang belum membeli supaya bisa di-follow-up.
+
+**Implementasi:**
+- **Menu baru** "Pembelian Tim" di sidebar dashboard (`/dashboard/team-purchases`,
+  `dashboard.team-purchases`). Berbeda dari menu "Tim / Downline" yang menampilkan
+  downline sebagai PENJUAL; halaman ini menampilkan downline sebagai PEMBELI.
+- **Ringkasan**: total downline, sudah membeli, belum membeli, dan total komisi
+  yang member hasilkan dari pembelian tim-nya.
+- **Filter**: Semua / Sudah Membeli / Perlu Follow-up (downline tanpa pembelian
+  lunas).
+- **Per downline**: status beli, jumlah pembelian, total belanja, komisi yang
+  masuk ke member, tanggal pembelian terakhir, link WhatsApp untuk follow-up, dan
+  daftar produk yang dibeli (expand via Alpine) lengkap dengan komisi per produk.
+
+**Catatan teknis:**
+- "Sudah membeli" = punya minimal 1 order `paid` dengan `amount > 0`.
+- Komisi yang dihitung HANYA milik member yang sedang login (tidak termasuk bonus
+  upline orang lain), diambil dari `commissions` yang terkait order downline.
+- Agregasi produk hanya untuk downline di halaman aktif (paginasi 15) agar ringan;
+  statistik ringkas & komisi total dihitung lewat query agregat, bukan load relasi.
+- Hanya downline LANGSUNG (`upline_id = member`) yang ditampilkan.
+
+**File:**
+- `app/Http/Controllers/Dashboard/TeamPurchaseController.php` (baru).
+- `routes/web.php` — route `dashboard.team-purchases`.
+- `resources/views/layouts/dashboard.blade.php` — menu sidebar "Pembelian Tim".
+- `resources/views/dashboard/team-purchases.blade.php` (baru).
+- `tests/Feature/TeamPurchasesTest.php` (baru).
+
+**Deploy:** Tidak ada migration, tidak ada perubahan `resources/js`/`resources/css`
+(Alpine sudah di-bundle); tidak perlu rebuild aset.
+
 ## 2026-06-18 — feat: koreksi komisi pesanan lama (saran pemilik kupon, filter, guard saldo, dropdown lazy)
 
 Penyempurnaan fitur "ganti affiliator pesanan" (lihat entri 2026-06-15) untuk
