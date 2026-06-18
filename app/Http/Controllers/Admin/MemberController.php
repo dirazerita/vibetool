@@ -27,9 +27,21 @@ class MemberController extends Controller
             });
         }
 
+        // Filter status verifikasi email.
+        $verification = $request->input('verification');
+        if ($verification === 'verified') {
+            $query->whereNotNull('email_verified_at');
+        } elseif ($verification === 'unverified') {
+            $query->whereNull('email_verified_at');
+        }
+
         $members = $query->latest()->paginate(15)->withQueryString();
 
-        return view('admin.members', compact('members'));
+        // Jumlah member terverifikasi / belum (untuk badge filter).
+        $verifiedCount = User::where('role', 'member')->whereNotNull('email_verified_at')->count();
+        $unverifiedCount = User::where('role', 'member')->whereNull('email_verified_at')->count();
+
+        return view('admin.members', compact('members', 'verification', 'verifiedCount', 'unverifiedCount'));
     }
 
     public function edit(User $user)

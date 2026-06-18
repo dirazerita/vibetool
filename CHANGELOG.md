@@ -2,6 +2,25 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-18 — feat: status verifikasi email member di admin + filter
+
+**Kebutuhan:** Admin perlu tahu member mana yang sudah/belum memverifikasi email.
+
+**Implementasi:**
+- **Kolom "Verifikasi Email"** di tabel `/admin/members`: badge "Terverifikasi"
+  (hijau, dengan tanggal verifikasi di tooltip) atau "Belum" (kuning).
+- **Filter tabs**: Semua / Email Terverifikasi / Belum Verifikasi, masing-masing
+  dengan badge jumlah. Filter ini bisa dikombinasikan dengan pencarian yang ada.
+- Datanya dari kolom `email_verified_at` yang sudah ada (tanpa migration).
+
+**File:**
+- `app/Http/Controllers/Admin/MemberController.php` — filter `verification` +
+  hitung `verifiedCount` / `unverifiedCount`.
+- `resources/views/admin/members.blade.php` — kolom badge + filter tabs.
+- `tests/Feature/AdminMemberEmailVerificationTest.php` (baru).
+
+**Deploy:** Tidak ada migration, tidak ada perubahan aset; cukup pull biasa.
+
 ## 2026-06-18 — feat: node Tim/Downline klikable + halaman detail member tim
 
 **Kebutuhan:** Item member di pohon Tim/Downline (member area) dibuat klikable;
