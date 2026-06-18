@@ -58,7 +58,7 @@
             {{-- Vertical stub --}}
             <div style="margin: 0 auto; width: 2px; height: 12px; background: #d1d5db;"></div>
             {{-- Node --}}
-            <div style="border: 2px solid #34d399; border-radius: 8px; padding: 6px 8px; min-width: 100px; max-width: 120px; background: #fff;">
+            <a href="{{ route('dashboard.team.show', $member->id) }}" style="display:block;text-decoration:none;border: 2px solid #34d399; border-radius: 8px; padding: 6px 8px; min-width: 100px; max-width: 120px; background: #fff; transition: box-shadow .15s;" title="Lihat detail {{ $member->name }}" onmouseover="this.style.boxShadow='0 0 0 3px rgba(52,211,153,0.4)'" onmouseout="this.style.boxShadow='none'">
                 <div style="font-weight: 600; font-size: 10px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $member->name }}</div>
                 <div style="font-size: 7px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $member->email }}</div>
                 <div style="font-size: 7px; color: #9ca3af;">{{ $member->created_at->format('d/m/Y') }}</div>
@@ -69,7 +69,7 @@
                 @if($member->downlines->count() > 0)
                 <div style="font-size: 7px; color: #9ca3af; margin-top: 2px;">{{ $member->downlines->count() }} downline</div>
                 @endif
-            </div>
+            </a>
         </div>
         @endforeach
     </div>
@@ -90,7 +90,7 @@
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                     @foreach($member->downlines as $j => $sub)
-                    <div style="border: 1px solid #fcd34d; border-radius: 8px; padding: 5px 8px; min-width: 95px; max-width: 115px; background: #fff; text-align: center;">
+                    <a href="{{ route('dashboard.team.show', $sub->id) }}" style="display:block;text-decoration:none;border: 1px solid #fcd34d; border-radius: 8px; padding: 5px 8px; min-width: 95px; max-width: 115px; background: #fff; text-align: center; transition: box-shadow .15s;" title="Lihat detail {{ $sub->name }}" onmouseover="this.style.boxShadow='0 0 0 3px rgba(252,211,77,0.4)'" onmouseout="this.style.boxShadow='none'">
                         <div style="font-weight: 500; font-size: 9px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $sub->name }}</div>
                         <div style="font-size: 7px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $sub->email }}</div>
                         <div style="font-size: 7px; color: #9ca3af;">{{ $sub->created_at->format('d/m/Y') }}</div>
@@ -98,7 +98,7 @@
                             <span style="background: #fffbeb; color: #b45309; border-radius: 9999px; padding: 1px 4px;">{{ $sub->total_sales }} penj.</span>
                             <span style="background: #fffbeb; color: #b45309; border-radius: 9999px; padding: 1px 4px;">Rp {{ number_format($sub->total_revenue ?? 0, 0, ',', '.') }}</span>
                         </div>
-                    </div>
+                    </a>
                     @endforeach
                 </div>
             </div>
