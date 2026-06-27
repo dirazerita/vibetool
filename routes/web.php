@@ -26,7 +26,9 @@ use App\Http\Controllers\Dashboard\CouponController as DashboardCouponController
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\EmailVerificationController;
 use App\Http\Controllers\Dashboard\LicenseController as DashboardLicenseController;
+use App\Http\Controllers\Dashboard\LandingPageController as DashboardLandingPageController;
 use App\Http\Controllers\Dashboard\MemberProductController;
+use App\Http\Controllers\Dashboard\MemberVideoTutorialController;
 use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
@@ -100,6 +102,25 @@ Route::middleware('auth')->group(function () {
         Route::get('/member-products/{product}/edit', [MemberProductController::class, 'edit'])->name('.member-products.edit');
         Route::put('/member-products/{product}', [MemberProductController::class, 'update'])->name('.member-products.update');
         Route::delete('/member-products/{product}', [MemberProductController::class, 'destroy'])->name('.member-products.destroy');
+
+        // Landing page per produk — mirror admin, dengan ownership check.
+        Route::get('/products/{product}/landing-page', [DashboardLandingPageController::class, 'edit'])->name('.products.landing-page');
+        Route::put('/products/{product}/landing-page', [DashboardLandingPageController::class, 'update'])->name('.products.landing-page.update');
+        Route::post('/products/{product}/landing-page/images', [DashboardLandingPageController::class, 'uploadImage'])->name('.products.landing-page.images.upload');
+        Route::delete('/products/{product}/landing-page/images/{image}', [DashboardLandingPageController::class, 'deleteImage'])->name('.products.landing-page.images.delete');
+        Route::post('/products/{product}/landing-page/images/reorder', [DashboardLandingPageController::class, 'reorderImages'])->name('.products.landing-page.images.reorder');
+        Route::post('/products/{product}/landing-page/testimonials', [DashboardLandingPageController::class, 'storeTestimonial'])->name('.products.landing-page.testimonials.store');
+        Route::put('/products/{product}/landing-page/testimonials/{testimonial}', [DashboardLandingPageController::class, 'updateTestimonial'])->name('.products.landing-page.testimonials.update');
+        Route::delete('/products/{product}/landing-page/testimonials/{testimonial}', [DashboardLandingPageController::class, 'deleteTestimonial'])->name('.products.landing-page.testimonials.delete');
+        Route::post('/products/{product}/landing-page/testimonials/{testimonial}/toggle', [DashboardLandingPageController::class, 'toggleTestimonial'])->name('.products.landing-page.testimonials.toggle');
+
+        // Video tutorial per produk — mirror admin, dengan ownership check.
+        Route::get('/products/{product}/video-tutorials', [MemberVideoTutorialController::class, 'index'])->name('.products.video-tutorials');
+        Route::post('/products/{product}/video-tutorials', [MemberVideoTutorialController::class, 'store'])->name('.products.video-tutorials.store');
+        Route::put('/products/{product}/video-tutorials/{tutorial}', [MemberVideoTutorialController::class, 'update'])->name('.products.video-tutorials.update');
+        Route::delete('/products/{product}/video-tutorials/{tutorial}', [MemberVideoTutorialController::class, 'destroy'])->name('.products.video-tutorials.destroy');
+        Route::post('/products/{product}/video-tutorials/{tutorial}/toggle', [MemberVideoTutorialController::class, 'toggle'])->name('.products.video-tutorials.toggle');
+        Route::post('/products/{product}/video-tutorials/reorder', [MemberVideoTutorialController::class, 'reorder'])->name('.products.video-tutorials.reorder');
         Route::get('/withdrawals', [DashboardWithdrawalController::class, 'index'])->name('.withdrawals');
         Route::post('/withdrawals', [DashboardWithdrawalController::class, 'store'])->name('.withdrawals.store');
         Route::get('/email-verification', [EmailVerificationController::class, 'show'])->name('.email-verification');
