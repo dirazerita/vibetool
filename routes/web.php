@@ -66,22 +66,21 @@ Route::get('/download/{token}', [DownloadController::class, 'download'])->name('
 
 // Auth required
 Route::middleware('auth')->group(function () {
+    // Checkout — dibuka untuk SEMUA user login (termasuk pending/baru register)
+    // agar user baru bisa checkout setelah register tanpa harus diaktivasi dulu.
+    Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('checkout');
+    Route::post('/checkout/{slug}', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout/{slug}/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/manual/{order}', [CheckoutController::class, 'manual'])->name('checkout.manual');
+    Route::post('/checkout/manual/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('checkout.manual.proof');
+    Route::post('/checkout/manual/{order}/cancel', [CheckoutController::class, 'cancel'])->name('checkout.manual.cancel');
+
+    // Klaim produk gratis (tanpa pembayaran)
+    Route::post('/free/{slug}/claim', [FreeProductController::class, 'claim'])->name('free.claim');
+
     // Member-only (akun harus sudah diaktifkan admin)
-    Route::middleware('active')->group(function () {
-        // Checkout
-        Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('checkout');
-        Route::post('/checkout/{slug}', [CheckoutController::class, 'process'])->name('checkout.process');
-        Route::post('/checkout/{slug}/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
-        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-        Route::get('/checkout/manual/{order}', [CheckoutController::class, 'manual'])->name('checkout.manual');
-        Route::post('/checkout/manual/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('checkout.manual.proof');
-        Route::post('/checkout/manual/{order}/cancel', [CheckoutController::class, 'cancel'])->name('checkout.manual.cancel');
-
-        // Klaim produk gratis (tanpa pembayaran)
-        Route::post('/free/{slug}/claim', [FreeProductController::class, 'claim'])->name('free.claim');
-    });
-
-    // Dashboard (member only, butuh akun aktif)
+    // Dashboard, admin, dan semua menu member
     Route::middleware('active')->prefix('dashboard')->name('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index']);
         Route::get('/balance', [DashboardBalanceController::class, 'index'])->name('.balance');
@@ -149,7 +148,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/software-requests/{softwareRequest}', [DashboardSoftwareRequestController::class, 'show'])->name('.software-requests.show');
         Route::get('/software-requests/{softwareRequest}/attachment', [DashboardSoftwareRequestController::class, 'attachment'])->name('.software-requests.attachment');
     });
-    // (penutup grup `active` di atas)
 
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {

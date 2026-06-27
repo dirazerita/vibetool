@@ -2,6 +2,31 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-28 — feat: register langsung redirect ke checkout + login otomatis
+
+**Kebutuhan:** User yang klik "Beli Sekarang" tanpa login → register → harus
+langsung diarahkan ke halaman checkout (bukan /pending), agar bisa masukkan
+kupon dan langsung bayar.
+
+**Implementasi:**
+- `RegisteredUserController@store`:
+  - Setelah register, user **login otomatis** (dulu logout ke /pending)
+  - **Redirect ke `/checkout/{product-slug}`** (dulu ke `/pending`)
+  - `createPendingOrderForRegistrant` tidak lagi dijalankan — order dibuat
+    di checkout agar kupon bisa diisi di sana
+  - `session('pending_user_data')` dihapus (tidak perlu)
+  - Jika tidak ada intended product, fallback ke dashboard
+- **Routes**: checkout dipindahkan dari middleware `active` ke middleware `auth`
+  saja, agar user baru (status pending) bisa akses checkout
+- Setelah submit checkout (manual payment) → ke `/checkout/manual/{order}` →
+  member diarahkan hubungi admin via WhatsApp
+
+**File:**
+- `app/Http/Controllers/Auth/RegisteredUserController.php` — login + redirect to checkout
+- `routes/web.php` — checkout routes di `auth` group, tidak di `active`
+
+**Deploy:** Tidak ada migration; cukup pull biasa.
+
 ## 2026-06-27 — feat: Full HTML Page — ganti seluruh landing page dengan HTML kustom
 
 **Kebutuhan:** User ingin landing page sepenuhnya diganti dengan HTML buatan

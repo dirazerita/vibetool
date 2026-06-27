@@ -117,25 +117,16 @@ class RegisteredUserController extends Controller
             Log::warning('Telegram notify new member failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
 
-        // Sistem aktivasi via WhatsApp: akun pending, tidak otomatis login.
-        // Simpan data user untuk halaman pending lalu logout & redirect.
-        $pendingData = [
-            'name' => $user->name,
-            'email' => $user->email,
-            'whatsapp_number' => $user->whatsapp_number,
-        ];
+        // Login user langsung agar bisa checkout tanpa login ulang
+        Auth::guard('web')->login($user);
 
-        if ($intendedProduct) {
-            $pendingData['product_title'] = $intendedProduct->title;
-            $pendingData['product_slug'] = $intendedProduct->slug;
-            $pendingData['product_price'] = (float) $intendedProduct->price;
+        // Arahkan ke checkout jika ada produk yang dituju
+        if ($intendedProduct && $intendedProduct->is_active) {
+            return redirect()->route('checkout', $intendedProduct->slug);
         }
 
-        session(['pending_user_data' => $pendingData]);
-
-        Auth::guard('web')->logout();
-
-        return redirect()->route('pending');
+        // Fallback: arahkan ke dashboard
+        return redirect()->route('dashboard');
     }
 
     private function createPendingOrderForRegistrant(User $user, Product $product): void
