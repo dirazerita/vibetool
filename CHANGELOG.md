@@ -2,6 +2,21 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-27 — fix: slug produk bersih + fix duplikasi Custom HTML di landing page
+
+**Fix 1 — Slug produk bersih (tanpa suffix random):**
+- Slug produk member tidak lagi berakhiran random (contoh: `-N53or`).
+- Implementasi: `generateUniqueSlug()` — slug = `Str::slug(title)`, hanya tambah
+  counter (-2, -3, ...) jika terjadi bentrok. Saat update, exclude produk sendiri
+  dari pengecekan agar slug tidak berubah jika judul tidak berubah.
+- `app/Http/Controllers/Dashboard/MemberProductController.php` — helper +
+  digunakan di `store()` & `update()`.
+
+**Fix 2 — Duplikasi section Custom HTML di landing page editor:**
+- Section Custom HTML yang standalone (di luar form, di bawah tombol Simpan)
+  dihapus dari kedua view (admin & dashboard). Hanya menyisakan textarea di dalam
+  form Konten Utama.
+
 ## 2026-06-27 — feat: Custom HTML di landing page editor
 
 **Kebutuhan:** Admin dan member yang upload produk perlu bisa menulis kode HTML

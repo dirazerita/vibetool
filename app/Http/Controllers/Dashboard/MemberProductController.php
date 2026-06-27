@@ -60,7 +60,7 @@ class MemberProductController extends Controller
 
         $data = [
             'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . Str::random(5),
+            'slug' => $this->generateUniqueSlug($request->title),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
             'commission_percent' => 0,
@@ -123,7 +123,7 @@ class MemberProductController extends Controller
 
         $data = [
             'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . Str::random(5),
+            'slug' => $this->generateUniqueSlug($request->title, $product->id),
             'description' => $request->description,
             'price' => $isFree ? 0 : $request->price,
             'product_type' => $request->product_type,
@@ -160,5 +160,23 @@ class MemberProductController extends Controller
         $product->delete();
 
         return redirect()->route('dashboard.member-products')->with('success', 'Produk berhasil dihapus.');
+    }
+
+    /**
+     * Buat slug unik dari judul. Slug bersih tanpa random suffix,
+     * hanya tambah counter (-2, -3) jika terjadi bentrok slug.
+     */
+    private function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $baseSlug = Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (Product::where('slug', $slug)->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $counter++;
+            $slug = $baseSlug.'-'.$counter;
+        }
+
+        return $slug;
     }
 }
