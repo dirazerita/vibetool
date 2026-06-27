@@ -2,6 +2,37 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-27 — feat: Custom HTML di landing page editor
+
+**Kebutuhan:** Admin dan member yang upload produk perlu bisa menulis kode HTML
+murni untuk landing page, memudahkan yang sudah terbiasa kode HTML dan ingin
+kontrol penuh atas tampilan.
+
+**Implementasi:**
+- **Migration**: kolom `custom_html` (text, nullable) di `product_landing_pages`.
+- **Model**: `custom_html` di fillable `ProductLandingPage`.
+- **Controller** (admin & dashboard): validasi `nullable|string`, sanitasi via
+  `Purifier::clean(..., 'landing_content')` supaya aman dari XSS tapi tetap
+  mengizinkan tag HTML standar.
+- **View editor**: section baru "Custom HTML" dengan textarea monospace 16 baris
+  di bawah "Konten Utama", sebelum "Galeri Gambar". Disimpan bersama konten utama
+  (tombol "Simpan Konten Utama").
+- **Public landing page**: custom HTML dirender dengan `{!! $landingPage->custom_html !!}`
+  setelah section "Tentang Produk", sebelum package picker.
+
+**File:**
+- `database/migrations/2026_06_27_100000_add_custom_html_to_product_landing_pages.php` (baru).
+- `app/Models/ProductLandingPage.php` — fillable.
+- `app/Http/Controllers/Admin/LandingPageController.php` — validasi + sanitasi + save.
+- `app/Http/Controllers/Dashboard/LandingPageController.php` — idem.
+- `resources/views/admin/products/landing-page.blade.php` — section Custom HTML.
+- `resources/views/dashboard/products/landing-page.blade.php` — idem.
+- `resources/views/product/landing.blade.php` — render.
+- `tests/Feature/LandingCustomHtmlTest.php` (baru).
+
+**Deploy:** ADA migration — setelah pull jalankan `php artisan migrate --force`.
+Tidak ada perubahan aset.
+
 ## 2026-06-27 — feat: lisensi otomatis untuk pembuat produk saat disetujui admin
 
 **Kebutuhan:** Member yang upload produk software perlu lisensi untuk produknya

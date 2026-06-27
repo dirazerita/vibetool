@@ -180,6 +180,21 @@
     </div>
 </div>
 
+{{-- Custom HTML Section --}}
+<div class="max-w-3xl mb-8">
+    <div class="dk-card" style="padding:24px;">
+        <h2 class="text-lg font-semibold dk-heading mb-4">Custom HTML</h2>
+        <p class="text-xs dk-text-muted mb-3">Tempel kode HTML murni di sini untuk membuat section kustom di landing page. Cocok untuk embed form, tabel, iframe, atau layout HTML buatan sendiri. Konten ini akan dirender di landing page setelah section Tentang Produk.</p>
+        <textarea name="custom_html" rows="16" class="w-full dk-input font-mono text-sm" style="font-family: 'Consolas', 'Courier New', monospace; line-height: 1.5;" placeholder="&lt;section style=&quot;padding: 80px 0; background: #f0f9ff;&quot;&gt;
+    &lt;div style=&quot;max-width: 56rem; margin: 0 auto; padding: 0 1rem;&quot;&gt;
+        &lt;h2&gt;Judul Section Kustom&lt;/h2&gt;
+        &lt;p&gt;Konten HTML Anda di sini...&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/section&gt;">{{ old('custom_html', $lp->custom_html ?? '') }}</textarea>
+        <p class="text-xs dk-text-muted mt-3">Klik tombol <strong>Simpan Konten Utama</strong> di atas untuk menyimpan custom HTML beserta konten hero/video/about. Tidak perlu tombol simpan terpisah.</p>
+    </div>
+</div>
+
 {{-- Galeri Section --}}
 <div class="max-w-3xl mb-8">
     <div class="dk-card" style="padding:24px;">
