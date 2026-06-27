@@ -2,6 +2,47 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-27 — feat: member bisa mengelola Landing Page & Video Tutorial untuk produk sendiri
+
+**Kebutuhan:** Member yang upload produk sebelumnya tidak bisa membuat landing page
+dan video tutorial untuk produknya (hanya admin). Di menu Produk Saya juga hanya
+ada tombol Edit dan Hapus.
+
+**Implementasi:**
+- **2 controller baru di dashboard**:
+  - `Dashboard\LandingPageController` — mirror `Admin\LandingPageController`
+    (edit/update landing page, upload/delete/order galeri gambar, CRUD testimonial,
+    toggle testimonial). Pengecekan kepemilikan: `$product->created_by === auth()->id()`
+    dan `canUploadProduct()`.
+  - `Dashboard\MemberVideoTutorialController` — mirror `Admin\VideoTutorialController`
+    (CRUD video tutorial, toggle, reorder). Pengecekan kepemilikan yang sama.
+- **Routes** di bawah `dashboard` prefix:
+  - `/products/{product}/landing-page` + sub-routes (images, testimonials, reorder)
+  - `/products/{product}/video-tutorials` + sub-routes (store, update, destroy, toggle, reorder)
+  Semua route dicek via controller authorization.
+- **View**: `dashboard/products/landing-page.blade.php` dan `video-tutorials.blade.php`
+  (adaptasi dari admin views, menggunakan `layouts.dashboard` dan dashboard route names).
+- **Produk Saya** (`dashboard/member-products`): setiap product card kini punya
+  tombol **Landing Page**, **Video Tutorial** (hanya untuk produk approved), dan
+  **Preview** (link ke halaman publik produk) — selain Edit dan Hapus.
+- **Sidebar**: menu baru **Landing Page** di bawah blok `canUploadProduct()`,
+  mengarah ke `dashboard.member-products`.
+
+**Keamanan:** Pengecekan `canUploadProduct()` + `created_by === auth()->id()` di
+setiap method controller. Akses produk member lain → 403.
+
+**File:**
+- `app/Http/Controllers/Dashboard/LandingPageController.php` (baru)
+- `app/Http/Controllers/Dashboard/MemberVideoTutorialController.php` (baru)
+- `routes/web.php` — import + 15 route baru
+- `resources/views/dashboard/products/landing-page.blade.php` (baru)
+- `resources/views/dashboard/products/video-tutorials.blade.php` (baru)
+- `resources/views/dashboard/member-products.blade.php` — tombol baru
+- `resources/views/layouts/dashboard.blade.php` — menu sidebar baru
+- `tests/Feature/MemberLandingAndVideoTutorialTest.php` (baru)
+
+**Deploy:** Tidak ada migration, tidak ada perubahan aset. Cukup pull biasa.
+
 ## 2026-06-18 — feat: upload bukti transfer di penarikan komisi
 
 **Kebutuhan:** Saat memproses pembayaran komisi (penarikan), admin bisa
