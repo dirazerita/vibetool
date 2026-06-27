@@ -172,6 +172,13 @@
                 </div>
             </div>
 
+            {{-- Custom HTML --}}
+            <div style="border-bottom:1px solid #1e2b3d pb-6 pt-6">
+                <h3 class="text-sm font-semibold uppercase tracking-wider mb-3 dk-text">Custom HTML</h3>
+                <p class="text-xs dk-text-muted mb-3">Tempel kode HTML murni untuk section landing page. Akan dirender setelah section Tentang Produk.</p>
+                <textarea name="custom_html" rows="14" class="w-full dk-input font-mono text-sm" style="font-family: 'Consolas', 'Courier New', monospace; line-height: 1.5;" placeholder="&lt;section style=&quot;padding: 80px 0; background: #f0f9ff;&quot;&gt;&#10;  &lt;div style=&quot;max-width: 56rem; margin: 0 auto;&quot;&gt;&#10;    &lt;h2&gt;Judul Section&lt;/h2&gt;&#10;    &lt;p&gt;Konten HTML Anda...&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/section&gt;">{{ old('custom_html', $lp->custom_html ?? '') }}</textarea>
+            </div>
+
             <div class="mt-6">
                 <button type="submit" class="dk-btn dk-btn-primary">Simpan Konten Utama</button>
                 <p class="text-xs mt-2 dk-text-muted">Tombol ini hanya menyimpan konten utama di atas. Galeri Gambar &amp; Testimonial punya tombol simpan sendiri di bawah.</p>
