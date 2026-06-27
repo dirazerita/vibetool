@@ -217,37 +217,32 @@ class LandingPageController extends Controller
         if (preg_match('/<body[^>]*>(.*?)<\/body>/si', $html, $m)) {
             $html = $m[1];
         } else {
-            // Tidak ada <body>, buang <html> dan <head> saja
             $html = preg_replace('/<html[^>]*>|<\/html>/si', '', $html);
             $html = preg_replace('/<head[^>]*>.*?<\/head>/si', '', $html);
         }
 
-        // 3. Buang <script> (CDN, inline JS) — keamanan + cegah konflik
-        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/si', '', $html);
-        $html = preg_replace('/<script\b[^>]*\/?>/si', '', $html);
-        // 4. Buang <meta>, <link>, <title>
+        // 3. Hapus tag & atribut berbahaya
+        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/si', '', $html);   // inline script
+        $html = preg_replace('/<script\b[^>]*\/?>/si', '', $html);             // self-closing script
         $html = preg_replace('/<meta\b[^>]*\/?>/si', '', $html);
         $html = preg_replace('/<link\b[^>]*\/?>/si', '', $html);
         $html = preg_replace('/<title\b[^>]*>.*?<\/title>/si', '', $html);
-
-        // 5. Buang <head> dan <html> yang mungkin tersisa (non-body path)
         $html = preg_replace('/<head\b[^>]*>.*?<\/head>/si', '', $html);
         $html = preg_replace('/<\/?html[^>]*>/si', '', $html);
 
-        // 6. Strip tag yang tidak diizinkan
-        $allowed = '<p><br><hr><h1><h2><h3><h4><h5><h6>'
-            .'<b><strong><i><em><u><s><mark><sub><sup><code><small>'
-            .'<ul><ol><li><dl><dt><dd>'
-            .'<blockquote><pre>'
-            .'<a><img><span><div>'
-            .'<table><thead><tbody><tfoot><tr><th><td><caption><colgroup><col>'
-            .'<section><article><header><footer><nav><main><aside>'
-            .'<figure><figcaption>'
-            .'<form><input><button><select><option><textarea><label><fieldset><legend>'
-            .'<iframe><video><audio><source><track>'
-            .'<picture><svg><path><circle><rect><line><polygon><text><g><defs><use>'
-            .'<details><summary><style>';
+        // 4. Hapus event handler inline (onclick, onload, dll) — XSS prevention
+        $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/si', '', $html);
 
-        return strip_tags($html, $allowed);
+        // 5. Hapus <iframe> dari sumber tidak aman, biarkan YouTube/Vimeo/Maps
+        $html = preg_replace_callback('/<iframe\b[^>]*>/si', function ($m) {
+            if (preg_match('/src=["\'](https?:)?\/\/(?:www\.)?(?:youtube(?:-nocookie)?\.com\/embed\/|player\.vimeo\.com\/video\/|www\.google\.com\/maps\/embed\?)/i', $m[0])) {
+                return $m[0];
+            }
+
+            return '';
+        }, $html);
+        $html = str_replace('</iframe>', '', $html);
+
+        return trim($html);
     }
 }

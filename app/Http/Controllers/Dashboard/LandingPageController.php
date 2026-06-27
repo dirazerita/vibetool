@@ -232,11 +232,9 @@ class LandingPageController extends Controller
 
     private function sanitizeHtml(string $html): string
     {
-        // 1. Buang DOCTYPE dan komentar HTML
         $html = preg_replace('/<!DOCTYPE[^>]*>/i', '', $html);
         $html = preg_replace('/<!--.*?-->/s', '', $html);
 
-        // 2. Ekstrak isi <body> — buang wrapper html/head sebelum body
         if (preg_match('/<body[^>]*>(.*?)<\/body>/si', $html, $m)) {
             $html = $m[1];
         } else {
@@ -244,7 +242,6 @@ class LandingPageController extends Controller
             $html = preg_replace('/<head[^>]*>.*?<\/head>/si', '', $html);
         }
 
-        // 3. Buang <script> (CDN, inline JS) — keamanan + cegah konflik
         $html = preg_replace('/<script\b[^>]*>.*?<\/script>/si', '', $html);
         $html = preg_replace('/<script\b[^>]*\/?>/si', '', $html);
         $html = preg_replace('/<meta\b[^>]*\/?>/si', '', $html);
@@ -252,21 +249,16 @@ class LandingPageController extends Controller
         $html = preg_replace('/<title\b[^>]*>.*?<\/title>/si', '', $html);
         $html = preg_replace('/<head\b[^>]*>.*?<\/head>/si', '', $html);
         $html = preg_replace('/<\/?html[^>]*>/si', '', $html);
+        $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/si', '', $html);
 
-        // 4. Strip tag tidak diizinkan
-        $allowed = '<p><br><hr><h1><h2><h3><h4><h5><h6>'
-            .'<b><strong><i><em><u><s><mark><sub><sup><code><small>'
-            .'<ul><ol><li><dl><dt><dd>'
-            .'<blockquote><pre>'
-            .'<a><img><span><div>'
-            .'<table><thead><tbody><tfoot><tr><th><td><caption><colgroup><col>'
-            .'<section><article><header><footer><nav><main><aside>'
-            .'<figure><figcaption>'
-            .'<form><input><button><select><option><textarea><label><fieldset><legend>'
-            .'<iframe><video><audio><source><track>'
-            .'<picture><svg><path><circle><rect><line><polygon><text><g><defs><use>'
-            .'<details><summary><style>';
+        $html = preg_replace_callback('/<iframe\b[^>]*>/si', function ($m) {
+            if (preg_match('/src=["\'](https?:)?\/\/(?:www\.)?(?:youtube(?:-nocookie)?\.com\/embed\/|player\.vimeo\.com\/video\/|www\.google\.com\/maps\/embed\?)/i', $m[0])) {
+                return $m[0];
+            }
+            return '';
+        }, $html);
+        $html = str_replace('</iframe>', '', $html);
 
-        return strip_tags($html, $allowed);
+        return trim($html);
     }
 }
