@@ -29,6 +29,8 @@ class ProductLandingPage extends Model
         'testimonial_title_color',
         'testimonial_bg_color',
         'custom_html',
+        'full_html',
+        'use_full_html',
     ];
 
     protected function casts(): array

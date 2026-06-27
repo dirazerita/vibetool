@@ -52,6 +52,8 @@ class LandingPageController extends Controller
             'testimonial_title_color' => 'nullable|string|max:10',
             'testimonial_bg_color' => 'nullable|string|max:10',
             'custom_html' => 'nullable|string',
+            'full_html' => 'nullable|string',
+            'use_full_html' => 'nullable',
         ]);
 
         $aboutContent = $request->input('about_content');
@@ -84,6 +86,15 @@ class LandingPageController extends Controller
         } else {
             $data['custom_html'] = $customHtml ?: null;
         }
+
+        $fullHtml = $request->input('full_html');
+        if (is_string($fullHtml) && $fullHtml !== '') {
+            $data['full_html'] = $this->sanitizeFullHtml($fullHtml);
+        } else {
+            $data['full_html'] = $fullHtml ?: null;
+        }
+
+        $data['use_full_html'] = $request->boolean('use_full_html');
 
         if ($request->hasFile('hero_image')) {
             $data['hero_image'] = ImageResizer::resizeHero($request->file('hero_image'));
@@ -251,6 +262,23 @@ class LandingPageController extends Controller
         $html = preg_replace('/<\/?html[^>]*>/si', '', $html);
         $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/si', '', $html);
 
+        $html = preg_replace_callback('/<iframe\b[^>]*>/si', function ($m) {
+            if (preg_match('/src=["\'](https?:)?\/\/(?:www\.)?(?:youtube(?:-nocookie)?\.com\/embed\/|player\.vimeo\.com\/video\/|www\.google\.com\/maps\/embed\?)/i', $m[0])) {
+                return $m[0];
+            }
+            return '';
+        }, $html);
+        $html = str_replace('</iframe>', '', $html);
+
+        return trim($html);
+    }
+
+    private function sanitizeFullHtml(string $html): string
+    {
+        $html = preg_replace('/<!--.*?-->/s', '', $html);
+        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/si', '', $html);
+        $html = preg_replace('/<script\b[^>]*\/?>/si', '', $html);
+        $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/si', '', $html);
         $html = preg_replace_callback('/<iframe\b[^>]*>/si', function ($m) {
             if (preg_match('/src=["\'](https?:)?\/\/(?:www\.)?(?:youtube(?:-nocookie)?\.com\/embed\/|player\.vimeo\.com\/video\/|www\.google\.com\/maps\/embed\?)/i', $m[0])) {
                 return $m[0];

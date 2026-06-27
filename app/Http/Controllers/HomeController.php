@@ -43,6 +43,11 @@ class HomeController extends Controller
         $landingPage = $product->landingPage;
 
         if ($landingPage && $landingPage->is_published) {
+            // Full HTML Page — ganti seluruh landing page dengan HTML kustom user
+            if ($landingPage->use_full_html && $landingPage->full_html) {
+                return response($landingPage->full_html);
+            }
+
             $product->load([
                 'landingPageImages',
                 'landingPageTestimonials' => function ($query) {

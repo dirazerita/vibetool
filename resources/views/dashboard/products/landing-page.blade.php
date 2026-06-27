@@ -179,6 +179,26 @@
                 <textarea name="custom_html" rows="14" class="w-full dk-input font-mono text-sm" style="font-family: 'Consolas', 'Courier New', monospace; line-height: 1.5;" placeholder="&lt;section style=&quot;padding: 80px 0; background: #f0f9ff;&quot;&gt;&#10;  &lt;div style=&quot;max-width: 56rem; margin: 0 auto;&quot;&gt;&#10;    &lt;h2&gt;Judul Section&lt;/h2&gt;&#10;    &lt;p&gt;Konten HTML Anda...&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/section&gt;">{{ old('custom_html', $lp->custom_html ?? '') }}</textarea>
             </div>
 
+            {{-- Full HTML Page — ganti seluruh landing page dengan HTML kustom --}}
+            <div style="border-bottom:1px solid #1e2b3d pb-6 pt-6">
+                <h3 class="text-sm font-semibold uppercase tracking-wider mb-1 dk-text">Full HTML Page</h3>
+                <p class="text-xs dk-text-muted mb-1">Paste <strong>satu halaman HTML utuh</strong>. Landing page akan sepenuhnya diganti dengan HTML ini.</p>
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="checkbox" name="use_full_html" id="use_full_html" value="1"
+                           {{ old('use_full_html', $lp->use_full_html ?? false) ? 'checked' : '' }}
+                           style="width:18px;height:18px;accent-color:#f59e0b;cursor:pointer"
+                           onchange="document.getElementById('full_html_block').style.display=this.checked?'block':'none'">
+                    <label for="use_full_html" class="text-sm font-medium" style="color:#fde047;cursor:pointer">Pakai Full HTML (gantikan landing page sistem)</label>
+                </div>
+                <div id="full_html_block" style="display:{{ old('use_full_html', $lp->use_full_html ?? false) ? 'block' : 'none' }}">
+                    <textarea name="full_html" rows="20" class="w-full dk-input font-mono text-xs"
+                              style="font-family: 'Consolas', 'Courier New', monospace; line-height: 1.5;white-space:pre;overflow-x:auto;"
+                              placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;&#10;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;title&gt;Judul&lt;/title&gt;&lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;&#10;&lt;/head&gt;&#10;&lt;body&gt;&#10;  &lt;h1&gt;Hello World&lt;/h1&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;"
+                    >{{ old('full_html', $lp->full_html ?? '') }}</textarea>
+                    <p class="text-[11px] dk-text-muted mt-1">&lt;script&gt; inline &amp; event handler dihapus untuk keamanan.</p>
+                </div>
+            </div>
+
             <div class="mt-6">
                 <button type="submit" class="dk-btn dk-btn-primary">Simpan Konten Utama</button>
                 <p class="text-xs mt-2 dk-text-muted">Tombol ini hanya menyimpan konten utama di atas. Galeri Gambar &amp; Testimonial punya tombol simpan sendiri di bawah.</p>

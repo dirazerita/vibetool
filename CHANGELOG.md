@@ -2,6 +2,43 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-27 — feat: Full HTML Page — ganti seluruh landing page dengan HTML kustom
+
+**Kebutuhan:** User ingin landing page sepenuhnya diganti dengan HTML buatan
+sendiri (full page dengan DOCTYPE, head, Tailwind CDN, dll), bukan sekadar
+section tambahan yang di-inject ke template existing.
+
+**Implementasi:**
+- **Migration**: kolom `full_html` (longText) + `use_full_html` (boolean) di
+  `product_landing_pages`.
+- **Model**: kedua kolom di fillable + cast `use_full_html` ke boolean.
+- **View editor**: section baru "Full HTML Page" dengan:
+  - Checkbox "Pakai Full HTML (gantikan landing page sistem)" — toggle on/off
+  - Textarea monospace besar untuk paste HTML utuh
+  - Tampil/sembunyi berdasarkan checkbox
+- **Controller** (admin & dashboard): `sanitizeFullHtml()` — hanya hapus
+  `<script>` inline dan event handler (`on*`), PERTAHANKAN DOCTYPE, `<html>`,
+  `<head>`, `<body>`, `<link>`, `<meta>`, `<title>`, CDN script, dan semua
+  atribut. Simpan via `full_html` + `use_full_html` di `updateOrCreate`.
+- **HomeController**: jika `use_full_html=true` dan `full_html` ada, render
+  langsung `response($landingPage->full_html)` — melewati seluruh template Blade.
+- **Custom HTML** (lama) tetap ada sebagai section tambahan di template sistem.
+
+**File:**
+- `database/migrations/2026_06_27_120000_add_full_html_to_product_landing_pages.php` (baru)
+- `app/Models/ProductLandingPage.php` — fillable
+- `app/Http/Controllers/Admin/LandingPageController.php` — validasi + save + sanitizeFullHtml
+- `app/Http/Controllers/Dashboard/LandingPageController.php` — idem
+- `app/Http/Controllers/HomeController.php` — render full_html
+- `resources/views/admin/products/landing-page.blade.php` — section Full HTML Page
+- `resources/views/dashboard/products/landing-page.blade.php` — idem
+
+**Deploy:** ADA migration — `bash ~/pull-vibetool.sh` lalu `php artisan migrate --force`.
+
+**Cara pakai:** Landing page editor → centang "Pakai Full HTML" → paste HTML →
+klik "Simpan Konten Utama" → publish → buka preview. Halaman landing page kini
+sepenuhnya HTML kustom.
+
 ## 2026-06-27 — fix: slug produk bersih + fix duplikasi Custom HTML + fix Purifier
 
 **Fix 1 — Slug produk bersih:**
