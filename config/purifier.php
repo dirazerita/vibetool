@@ -57,8 +57,6 @@ return [
             'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true, 'tel' => true],
         ],
         'custom_html_content' => [
-            'HTML.DefinitionID' => 'html5-definitions',
-            'HTML.DefinitionRev' => 1,
             'HTML.Doctype' => 'HTML 4.01 Transitional',
             'HTML.Allowed' => 'p[style|class],br,hr,'
                 .'h1[style|class],h2[style|class],h3[style|class],h4[style|class],h5[style|class],h6[style|class],'
