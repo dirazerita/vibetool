@@ -80,7 +80,7 @@ class LandingPageController extends Controller
         // HTML kustom — dibersihkan pakai purifier seperti about_content.
         $customHtml = $request->input('custom_html');
         if (is_string($customHtml) && $customHtml !== '') {
-            $data['custom_html'] = Purifier::clean($customHtml, 'landing_content');
+            $data['custom_html'] = Purifier::clean($customHtml, 'custom_html_content');
         } else {
             $data['custom_html'] = $customHtml ?: null;
         }

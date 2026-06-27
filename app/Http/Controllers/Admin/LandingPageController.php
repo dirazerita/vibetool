@@ -68,7 +68,7 @@ class LandingPageController extends Controller
         // tapi dengan rules yang lebih longgar untuk kode HTML murni.
         $customHtml = $request->input('custom_html');
         if (is_string($customHtml) && $customHtml !== '') {
-            $data['custom_html'] = Purifier::clean($customHtml, 'landing_content');
+            $data['custom_html'] = Purifier::clean($customHtml, 'custom_html_content');
         } else {
             $data['custom_html'] = $customHtml ?: null;
         }

@@ -56,6 +56,50 @@ return [
             'AutoFormat.RemoveEmpty' => true,
             'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true, 'tel' => true],
         ],
+        'custom_html_content' => [
+            'HTML.DefinitionID' => 'html5-definitions',
+            'HTML.DefinitionRev' => 1,
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p[style|class],br,hr,'
+                .'h1[style|class],h2[style|class],h3[style|class],h4[style|class],h5[style|class],h6[style|class],'
+                .'b,strong,i,em,u,s,mark,sub,sup,code,'
+                .'ul[style|class],ol[style|class],li[style|class],'
+                .'blockquote[style|class],pre,'
+                .'a[href|title|target|rel|style|class],'
+                .'img[src|alt|title|width|height|style|class|loading],'
+                .'span[style|class],div[style|class],'
+                .'table[style|class],thead,tbody,tr[style|class],th[style|class|colspan|rowspan],td[style|class|colspan|rowspan],'
+                .'section[style|class],article[style|class],header[style|class],footer[style|class],nav[style|class],main[style|class],aside[style|class],'
+                .'figure[style|class],figcaption[style|class],'
+                .'form[style|class|action|method|target],input[style|class|type|name|value|placeholder|required],'
+                .'button[style|class|type],select[style|class|name],option[value|selected],textarea[style|class|name|rows|cols|placeholder],'
+                .'label[style|class|for],fieldset[style|class],legend[style|class],'
+                .'iframe[src|width|height|style|frameborder|allowfullscreen|loading],'
+                .'video[src|width|height|style|controls|autoplay|loop|muted|poster],audio[src|style|controls],source[src|type|srcset],'
+                .'picture,svg[style|class|width|height|viewBox|fill|stroke],path[d|fill|stroke|stroke-width],circle[cx|cy|r|fill],rect[width|height|x|y|fill],'
+                .'details[style|class],summary[style|class]',
+            'HTML.TargetBlank' => true,
+            'CSS.AllowedProperties' => 'font,font-size,font-weight,font-style,font-family,font-variant,text-decoration,text-transform,'
+                .'padding,padding-left,padding-right,padding-top,padding-bottom,'
+                .'margin,margin-left,margin-right,margin-top,margin-bottom,'
+                .'color,background,background-color,background-image,background-size,background-position,background-repeat,'
+                .'text-align,text-indent,line-height,letter-spacing,word-spacing,'
+                .'border,border-color,border-width,border-style,border-top,border-right,border-bottom,border-left,'
+                .'border-radius,border-top-left-radius,border-top-right-radius,border-bottom-left-radius,border-bottom-right-radius,'
+                .'width,height,min-width,min-height,max-width,max-height,'
+                .'list-style,list-style-type,list-style-position,'
+                .'vertical-align,white-space,overflow,overflow-x,overflow-y,'
+                .'display,position,top,right,bottom,left,z-index,'
+                .'opacity,visibility,box-shadow,text-shadow,transform,transition,'
+                .'flex,flex-direction,flex-wrap,justify-content,align-items,align-content,gap,'
+                .'grid-template-columns,grid-template-rows,grid-gap,grid-column-gap,grid-row-gap,'
+                .'object-fit,object-position,cursor,pointer-events,user-select',
+            'HTML.SafeIframe' => true,
+            'URI.SafeIframeRegexp' => '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|www\.google\.com/maps/embed\?)%',
+            'AutoFormat.AutoParagraph' => false,
+            'AutoFormat.RemoveEmpty' => false,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true, 'tel' => true, 'data' => true],
+        ],
         'test' => [
             'Attr.EnableID' => 'true',
         ],
