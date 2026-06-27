@@ -188,6 +188,11 @@
     </section>
     @endif
 
+    {{-- Custom HTML Section — kode HTML murni dari landing page editor --}}
+    @if($landingPage->custom_html)
+    {!! $landingPage->custom_html !!}
+    @endif
+
     {{-- Product Info / Package Picker --}}
     @unless($isFree)
     <section style="padding: 80px 0; background-color: #151e2d;">

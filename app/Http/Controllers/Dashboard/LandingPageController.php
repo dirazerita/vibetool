@@ -51,6 +51,7 @@ class LandingPageController extends Controller
             'about_bg_color' => 'nullable|string|max:10',
             'testimonial_title_color' => 'nullable|string|max:10',
             'testimonial_bg_color' => 'nullable|string|max:10',
+            'custom_html' => 'nullable|string',
         ]);
 
         $aboutContent = $request->input('about_content');
@@ -75,6 +76,14 @@ class LandingPageController extends Controller
             'testimonial_title_color' => $request->input('testimonial_title_color', '#111827'),
             'testimonial_bg_color' => $request->input('testimonial_bg_color', '#f9fafb'),
         ];
+
+        // HTML kustom — dibersihkan pakai purifier seperti about_content.
+        $customHtml = $request->input('custom_html');
+        if (is_string($customHtml) && $customHtml !== '') {
+            $data['custom_html'] = Purifier::clean($customHtml, 'landing_content');
+        } else {
+            $data['custom_html'] = $customHtml ?: null;
+        }
 
         if ($request->hasFile('hero_image')) {
             $data['hero_image'] = ImageResizer::resizeHero($request->file('hero_image'));
