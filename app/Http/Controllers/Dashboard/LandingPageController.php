@@ -77,10 +77,10 @@ class LandingPageController extends Controller
             'testimonial_bg_color' => $request->input('testimonial_bg_color', '#f9fafb'),
         ];
 
-        // HTML kustom — dibersihkan pakai purifier seperti about_content.
+        // HTML kustom — sanitasi via strip_tags agar kompatibel dengan HTML5.
         $customHtml = $request->input('custom_html');
         if (is_string($customHtml) && $customHtml !== '') {
-            $data['custom_html'] = Purifier::clean($customHtml, 'custom_html_content');
+            $data['custom_html'] = $this->sanitizeHtml($customHtml);
         } else {
             $data['custom_html'] = $customHtml ?: null;
         }
@@ -228,5 +228,23 @@ class LandingPageController extends Controller
 
         return redirect()->route('dashboard.products.landing-page', $product)
             ->with('success', 'Status testimonial berhasil diubah.');
+    }
+
+    private function sanitizeHtml(string $html): string
+    {
+        $allowed = '<p><br><hr><h1><h2><h3><h4><h5><h6>'
+            .'<b><strong><i><em><u><s><mark><sub><sup><code><small>'
+            .'<ul><ol><li><dl><dt><dd>'
+            .'<blockquote><pre>'
+            .'<a><img><span><div>'
+            .'<table><thead><tbody><tfoot><tr><th><td><caption><colgroup><col>'
+            .'<section><article><header><footer><nav><main><aside>'
+            .'<figure><figcaption>'
+            .'<form><input><button><select><option><textarea><label><fieldset><legend>'
+            .'<iframe><video><audio><source><track>'
+            .'<picture><svg><path><circle><rect><line><polygon><text><g><defs><use>'
+            .'<details><summary><style>';
+
+        return strip_tags($html, $allowed);
     }
 }
