@@ -209,6 +209,32 @@ class LandingPageController extends Controller
      */
     private function sanitizeHtml(string $html): string
     {
+        // 1. Buang DOCTYPE dan komentar HTML
+        $html = preg_replace('/<!DOCTYPE[^>]*>/i', '', $html);
+        $html = preg_replace('/<!--.*?-->/s', '', $html);
+
+        // 2. Ekstrak isi <body> — buang wrapper html/head sebelum body
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/si', $html, $m)) {
+            $html = $m[1];
+        } else {
+            // Tidak ada <body>, buang <html> dan <head> saja
+            $html = preg_replace('/<html[^>]*>|<\/html>/si', '', $html);
+            $html = preg_replace('/<head[^>]*>.*?<\/head>/si', '', $html);
+        }
+
+        // 3. Buang <script> (CDN, inline JS) — keamanan + cegah konflik
+        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/si', '', $html);
+        $html = preg_replace('/<script\b[^>]*\/?>/si', '', $html);
+        // 4. Buang <meta>, <link>, <title>
+        $html = preg_replace('/<meta\b[^>]*\/?>/si', '', $html);
+        $html = preg_replace('/<link\b[^>]*\/?>/si', '', $html);
+        $html = preg_replace('/<title\b[^>]*>.*?<\/title>/si', '', $html);
+
+        // 5. Buang <head> dan <html> yang mungkin tersisa (non-body path)
+        $html = preg_replace('/<head\b[^>]*>.*?<\/head>/si', '', $html);
+        $html = preg_replace('/<\/?html[^>]*>/si', '', $html);
+
+        // 6. Strip tag yang tidak diizinkan
         $allowed = '<p><br><hr><h1><h2><h3><h4><h5><h6>'
             .'<b><strong><i><em><u><s><mark><sub><sup><code><small>'
             .'<ul><ol><li><dl><dt><dd>'
