@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\ImageResizer;
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Product;
-use App\Models\ProductPackage;
+use App\Services\OrderPaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -29,13 +31,19 @@ class ProductController extends Controller
         return view('admin.products.pending', compact('products'));
     }
 
-    public function approve(Request $request, Product $product)
+    public function approve(Request $request, Product $product, OrderPaymentService $paymentService)
     {
         $product->update([
             'approval_status' => 'approved',
             'is_active' => true,
             'rejection_reason' => null,
         ]);
+
+        // Berikan lisensi otomatis ke pembuat produk (jika software)
+        // agar bisa langsung test produknya sendiri.
+        if ($product->created_by) {
+            $paymentService->assignLicenseToCreator($product);
+        }
 
         return redirect()->back()->with('success', 'Produk "'.$product->title.'" berhasil disetujui.');
     }

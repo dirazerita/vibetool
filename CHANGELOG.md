@@ -2,6 +2,32 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
+## 2026-06-27 — feat: lisensi otomatis untuk pembuat produk saat disetujui admin
+
+**Kebutuhan:** Member yang upload produk software perlu lisensi untuk produknya
+sendiri agar bisa langsung test, tanpa harus membeli produknya.
+
+**Implementasi:**
+- `OrderPaymentService::assignLicenseToCreator(Product $product)` — method
+  publik baru yang membuat lisensi untuk pembuat produk TANPA order:
+  - Hanya untuk produk tipe `software`
+  - Hanya kalau produk punya `created_by` (produk yang diupload member)
+  - Cek duplikat: tidak akan buat lisensi kalau pembuat sudah punya lisensi
+  - Lisensi lifetime (mengikuti `license_duration` produk)
+  - Key digenerate dengan algoritma yang sama dengan pembelian normal
+- `Admin\ProductController::approve()` — setelah approve, panggil
+  `assignLicenseToCreator()` untuk langsung memberikan lisensi ke pembuat.
+- Lisensi muncul di halaman "Lisensi Saya" member (`/dashboard/licenses`) beserta
+  license key-nya, siap di-test.
+
+**File:**
+- `app/Services/OrderPaymentService.php` — method `assignLicenseToCreator()`.
+- `app/Http/Controllers/Admin/ProductController.php` — tambah import + panggil
+  di `approve()`.
+- `tests/Feature/AutoLicenseForProductCreatorTest.php` (baru).
+
+**Deploy:** Tidak ada migration, tidak ada perubahan aset; cukup pull biasa.
+
 ## 2026-06-27 — feat: member bisa mengelola Landing Page & Video Tutorial untuk produk sendiri
 
 **Kebutuhan:** Member yang upload produk sebelumnya tidak bisa membuat landing page

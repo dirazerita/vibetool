@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Commission;
 use App\Models\License;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -237,6 +238,42 @@ class OrderPaymentService
                 $upline->increment('balance', $uplineCommission);
             }
         }
+    }
+
+    /**
+     * Buat lisensi otomatis untuk pembuat produk saat produknya disetujui admin,
+     * agar pembuat bisa langsung test/menggunakan lisensi produknya sendiri.
+     */
+    public function assignLicenseToCreator(Product $product): void
+    {
+        if (! $product->isSoftware()) {
+            return;
+        }
+
+        if (! $product->created_by) {
+            return;
+        }
+
+        // Jangan buat duplikat — pembuat produk sudah punya lisensi untuk produk ini.
+        $existing = License::where('product_id', $product->id)
+            ->where('user_id', $product->created_by)
+            ->exists();
+
+        if ($existing) {
+            return;
+        }
+
+        $key = $this->generateUniqueLicenseKey($product->id);
+        $duration = $product->license_duration ?? 'lifetime';
+        $expiresAt = $this->calculateExpiresAt($duration);
+
+        License::create([
+            'product_id' => $product->id,
+            'key' => $key,
+            'user_id' => $product->created_by,
+            'assigned_at' => now(),
+            'expires_at' => $expiresAt,
+        ]);
     }
 
     private function assignLicense(Order $order): void
