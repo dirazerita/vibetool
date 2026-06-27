@@ -2,7 +2,23 @@
 
 Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 
-## 2026-06-27 — fix: slug produk bersih + fix duplikasi Custom HTML di landing page
+## 2026-06-27 — fix: slug produk bersih + fix duplikasi Custom HTML + fix Purifier
+
+**Fix 1 — Slug produk bersih:**
+- Slug produk member tidak lagi berakhiran random (contoh: `-N53or`).
+- `generateUniqueSlug()` — slug = `Str::slug(title)`, hanya tambah counter jika bentrok.
+
+**Fix 2 — Duplikasi section Custom HTML:**
+- Section Custom HTML yang standalone (di luar form) dihapus. Hanya textarea di dalam form.
+
+**Fix 3 — Custom HTML tidak muncul di preview (Purifier):**
+- Purifier config `landing_content` tidak mengizinkan HTML5 elements (`<section>`,
+  `<article>`, `<header>`, `<video>`, `<iframe>`, `<form>`, `<svg>`, dll) sehingga
+  kode HTML user di-strip habis.
+- Config baru `custom_html_content` dibuat dengan dukungan HTML5 elements,
+  CSS properties lengkap, iframe safe, dan `RemoveEmpty=false`.
+
+**Deploy:** `bash ~/pull-vibetool.sh` (tidak perlu migrate)
 
 **Fix 1 — Slug produk bersih (tanpa suffix random):**
 - Slug produk member tidak lagi berakhiran random (contoh: `-N53or`).
@@ -12,10 +28,7 @@ Catatan perubahan VibeTool/PRODIG. Entri terbaru di atas.
 - `app/Http/Controllers/Dashboard/MemberProductController.php` — helper +
   digunakan di `store()` & `update()`.
 
-**Fix 2 — Duplikasi section Custom HTML di landing page editor:**
-- Section Custom HTML yang standalone (di luar form, di bawah tombol Simpan)
-  dihapus dari kedua view (admin & dashboard). Hanya menyisakan textarea di dalam
-  form Konten Utama.
+**Fix 2 — Duplikasi section Custom HTML:** section standalone dihapus, textarea di dalam form.
 
 ## 2026-06-27 — feat: Custom HTML di landing page editor
 
