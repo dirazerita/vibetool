@@ -105,11 +105,9 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Auto-create pending manual order kalau user daftar via link affiliate produk —
-        // supaya order tersimpan menunggu pembayaran sejak sebelum admin aktivasi.
-        if ($intendedProduct && $intendedProduct->is_active) {
-            $this->createPendingOrderForRegistrant($user, $intendedProduct);
-        }
+        // Order TIDAK dibuat di register — user akan checkout di halaman
+        // /checkout/{slug} setelah login otomatis, tempat dia bisa isi kupon
+        // diskon dan menentukan downline dari pemilik kupon.
 
         try {
             app(TelegramService::class)->notifyNewMember($user->fresh()->load(['upline', 'intendedProduct']));

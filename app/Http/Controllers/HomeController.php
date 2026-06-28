@@ -20,6 +20,10 @@ class HomeController extends Controller
     {
         $product = Product::where('slug', $slug)->where('is_active', true)->where('approval_status', 'approved')->firstOrFail();
 
+        // Simpan intended product slug untuk redirect setelah register,
+        // baik dengan ref maupun tanpa ref.
+        session(['intended_product_slug' => $slug]);
+
         $refCode = $request->query('ref');
         if ($refCode) {
             $refMember = User::where('referral_code', $refCode)->first();
