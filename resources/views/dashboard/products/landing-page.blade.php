@@ -87,9 +87,12 @@
                                 <div class="mb-2">
                                     <img src="{{ asset('storage/' . $lp->hero_image) }}" alt="Hero" class="w-full rounded-lg object-cover" style="max-height: 200px;">
                                 </div>
+                                <label class="flex items-center gap-2 mb-2 text-sm" style="color:#fca5a5;cursor:pointer">
+                                    <input type="checkbox" name="remove_hero_image" value="1" style="accent-color:#ef4444"> Hapus gambar hero
+                                </label>
                             @endif
                             <input type="file" name="hero_image" id="hero_image" accept="image/*" class="w-full dk-input">
-                            <p class="text-xs mt-1 dk-text-muted">Maks 5MB. Kosongkan jika tidak ingin mengubah.</p>
+                            <p class="text-xs mt-1 dk-text-muted">Maks 5MB. Upload gambar baru otomatis mengganti yang lama.</p>
                             @error('hero_image') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>

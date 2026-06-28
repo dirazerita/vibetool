@@ -8,6 +8,7 @@ use App\Models\LandingPageImage;
 use App\Models\LandingPageTestimonial;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Mews\Purifier\Facades\Purifier;
 
 class LandingPageController extends Controller
@@ -54,6 +55,7 @@ class LandingPageController extends Controller
             'custom_html' => 'nullable|string',
             'full_html' => 'nullable|string',
             'use_full_html' => 'nullable',
+            'remove_hero_image' => 'nullable',
         ]);
 
         $aboutContent = $request->input('about_content');
@@ -97,7 +99,17 @@ class LandingPageController extends Controller
         $data['use_full_html'] = $request->boolean('use_full_html');
 
         if ($request->hasFile('hero_image')) {
+            $existing = $product->landingPage;
+            if ($existing && $existing->hero_image) {
+                Storage::disk('public')->delete($existing->hero_image);
+            }
             $data['hero_image'] = ImageResizer::resizeHero($request->file('hero_image'));
+        } elseif ($request->boolean('remove_hero_image')) {
+            $existing = $product->landingPage;
+            if ($existing && $existing->hero_image) {
+                Storage::disk('public')->delete($existing->hero_image);
+            }
+            $data['hero_image'] = null;
         }
 
         $product->landingPage()->updateOrCreate(
