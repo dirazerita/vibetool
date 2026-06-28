@@ -177,11 +177,13 @@ Route::middleware('auth')->group(function () {
         Route::put('/orders/{order}/affiliate', [OrderController::class, 'updateAffiliate'])->name('orders.update-affiliate');
         Route::post('/orders/{order}/assign-coupon-owner', [OrderController::class, 'assignCouponOwner'])->name('orders.assign-coupon-owner');
         Route::get('/members', [MemberController::class, 'index'])->name('members');
+        Route::get('/members/{user}', [MemberController::class, 'show'])->name('members.show');
         Route::get('/members/{user}/edit', [MemberController::class, 'edit'])->name('members.edit');
         Route::put('/members/{user}', [MemberController::class, 'update'])->name('members.update');
         Route::patch('/members/{user}/activate', [MemberController::class, 'activate'])->name('members.activate');
         Route::patch('/members/{user}/deactivate', [MemberController::class, 'deactivate'])->name('members.deactivate');
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('members.destroy');
+        Route::post('/orders/{order}/reverse-payment', [MemberController::class, 'reversePayment'])->name('orders.reverse-payment');
         Route::get('/commissions', [AdminCommissionController::class, 'index'])->name('commissions');
         Route::get('/commissions/{user}', [AdminCommissionController::class, 'show'])->name('commissions.show');
         Route::resource('member-commissions', MemberCommissionController::class)->except(['show']);

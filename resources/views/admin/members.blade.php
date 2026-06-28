@@ -67,7 +67,9 @@
         <tbody>
             @forelse($members as $member)
             <tr>
-                <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">{{ $member->name }}</td>
+                <td class="px-6 py-4 text-sm font-medium" style="color:#e2e8f0">
+                    <a href="{{ route('admin.members.show', $member) }}" class="hover:underline" style="color:#818cf8">{{ $member->name }}</a>
+                </td>
                 <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->email }}</td>
                 <td class="px-6 py-4 text-sm" style="color:#94a3b8">{{ $member->whatsapp_number ?? '-' }}</td>
                 <td class="px-6 py-4 text-sm">

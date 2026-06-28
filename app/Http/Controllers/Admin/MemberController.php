@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\PhoneNumber;
 use App\Http\Controllers\Controller;
+use App\Models\Commission;
+use App\Models\License;
+use App\Models\Order;
 use App\Models\ReferralCodeHistory;
 use App\Models\User;
+use App\Services\OrderPaymentService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -42,6 +47,41 @@ class MemberController extends Controller
         $unverifiedCount = User::where('role', 'member')->whereNull('email_verified_at')->count();
 
         return view('admin.members', compact('members', 'verification', 'verifiedCount', 'unverifiedCount'));
+    }
+
+    public function show(User $user)
+    {
+        abort_if($user->role !== 'member', 404);
+
+        // Riwayat pembelian
+        $orders = Order::where('user_id', $user->id)
+            ->with('product:id,title,slug,product_type')
+            ->latest()
+            ->paginate(15);
+
+        // Downline tree — load 3 level
+        $member = $user->load(['downlines' => function ($q) {
+            $q->with(['downlines' => function ($q2) {
+                $q2->with(['downlines' => fn ($q3) => $q3->orderBy('name')])
+                    ->orderBy('name');
+            }])
+            ->orderBy('name');
+        }]);
+
+        return view('admin.members-show', compact('user', 'orders', 'member'));
+    }
+
+    public function reversePayment(Request $request, Order $order, OrderPaymentService $paymentService): RedirectResponse
+    {
+        abort_if($order->user->role !== 'member', 404);
+
+        if ($order->status !== 'paid') {
+            return back()->with('error', 'Pesanan ini tidak dalam status lunas.');
+        }
+
+        $paymentService->unmarkAsPaid($order);
+
+        return back()->with('success', 'Pesanan #'.$order->id.' berhasil dikembalikan ke status menunggu pembayaran. Komisi & lisensi dihapus.');
     }
 
     public function edit(User $user)
