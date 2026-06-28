@@ -39,6 +39,45 @@ class OrderPaymentService
     }
 
     /**
+     * Reverse status paid → pending: hapus komisi, lisensi, ubah status order.
+     * Dipakai admin jika user terbukti belum bayar (bukti palsu).
+     */
+    public function unmarkAsPaid(Order $order): void
+    {
+        if ($order->status !== 'paid') {
+            return;
+        }
+
+        DB::transaction(function () use ($order) {
+            // 1. Reverse semua komisi (direct, upline, creator)
+            $commissions = Commission::where('order_id', $order->id)->get();
+            foreach ($commissions as $commission) {
+                $recipient = User::find($commission->user_id);
+                if ($recipient) {
+                    $currentBalance = (float) $recipient->balance;
+                    $reverseAmount = (float) $commission->amount;
+                    // Hanya reverse sampai 0 — earning sah dari order lain tidak diganggu
+                    if ($reverseAmount > $currentBalance) {
+                        $recipient->update(['balance' => 0]);
+                    } else {
+                        $recipient->decrement('balance', $reverseAmount);
+                    }
+                }
+                $commission->delete();
+            }
+
+            // 2. Hapus lisensi (jika ada)
+            License::where('order_id', $order->id)->delete();
+
+            // 3. Ubah order ke pending
+            $order->update([
+                'status' => 'pending',
+                'paid_at' => null,
+            ]);
+        });
+    }
+
+    /**
      * Ganti affiliator (dan otomatis upline-nya) untuk sebuah order.
      *
      * Dipakai admin di halaman pesanan untuk mengoreksi atribusi komisi.
