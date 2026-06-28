@@ -61,12 +61,39 @@
 
                 <div>
                     <label for="members" class="dk-label">Assign ke Member (kosongkan = semua member)</label>
-                    <select name="members[]" id="members" multiple class="w-full dk-input" style="min-height: 120px;">
-                        @foreach($members as $member)
-                            <option value="{{ $member->id }}" {{ in_array($member->id, old('members', [])) ? 'selected' : '' }}>{{ $member->name }} ({{ $member->email }})</option>
-                        @endforeach
-                    </select>
-                    <p class="text-xs mt-1 dk-text-muted">Tahan Ctrl/Cmd untuk memilih beberapa member</p>
+                    <div x-data="memberPicker({{ json_encode($members->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'email' => $m->email])) }}, {{ json_encode(old('members', [])) }})" class="relative">
+                        {{-- Input pencarian --}}
+                        <input type="text" x-model="query" @input="filter()" placeholder="Cari nama atau email member..."
+                               class="w-full dk-input mb-2 text-sm" style="padding:8px 12px;">
+                        {{-- Selected tags --}}
+                        <div class="flex flex-wrap gap-1 mb-2" x-show="selected.length > 0">
+                            <template x-for="(id, idx) in selected" :key="id">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs" style="background:rgba(79,70,229,0.2);color:#a5b4fc;border:1px solid rgba(79,70,229,0.3)">
+                                    <span x-text="getName(id)"></span>
+                                    <button type="button" @click="remove(idx)" class="hover:text-white" style="font-size:14px;line-height:1;">&times;</button>
+                                </span>
+                            </template>
+                        </div>
+                        {{-- Dropdown hasil --}}
+                        <div x-show="results.length > 0 && query.length > 0"
+                             class="absolute z-50 w-full rounded-md max-h-44 overflow-y-auto"
+                             style="background:#0f1623;border:1px solid #2d3a4a;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+                            <template x-for="m in results" :key="m.id">
+                                <label class="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-800" style="color:#e2e8f0">
+                                    <input type="checkbox" :checked="isSelected(m.id)" @change="toggle(m.id)" class="rounded" style="accent-color:#818cf8">
+                                    <span x-text="m.name"></span>
+                                    <span class="text-xs dk-text-muted" x-text="'('+m.email+')'"></span>
+                                </label>
+                            </template>
+                        </div>
+                        <p class="text-xs mt-1 dk-text-muted" x-show="query.length > 0 && results.length === 0" x-cloak>Tidak ada member yang cocok.</p>
+                        {{-- Hidden select untuk submit --}}
+                        <select name="members[]" id="members" multiple class="hidden" x-ref="select">
+                            <template x-for="id in selected" :key="id">
+                                <option :value="id" selected></option>
+                            </template>
+                        </select>
+                    </div>
                     @error('members') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -111,5 +138,34 @@ document.getElementById('generate-code').addEventListener('click', function() {
         document.getElementById('code').value = data.code;
     });
 });
+</script>
+
+<script>
+    function memberPicker(allMembers, initialSelected) {
+        return {
+            all: allMembers,
+            selected: initialSelected.filter(id => id !== null && id !== undefined && id !== ''),
+            query: '',
+            results: [],
+            filter() {
+                const q = this.query.toLowerCase().trim();
+                if (!q) { this.results = []; return; }
+                this.results = this.all.filter(m =>
+                    m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+                ).slice(0, 30);
+            },
+            getName(id) {
+                const m = this.all.find(x => x.id == id);
+                return m ? m.name : '?';
+            },
+            isSelected(id) { return this.selected.indexOf(id) !== -1; },
+            toggle(id) {
+                if (this.isSelected(id)) {
+                    this.selected = this.selected.filter(x => x !== id);
+                } else { this.selected.push(id); }
+            },
+            remove(idx) { this.selected.splice(idx, 1); },
+        };
+    }
 </script>
 @endsection
