@@ -17,6 +17,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Assign Member</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Assign Produk</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Digunakan</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Expired</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase" style="color:#94a3b8">Aksi</th>
             </tr>
@@ -43,6 +44,13 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $coupon->is_active ? 'dk-badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7"' : 'dk-badge" style="background:rgba(239,68,68,0.15);color:#fca5a5"' }}">
                         {{ $coupon->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
+                </td>
+                <td class="px-6 py-4 text-sm" style="color:#e2e8f0">
+                    @if($coupon->max_uses)
+                        <span style="color:#c4b5fd">{{ $coupon->used_count }}</span><span class="dk-text-muted"> / {{ $coupon->max_uses }}</span>
+                    @else
+                        <span style="color:#c4b5fd">{{ $coupon->used_count }}</span><span class="dk-text-muted"> kali</span>
+                    @endif
                 </td>
                 <td class="px-6 py-4 text-sm" style="color:#94a3b8">
                     {{ $coupon->expired_at ? $coupon->expired_at->format('d M Y H:i') : '-' }}
