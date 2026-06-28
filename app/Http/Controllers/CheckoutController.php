@@ -93,17 +93,15 @@ class CheckoutController extends Controller
             return response()->json(['success' => false, 'message' => 'Kode kupon tidak ditemukan.']);
         }
 
-        if (! $this->isCouponAccessible($coupon, $user, $referrer)) {
-            Log::info('DEBUG checkout applyCoupon rejected', [
-                'user_id' => $user?->id,
-                'upline_id' => $user?->upline_id,
-                'coupon_code' => $coupon->code,
-                'session_auto_coupon' => session('auto_coupon'),
-                'session_ref' => session('ref_code'),
-                'resolved_referrer_id' => $referrer?->id,
-            ]);
-
-            return response()->json(['success' => false, 'message' => 'Kupon tidak valid untuk akun Anda.']);
+        // Validasi dasar (aktif, belum expired, belum habis)
+        if (! $coupon->is_active) {
+            return response()->json(['success' => false, 'message' => 'Kupon sudah tidak aktif.']);
+        }
+        if ($coupon->expired_at && $coupon->expired_at->isPast()) {
+            return response()->json(['success' => false, 'message' => 'Kupon sudah kedaluwarsa.']);
+        }
+        if ($coupon->max_uses && $coupon->used_count >= $coupon->max_uses) {
+            return response()->json(['success' => false, 'message' => 'Kupon sudah habis digunakan.']);
         }
 
         if (! $coupon->isValidForProduct($product)) {
@@ -115,6 +113,21 @@ class CheckoutController extends Controller
                 'success' => false,
                 'message' => 'Minimal pembelian Rp '.number_format($coupon->min_purchase, 0, ',', '.').' untuk menggunakan kupon ini.',
             ]);
+        }
+
+        // Untuk kupon yang diketik manual (bukan auto_coupon dari session),
+        // resolve pemilik kupon & set ref_code di session agar user jadi
+        // downline pemilik kupon saat checkout diproses.
+        $isSessionAuto = session('auto_coupon') && strtoupper(session('auto_coupon')) === strtoupper($coupon->code);
+        if (! $isSessionAuto) {
+            $couponOwner = $this->resolveCouponOwnerForCheckout($coupon, $user);
+            if ($couponOwner) {
+                session([
+                    'auto_coupon_member_id' => $couponOwner->id,
+                    'auto_coupon_member_name' => $couponOwner->name,
+                    'ref_code' => $couponOwner->referral_code,
+                ]);
+            }
         }
 
         $discount = $coupon->calculateDiscount($product->price);
@@ -575,5 +588,35 @@ class CheckoutController extends Controller
             'final_price' => $basePrice - $discount,
             'final_price_formatted' => 'Rp '.number_format($basePrice - $discount, 0, ',', '.'),
         ];
+    }
+
+    /**
+     * Resolve pemilik kupon untuk kupon yang diketik manual di checkout.
+     * Utamakan upline pembeli jika dia pemilik kupon, lain itu ambil
+     * pemilik kupon mana pun selain pembeli sendiri.
+     */
+    private function resolveCouponOwnerForCheckout(Coupon $coupon, ?User $user): ?User
+    {
+        // Kupon global (tanpa members) — tidak ada pemilik spesifik
+        if ($coupon->members()->count() === 0) {
+            return null;
+        }
+
+        // Kupon hanya dimiliki pembeli — tidak bisa
+        $candidates = $coupon->members()->where('user_id', '!=', optional($user)->id)->get();
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        // Utamakan upline pembeli jika dia pemilik kupon
+        if ($user && $user->upline_id) {
+            $upline = $candidates->firstWhere('id', $user->upline_id);
+            if ($upline) {
+                return $upline;
+            }
+        }
+
+        // Fallback: pemilik kupon pertama
+        return $candidates->sortBy('id')->first();
     }
 }
