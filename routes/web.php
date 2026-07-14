@@ -31,6 +31,7 @@ use App\Http\Controllers\Dashboard\LandingPageController as DashboardLandingPage
 use App\Http\Controllers\Dashboard\MemberProductController;
 use App\Http\Controllers\Dashboard\MemberVideoTutorialController;
 use App\Http\Controllers\Dashboard\MessageController as DashboardMessageController;
+use App\Http\Controllers\Dashboard\PageBuilderController as DashboardPageBuilderController;
 use App\Http\Controllers\Dashboard\ProductController as DashboardProductController;
 use App\Http\Controllers\Dashboard\PromoController as DashboardPromoController;
 use App\Http\Controllers\Dashboard\PromoTemplateController as DashboardPromoTemplateController;
@@ -103,6 +104,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/member-products/{product}/edit', [MemberProductController::class, 'edit'])->name('.member-products.edit');
         Route::put('/member-products/{product}', [MemberProductController::class, 'update'])->name('.member-products.update');
         Route::delete('/member-products/{product}', [MemberProductController::class, 'destroy'])->name('.member-products.destroy');
+
+        // Page Builder per produk — mirror admin, dengan ownership check.
+        Route::get('/page-builder', [DashboardPageBuilderController::class, 'index'])->name('.page-builder.index');
+        Route::get('/page-builder/{product}', [DashboardPageBuilderController::class, 'edit'])->name('.page-builder.edit');
+        Route::put('/page-builder/{product}', [DashboardPageBuilderController::class, 'update'])->name('.page-builder.update');
+        Route::post('/page-builder/{product}/upload-image', [DashboardPageBuilderController::class, 'uploadImage'])->name('.page-builder.upload-image');
 
         // Landing page per produk — mirror admin, dengan ownership check.
         Route::get('/products/{product}/landing-page', [DashboardLandingPageController::class, 'edit'])->name('.products.landing-page');
