@@ -100,6 +100,49 @@
                     </div>
                 @endif
 
+                {{-- Perangkat terkoneksi + reset device --}}
+                @php
+                    $devices = $license->devices;
+                    $maxDevices = max(1, (int) ($product->max_devices ?? 1));
+                    $deviceCount = $devices->count();
+                @endphp
+                <div style="background:#151e2d;border:1px solid #2d3a4a;border-radius:8px;padding:12px;margin-bottom:12px;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-[11px] font-semibold dk-text uppercase tracking-wide">Perangkat Terkoneksi</div>
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full {{ $deviceCount >= $maxDevices ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/20 text-emerald-300' }}">
+                            {{ $deviceCount }} / {{ $maxDevices }}
+                        </span>
+                    </div>
+
+                    @if($deviceCount === 0)
+                        <p class="text-xs dk-text-muted">Belum ada perangkat yang terhubung. Lisensi siap diaktifkan di perangkat mana pun.</p>
+                    @else
+                        <ul class="space-y-2 mb-3">
+                            @foreach($devices as $device)
+                                <li class="flex items-start gap-2 text-xs">
+                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:#818cf8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    <div class="min-w-0">
+                                        <div class="font-medium dk-heading truncate">{{ $device->label ?: 'Perangkat tanpa nama' }}</div>
+                                        <div class="dk-text-muted">
+                                            @if($device->ip_address)IP {{ $device->ip_address }} · @endif
+                                            Terakhir aktif {{ $device->last_seen_at?->diffForHumans() ?? '—' }}
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <form method="POST" action="{{ route('dashboard.licenses.reset-devices', $license->id) }}"
+                              onsubmit="return confirm('Reset perangkat lisensi ini? Semua perangkat yang terkoneksi akan dilepas dan kamu perlu mengaktifkan ulang di perangkat yang ingin dipakai.');">
+                            @csrf
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-red-500/40 text-red-300 hover:bg-red-500/10 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Reset Perangkat
+                            </button>
+                        </form>
+                        <p class="text-[11px] dk-text-muted mt-1.5 leading-snug">Gunakan ini kalau ingin pindah ke PC/laptop lain. Setelah reset, aktifkan lisensi di perangkat baru.</p>
+                    @endif
+                </div>
+
                 {{-- Action buttons di footer kartu --}}
                 <div class="flex flex-wrap gap-1.5 pt-2 dk-divider mt-auto">
                     @if($product && ($product->file_url || $product->file_path) && $license->order && $license->order->download_token)
