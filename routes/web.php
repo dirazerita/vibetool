@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MemberCommissionController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PromoTemplateController as AdminPromoTemplateController;
@@ -157,6 +158,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/products-pending', [AdminProductController::class, 'pendingProducts'])->name('products.pending');
         Route::post('/products/{product}/approve', [AdminProductController::class, 'approve'])->name('products.approve');
         Route::post('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
+        Route::get('/page-builder', [PageBuilderController::class, 'index'])->name('page-builder.index');
+        Route::get('/page-builder/{product}', [PageBuilderController::class, 'edit'])->name('page-builder.edit');
+        Route::put('/page-builder/{product}', [PageBuilderController::class, 'update'])->name('page-builder.update');
+        Route::post('/page-builder/{product}/upload-image', [PageBuilderController::class, 'uploadImage'])->name('page-builder.upload-image');
         Route::get('/products/{product}/landing-page', [LandingPageController::class, 'edit'])->name('products.landing-page');
         Route::put('/products/{product}/landing-page', [LandingPageController::class, 'update'])->name('products.landing-page.update');
         Route::post('/products/{product}/landing-page/images', [LandingPageController::class, 'uploadImage'])->name('products.landing-page.images.upload');
