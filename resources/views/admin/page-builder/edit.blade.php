@@ -55,7 +55,10 @@
     @media (max-width:1024px) { .pb-wrap { grid-template-columns:200px 1fr; } .pb-settings { position:fixed; right:0; top:60px; bottom:0; width:300px; z-index:60; background:#0f1729; border-left:1px solid #1e2b3d; padding:16px; } }
 </style>
 
-<div x-data="pageBuilder()" x-init="init()" @beforeunload.window="if (dirty) $event.preventDefault()">
+{{-- CATATAN: jangan tambahkan x-init="init()" — Alpine otomatis memanggil
+     method init() pada objek x-data. Kalau ditulis eksplisit, init() jalan
+     2x dan template awal ter-push dobel (bug konten kembar). --}}
+<div x-data="pageBuilder()" @beforeunload.window="if (dirty) $event.preventDefault()">
 
     <div class="pb-toolbar">
         <a href="{{ route('admin.page-builder.index') }}" class="dk-btn dk-btn-outline" style="padding:7px 14px;">
@@ -100,6 +103,11 @@
                     </div>
                 </template>
             </div>
+            <div class="dk-divider" style="margin:14px 0;"></div>
+            <button type="button" class="dk-btn dk-btn-outline" style="width:100%; justify-content:center; padding:6px; font-size:12px;" @click="resetTemplate()">
+                <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Reset ke Template Awal
+            </button>
             <div class="dk-divider" style="margin:14px 0;"></div>
             <div class="dk-text-muted" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">Pengaturan Halaman</div>
             <div class="pb-field">
@@ -382,7 +390,14 @@ function pageBuilder() {
             return {};
         },
 
+        _inited: false,
+
         init() {
+            // Guard: Alpine memanggil init() otomatis — cegah eksekusi ganda
+            // yang membuat template awal ter-push dua kali (konten kembar).
+            if (this._inited) return;
+            this._inited = true;
+
             if (savedJson) {
                 try {
                     const parsed = JSON.parse(savedJson);
@@ -391,11 +406,23 @@ function pageBuilder() {
                     return;
                 } catch (e) { /* fallthrough ke template default */ }
             }
-            // Template awal: susunan landing page standar dari data produk yang ada.
+            this.applyDefaultTemplate();
+        },
+
+        // Template awal: susunan landing page standar dari data produk yang ada.
+        applyDefaultTemplate() {
+            this.blocks = [];
             ['hero', 'features', 'text', 'video', 'testimonials', 'pricing', 'faq', 'cta'].forEach(t => {
                 if (t === 'video' && !seed.videoUrl) return;
                 this.blocks.push({ id: uid++, type: t, d: this.defaults(t) });
             });
+            this.selected = null;
+        },
+
+        resetTemplate() {
+            if (!confirm('Susun ulang kanvas ke template awal? Semua blok yang ada sekarang akan diganti.')) return;
+            this.applyDefaultTemplate();
+            this.dirty = true;
         },
 
         addBlock(type) {
