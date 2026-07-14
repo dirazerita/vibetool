@@ -8,81 +8,9 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body { background: #0b1120 !important; color: #e2e8f0 !important; }
-        .dk-sidebar-link { display:flex; align-items:center; padding:10px 16px; font-size:14px; font-weight:500; border-radius:10px; color:#94a3b8; transition:all 0.2s; text-decoration:none; }
-        .dk-sidebar-link:hover { background:rgba(99,102,241,0.1); color:#c7d2fe; }
-        .dk-sidebar-link.active { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(99,102,241,0.3); }
-        .dk-sidebar-link svg { width:20px; height:20px; margin-right:12px; flex-shrink:0; }
-        .dk-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; }
-        .dk-table { background:#1a2332; border:1px solid #2d3a4a; border-radius:12px; overflow-x:auto; }
-        .dk-table thead { background:#151e2d; }
-        .dk-table th { color:#94a3b8 !important; border-bottom:1px solid #2d3a4a; padding:12px 24px; text-align:left; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
-        .dk-table td { color:#cbd5e1 !important; border-bottom:1px solid #1e2b3d; padding:16px 24px; font-size:14px; }
-        .dk-table tbody tr:hover { background:#1e2b3d; }
-        .dk-table tbody tr:last-child td { border-bottom:none; }
-        .dk-input { background:#151e2d !important; color:#e2e8f0 !important; border:1px solid #2d3a4a !important; border-radius:8px; padding:8px 12px; font-size:14px; transition:border-color 0.2s; }
-        .dk-input:focus { border-color:#6366f1 !important; outline:none; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
-        .dk-input::placeholder { color:#64748b !important; }
-        .dk-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 20px; border-radius:10px; font-weight:600; font-size:14px; border:none; cursor:pointer; transition:all 0.2s; text-decoration:none; }
-        .dk-btn-primary { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; box-shadow:0 2px 8px rgba(99,102,241,0.25); }
-        .dk-btn-primary:hover { box-shadow:0 4px 16px rgba(99,102,241,0.4); transform:translateY(-1px); color:#fff; }
-        .dk-btn-success { background:linear-gradient(135deg,#059669,#10b981); color:#fff; box-shadow:0 2px 8px rgba(16,185,129,0.25); }
-        .dk-btn-success:hover { box-shadow:0 4px 16px rgba(16,185,129,0.4); transform:translateY(-1px); color:#fff; }
-        .dk-btn-danger { background:linear-gradient(135deg,#dc2626,#e11d48); color:#fff; box-shadow:0 2px 8px rgba(239,68,68,0.25); }
-        .dk-btn-danger:hover { box-shadow:0 4px 16px rgba(239,68,68,0.4); transform:translateY(-1px); color:#fff; }
-        .dk-btn-warning { background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff; box-shadow:0 2px 8px rgba(245,158,11,0.25); }
-        .dk-btn-outline { background:transparent; color:#94a3b8; border:1px solid #2d3a4a; }
-        .dk-btn-outline:hover { background:#1e2b3d; color:#e2e8f0; }
-        .dk-badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:600; }
-        .dk-alert-success { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; padding:12px 16px; border-radius:10px; margin-bottom:24px; font-size:14px; }
-        .dk-alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:12px 16px; border-radius:10px; margin-bottom:24px; font-size:14px; }
-        .dk-label { color:#94a3b8; font-size:14px; font-weight:500; margin-bottom:6px; display:block; }
-        .dk-heading { color:#f1f5f9; }
-        .dk-text-muted { color:#64748b; }
-        .dk-text { color:#cbd5e1; }
-        .dk-divider { border-top:1px solid #1e2b3d; margin:12px 0; }
-        .dk-stat-card { background:#1a2332; border:1px solid #2d3a4a; border-radius:14px; padding:24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; }
-        .dk-stat-card > div { min-width:0; }
-        .dk-stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        select.dk-input { appearance:auto; }
-        textarea.dk-input { resize:vertical; }
-
-        /* Layout shell */
-        * { box-sizing: border-box; }
-        .dk-shell { min-height:100vh; display:flex; }
-        .dk-sidebar { width:260px; background:linear-gradient(180deg,#0f1729 0%,#131d30 100%); flex-shrink:0; border-right:1px solid #1e2b3d; display:flex; flex-direction:column; }
-        .dk-main { flex:1; overflow:auto; min-width:0; }
-        .dk-content { padding:32px; }
-        .dk-topbar { display:none; }
-        .dk-overlay { display:none; }
-
-        /* Responsive stat / card grids */
-        .dk-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); }
-        .dk-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); }
-
-        @media (max-width:1024px) {
-            .dk-grid-4 { grid-template-columns:repeat(2,1fr) !important; }
-            .dk-grid-3 { grid-template-columns:repeat(2,1fr) !important; }
-        }
-
-        @media (max-width:768px) {
-            .dk-sidebar { position:fixed; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); transition:transform 0.25s ease; }
-            .dk-sidebar.dk-open { transform:translateX(0); }
-            .dk-topbar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#0f1729; border-bottom:1px solid #1e2b3d; position:fixed; top:0; left:0; right:0; z-index:30; height:60px; }
-            .dk-content { padding:78px 16px 20px; }
-            .dk-overlay.dk-open { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
-            .dk-table { display:block; overflow-x:auto; white-space:nowrap; }
-            .dk-table th, .dk-table td { padding:12px 16px; }
-        }
-
-        @media (max-width:640px) {
-            .dk-grid-4 { grid-template-columns:1fr !important; }
-            .dk-grid-3 { grid-template-columns:1fr !important; }
-        }
-    </style>
+    @include('layouts.partials.dk-theme')
 </head>
-<body class="font-sans antialiased" style="background:#0b1120; color:#e2e8f0;" x-data="{ sidebarOpen: false }">
+<body class="font-sans antialiased" style="color:#e2e8f0;" x-data="{ sidebarOpen: false }">
     <div class="dk-shell">
         <div class="dk-overlay" :class="sidebarOpen ? 'dk-open' : ''" @click="sidebarOpen = false"></div>
         <aside class="dk-sidebar" :class="sidebarOpen ? 'dk-open' : ''">
