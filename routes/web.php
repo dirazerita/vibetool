@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/products', [DashboardProductController::class, 'index'])->name('.products');
         Route::get('/purchases', [DashboardPurchaseController::class, 'index'])->name('.purchases');
         Route::get('/licenses', [DashboardLicenseController::class, 'index'])->name('.licenses');
+        Route::post('/licenses/{license}/reset-devices', [DashboardLicenseController::class, 'resetDevices'])->name('.licenses.reset-devices');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('.commissions');
         Route::get('/coupons', [DashboardCouponController::class, 'index'])->name('.coupons');
         Route::get('/team', [TeamController::class, 'index'])->name('.team');
