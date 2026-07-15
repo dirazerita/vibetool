@@ -66,6 +66,22 @@ Route::post('/webhook/telegram/{secret}', [TelegramWebhookController::class, 'ha
 // Download
 Route::get('/download/{token}', [DownloadController::class, 'download'])->name('download');
 
+// Autologin dari aplikasi Android native: signed URL 15 menit yang melogin
+// member lalu redirect ke checkout. Pembayaran gateway memang berbasis web.
+Route::get('/app/autologin', function (\Illuminate\Http\Request $request) {
+    $user = \App\Models\User::find($request->query('user'));
+    $slug = $request->query('slug');
+
+    if (! $user || ($user->status ?? 'active') !== 'active') {
+        abort(403, 'Akun tidak valid atau belum aktif.');
+    }
+
+    \Illuminate\Support\Facades\Auth::login($user);
+    $request->session()->regenerate();
+
+    return redirect()->route('checkout', $slug);
+})->middleware('signed')->name('app.autologin');
+
 // Auth required
 Route::middleware('auth')->group(function () {
     // Checkout — dibuka untuk SEMUA user login (termasuk pending/baru register)
