@@ -199,6 +199,13 @@ data class TeamPurchaseMember(
     @SerializedName("purchase_count") val purchaseCount: Int,
     @SerializedName("total_spent") val totalSpent: Double,
     @SerializedName("my_commission") val myCommission: Double,
+    val purchases: List<TeamPurchaseDetail> = emptyList(),
+)
+
+data class TeamPurchaseDetail(
+    @SerializedName("product_title") val productTitle: String,
+    val amount: Double,
+    val date: String?,
 )
 
 // ===== Penarikan =====

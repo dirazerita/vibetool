@@ -265,6 +265,15 @@ class AppDataController extends Controller
             ->get()
             ->keyBy('user_id');
 
+        // Detail order per downline — untuk expand "detail pembelian" di app.
+        $orderDetails = $ids->isEmpty() ? collect() : Order::whereIn('user_id', $ids)
+            ->where('status', 'paid')
+            ->where('amount', '>', 0)
+            ->with('product:id,title')
+            ->latest()
+            ->get()
+            ->groupBy('user_id');
+
         // Komisi yang SAYA dapatkan dari order tiap downline.
         $myCommissions = $ids->isEmpty() ? collect() : Commission::where('user_id', $user->id)
             ->whereHas('order', fn ($q) => $q->whereIn('user_id', $ids)->where('status', 'paid'))
@@ -272,9 +281,15 @@ class AppDataController extends Controller
             ->get()
             ->groupBy(fn ($c) => $c->order?->user_id);
 
-        $team = $downlines->map(function ($d) use ($orderTotals, $myCommissions) {
+        $team = $downlines->map(function ($d) use ($orderTotals, $myCommissions, $orderDetails) {
             $orders = $orderTotals->get($d->id);
             $commission = collect($myCommissions->get($d->id, []))->sum('amount');
+
+            $purchases = collect($orderDetails->get($d->id, []))->map(fn ($o) => [
+                'product_title' => $o->product?->title ?? '—',
+                'amount' => (float) $o->amount,
+                'date' => $o->created_at->toIso8601String(),
+            ])->values();
 
             return [
                 'id' => $d->id,
@@ -284,6 +299,7 @@ class AppDataController extends Controller
                 'purchase_count' => (int) ($orders->cnt ?? 0),
                 'total_spent' => (float) ($orders->total ?? 0),
                 'my_commission' => (float) $commission,
+                'purchases' => $purchases,
             ];
         });
 
