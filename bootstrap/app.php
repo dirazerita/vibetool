@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'track.referral' => \App\Http\Middleware\TrackReferral::class,
+            'auth.apitoken' => \App\Http\Middleware\AuthenticateApiToken::class,
         ]);
         $middleware->append(\App\Http\Middleware\TrackReferral::class);
         $middleware->validateCsrfTokens(except: [
