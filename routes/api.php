@@ -27,6 +27,10 @@ Route::prefix('app')->group(function () {
         Route::get('/purchases', [AppDataController::class, 'purchases']);
         Route::get('/checkout-link/{slug}', [AppDataController::class, 'checkoutLink']);
         Route::get('/web-link', [AppDataController::class, 'webLink']);
+        Route::get('/coupons', [AppDataController::class, 'coupons']);
+        Route::get('/team-purchases', [AppDataController::class, 'teamPurchases']);
+        Route::get('/withdrawals', [AppDataController::class, 'withdrawals']);
+        Route::post('/withdrawals', [AppDataController::class, 'storeWithdrawal']);
     });
 });
 

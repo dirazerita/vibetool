@@ -53,4 +53,16 @@ interface ApiService {
     /** Signed autologin URL untuk membuka halaman dashboard web dari app. */
     @GET("api/app/web-link")
     suspend fun webLink(@Query("to") to: String): Response<WebLinkResponse>
+
+    @GET("api/app/coupons")
+    suspend fun coupons(): Response<CouponsResponse>
+
+    @GET("api/app/team-purchases")
+    suspend fun teamPurchases(): Response<TeamPurchasesResponse>
+
+    @GET("api/app/withdrawals")
+    suspend fun withdrawals(): Response<WithdrawalsResponse>
+
+    @POST("api/app/withdrawals")
+    suspend fun requestWithdrawal(@Body body: WithdrawRequest): Response<SimpleResponse>
 }

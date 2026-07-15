@@ -1,10 +1,9 @@
 package id.vibetool.app.ui.screens
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,21 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.DesignServices
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.MarkEmailRead
-import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -64,34 +49,10 @@ import id.vibetool.app.ui.theme.Red
 import id.vibetool.app.ui.theme.TextMuted
 import kotlinx.coroutines.launch
 
-/** Item menu: kalau webPath != null dibuka di web (autologin), selain itu aksi native. */
-private data class MenuItem(
-    val icon: ImageVector,
-    val title: String,
-    val webPath: String? = null,
-    val needsUpload: Boolean = false,
-)
-
-private val menuItems = listOf(
-    MenuItem(Icons.Filled.ShoppingBag, "Pembelian Saya"),                      // native
-    MenuItem(Icons.Filled.LocalOffer, "Kuponku", "dashboard/coupons"),
-    MenuItem(Icons.Filled.Campaign, "Promo & Share", "dashboard/promo"),
-    MenuItem(Icons.Filled.ReceiptLong, "Pembelian Tim", "dashboard/team-purchases"),
-    MenuItem(Icons.Filled.PlayCircle, "Video Tutorial", "dashboard/video-tutorials"),
-    MenuItem(Icons.Filled.Inventory2, "Produk Saya", "dashboard/member-products", needsUpload = true),
-    MenuItem(Icons.Filled.DesignServices, "Page Builder", "dashboard/page-builder", needsUpload = true),
-    MenuItem(Icons.Filled.Description, "Template Promo Saya", "dashboard/promo-templates", needsUpload = true),
-    MenuItem(Icons.Filled.AccountBalanceWallet, "Penarikan", "dashboard/withdrawals"),
-    MenuItem(Icons.AutoMirrored.Filled.Chat, "Pesan", "dashboard/messages"),
-    MenuItem(Icons.Filled.Lightbulb, "Request Software", "dashboard/software-requests"),
-    MenuItem(Icons.Filled.MarkEmailRead, "Verifikasi Email", "dashboard/email-verification"),
-    MenuItem(Icons.Filled.Settings, "Pengaturan", "dashboard/settings"),
-)
-
 @Composable
 fun ProfileScreen(
     onLoggedOut: () -> Unit,
-    onOpenPurchases: () -> Unit = {},
+    onOpenWithdrawals: () -> Unit = {},
 ) {
     var user by remember { mutableStateOf<User?>(null) }
     var loggingOut by remember { mutableStateOf(false) }
@@ -104,23 +65,6 @@ fun ProfileScreen(
             if (me.isSuccessful) user = me.body()?.user
         } catch (e: Exception) {
             // Layar tetap tampil dengan data seadanya.
-        }
-    }
-
-    /** Buka halaman dashboard web dengan autologin (signed URL 15 menit). */
-    fun openWeb(path: String) {
-        scope.launch {
-            try {
-                val res = ApiClient.api().webLink(path)
-                val url = res.body()?.url
-                if (res.isSuccessful && url != null) {
-                    CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(url))
-                } else {
-                    Toast.makeText(context, "Gagal membuka halaman.", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(context, "Tidak bisa terhubung ke server.", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -154,7 +98,7 @@ fun ProfileScreen(
                         modifier = Modifier.size(64.dp).background(GradientPrimary, CircleShape),
                     )
                 } else {
-                    androidx.compose.foundation.layout.Box(
+                    Box(
                         modifier = Modifier.size(64.dp).background(GradientPrimary, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -173,7 +117,7 @@ fun ProfileScreen(
                     )
                     Text(user?.email ?: "", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
                     user?.referralCode?.let {
-                        Text("Kode: $it", style = MaterialTheme.typography.labelSmall, color = IndigoLight)
+                        Text("Kode Referral: $it", style = MaterialTheme.typography.labelSmall, color = IndigoLight)
                     }
                 }
             }
@@ -181,11 +125,11 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        // Saldo (tap -> Penarikan di web)
+        // Saldo — tap untuk ke halaman Penarikan (native)
         user?.let { u ->
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { openWeb("dashboard/withdrawals") },
+                onClick = onOpenWithdrawals,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, tint = Green)
@@ -202,39 +146,32 @@ fun ProfileScreen(
                     Text("Tarik Saldo →", style = MaterialTheme.typography.labelLarge, color = IndigoLight)
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
         }
 
-        // ===== Menu lengkap (paritas dengan sidebar web) =====
-        Text(
-            "Menu",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 6.dp),
-        )
-
-        val canUpload = user?.canUploadProduct == true
+        // Buka website
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
+            onClick = {
+                CustomTabsIntent.Builder().build()
+                    .launchUrl(context, Uri.parse(ApiClient.BASE_URL))
+            },
         ) {
-            Column {
-                menuItems
-                    .filter { !it.needsUpload || canUpload }
-                    .forEach { item ->
-                        MenuRow(
-                            icon = item.icon,
-                            title = item.title,
-                            isWeb = item.webPath != null,
-                            onClick = {
-                                if (item.webPath != null) openWeb(item.webPath)
-                                else onOpenPurchases()
-                            },
-                        )
-                    }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Language, contentDescription = null, tint = IndigoLight)
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text("Buka Website VibeTool.Id", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Fitur lengkap lainnya ada di tab Menu",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextMuted,
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         // Logout
         GlassCard(
@@ -253,35 +190,5 @@ fun ProfileScreen(
         }
 
         Spacer(Modifier.height(32.dp))
-    }
-}
-
-@Composable
-private fun MenuRow(icon: ImageVector, title: String, isWeb: Boolean, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 13.dp),
-    ) {
-        Icon(icon, contentDescription = null, tint = IndigoLight, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(14.dp))
-        Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        if (isWeb) {
-            Icon(
-                Icons.Filled.OpenInBrowser,
-                contentDescription = "Dibuka di web",
-                tint = TextMuted,
-                modifier = Modifier.size(15.dp),
-            )
-            Spacer(Modifier.width(4.dp))
-        }
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = TextMuted,
-            modifier = Modifier.size(20.dp),
-        )
     }
 }
