@@ -192,6 +192,29 @@ class AppDataController extends Controller
         return response()->json(['ok' => true, 'checkout_url' => $url]);
     }
 
+    /**
+     * Link web dashboard sekali pakai: signed URL yang melogin user lalu
+     * membuka halaman dashboard web (menu yang belum ada versi native-nya —
+     * Kuponku, Penarikan, Pesan, Page Builder, dll). Path ber-whitelist
+     * (dashboard/...) — divalidasi lagi di route app.autologin.
+     */
+    public function webLink(Request $request): JsonResponse
+    {
+        $to = ltrim((string) $request->query('to'), '/');
+
+        $allowed = $to === 'dashboard' || str_starts_with($to, 'dashboard/');
+        if (! $allowed) {
+            return response()->json(['ok' => false, 'error' => 'invalid_path', 'message' => 'Path tidak diizinkan.'], 422);
+        }
+
+        $url = URL::temporarySignedRoute('app.autologin', now()->addMinutes(15), [
+            'user' => $request->user()->id,
+            'to' => $to,
+        ]);
+
+        return response()->json(['ok' => true, 'url' => $url]);
+    }
+
     private function formatProduct(Product $p, bool $detail = false): array
     {
         $thumb = null;

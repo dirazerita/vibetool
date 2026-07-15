@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,11 @@ import id.vibetool.app.ui.theme.IndigoLight
 import id.vibetool.app.ui.theme.TextMuted
 
 @Composable
-fun HomeScreen(onOpenProduct: (String) -> Unit) {
+fun HomeScreen(
+    onOpenProduct: (String) -> Unit,
+    onOpenTeam: () -> Unit = {},
+    onOpenPurchases: () -> Unit = {},
+) {
     var summary by remember { mutableStateOf<DashboardSummary?>(null) }
     var products by remember { mutableStateOf<List<Product>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
@@ -96,11 +101,16 @@ fun HomeScreen(onOpenProduct: (String) -> Unit) {
             // Header saldo & referral — span 2 kolom
             summary?.let { s ->
                 item(span = { GridItemSpan(2) }) {
-                    BalanceHeader(s) { link ->
-                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        cm.setPrimaryClip(ClipData.newPlainText("Link Afiliasi", link))
-                        Toast.makeText(context, "Link afiliasi disalin!", Toast.LENGTH_SHORT).show()
-                    }
+                    BalanceHeader(
+                        s = s,
+                        onCopyLink = { link ->
+                            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            cm.setPrimaryClip(ClipData.newPlainText("Link Afiliasi", link))
+                            Toast.makeText(context, "Link afiliasi disalin!", Toast.LENGTH_SHORT).show()
+                        },
+                        onTeamClick = onOpenTeam,
+                        onPurchasesClick = onOpenPurchases,
+                    )
                 }
             }
 
@@ -120,7 +130,12 @@ fun HomeScreen(onOpenProduct: (String) -> Unit) {
 }
 
 @Composable
-private fun BalanceHeader(s: DashboardSummary, onCopyLink: (String) -> Unit) {
+private fun BalanceHeader(
+    s: DashboardSummary,
+    onCopyLink: (String) -> Unit,
+    onTeamClick: () -> Unit = {},
+    onPurchasesClick: () -> Unit = {},
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -136,9 +151,9 @@ private fun BalanceHeader(s: DashboardSummary, onCopyLink: (String) -> Unit) {
             )
             Spacer(Modifier.height(14.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                StatChip(Icons.Filled.Group, "${s.teamCount} Tim")
+                StatChip(Icons.Filled.Group, "${s.teamCount} Tim", onClick = onTeamClick)
                 Spacer(Modifier.width(8.dp))
-                StatChip(Icons.Filled.ShoppingBag, "${s.purchaseCount} Pembelian")
+                StatChip(Icons.Filled.ShoppingBag, "${s.purchaseCount} Pembelian", onClick = onPurchasesClick)
             }
             s.referralLink?.let { link ->
                 Spacer(Modifier.height(14.dp))
@@ -167,11 +182,16 @@ private fun BalanceHeader(s: DashboardSummary, onCopyLink: (String) -> Unit) {
 }
 
 @Composable
-private fun StatChip(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
+private fun StatChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit = {},
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .background(Color(0x26FFFFFF), RoundedCornerShape(20.dp))
+            .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.height(15.dp))
