@@ -26,6 +26,7 @@ Route::prefix('app')->group(function () {
         Route::get('/team', [AppDataController::class, 'team']);
         Route::get('/purchases', [AppDataController::class, 'purchases']);
         Route::get('/checkout-link/{slug}', [AppDataController::class, 'checkoutLink']);
+        Route::get('/web-link', [AppDataController::class, 'webLink']);
     });
 });
 

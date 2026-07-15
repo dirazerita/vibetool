@@ -5,6 +5,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -48,4 +49,8 @@ interface ApiService {
 
     @GET("api/app/checkout-link/{slug}")
     suspend fun checkoutLink(@Path("slug") slug: String): Response<CheckoutLinkResponse>
+
+    /** Signed autologin URL untuk membuka halaman dashboard web dari app. */
+    @GET("api/app/web-link")
+    suspend fun webLink(@Query("to") to: String): Response<WebLinkResponse>
 }

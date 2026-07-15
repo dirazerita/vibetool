@@ -149,3 +149,11 @@ data class CheckoutLinkResponse(
     @SerializedName("checkout_url") val checkoutUrl: String? = null,
     val message: String? = null,
 )
+
+// ===== Link web dashboard (autologin) =====
+
+data class WebLinkResponse(
+    val ok: Boolean,
+    val url: String? = null,
+    val message: String? = null,
+)

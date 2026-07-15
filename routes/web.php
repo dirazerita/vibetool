@@ -67,19 +67,35 @@ Route::post('/webhook/telegram/{secret}', [TelegramWebhookController::class, 'ha
 Route::get('/download/{token}', [DownloadController::class, 'download'])->name('download');
 
 // Autologin dari aplikasi Android native: signed URL 15 menit yang melogin
-// member lalu redirect ke checkout. Pembayaran gateway memang berbasis web.
+// member lalu redirect ke halaman tujuan (checkout / halaman dashboard).
+// Param: user (id), lalu salah satu dari:
+//   - slug : redirect ke checkout/{slug} (untuk pembelian)
+//   - to   : path internal ber-whitelist (dashboard/...) untuk buka menu web
 Route::get('/app/autologin', function (\Illuminate\Http\Request $request) {
     $user = \App\Models\User::find($request->query('user'));
-    $slug = $request->query('slug');
 
     if (! $user || ($user->status ?? 'active') !== 'active') {
         abort(403, 'Akun tidak valid atau belum aktif.');
     }
 
+    $slug = $request->query('slug');
+    $to = ltrim((string) $request->query('to'), '/');
+
+    // Whitelist path internal — cegah open redirect.
+    $allowedTo = $to !== '' && (
+        $to === 'dashboard' || str_starts_with($to, 'dashboard/')
+    );
+
+    if (! $slug && ! $allowedTo) {
+        abort(403, 'Tujuan tidak valid.');
+    }
+
     \Illuminate\Support\Facades\Auth::login($user);
     $request->session()->regenerate();
 
-    return redirect()->route('checkout', $slug);
+    return $slug
+        ? redirect()->route('checkout', $slug)
+        : redirect('/'.$to);
 })->middleware('signed')->name('app.autologin');
 
 // Auth required

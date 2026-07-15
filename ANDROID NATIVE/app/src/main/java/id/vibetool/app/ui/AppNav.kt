@@ -31,6 +31,7 @@ import id.vibetool.app.ui.screens.LicensesScreen
 import id.vibetool.app.ui.screens.LoginScreen
 import id.vibetool.app.ui.screens.ProductDetailScreen
 import id.vibetool.app.ui.screens.ProfileScreen
+import id.vibetool.app.ui.screens.PurchasesScreen
 import id.vibetool.app.ui.screens.RegisterScreen
 import id.vibetool.app.ui.screens.TeamScreen
 import id.vibetool.app.ui.theme.BgDeep
@@ -112,7 +113,20 @@ fun AppNav() {
                 RegisterScreen(onBackToLogin = { navController.popBackStack() })
             }
             composable("home") {
-                HomeScreen(onOpenProduct = { slug -> navController.navigate("product/$slug") })
+                HomeScreen(
+                    onOpenProduct = { slug -> navController.navigate("product/$slug") },
+                    onOpenTeam = {
+                        navController.navigate("team") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onOpenPurchases = { navController.navigate("purchases") },
+                )
+            }
+            composable("purchases") {
+                PurchasesScreen(onBack = { navController.popBackStack() })
             }
             composable("product/{slug}") { entry ->
                 val slug = entry.arguments?.getString("slug") ?: return@composable
@@ -128,6 +142,7 @@ fun AppNav() {
                             popUpTo(0) { inclusive = true }
                         }
                     },
+                    onOpenPurchases = { navController.navigate("purchases") },
                 )
             }
         }
