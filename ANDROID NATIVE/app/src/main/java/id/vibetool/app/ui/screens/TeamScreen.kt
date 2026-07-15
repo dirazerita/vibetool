@@ -38,8 +38,9 @@ import id.vibetool.app.ui.theme.GradientPrimary
 import id.vibetool.app.ui.theme.Green
 import id.vibetool.app.ui.theme.TextMuted
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun TeamScreen() {
+fun TeamScreen(onBack: (() -> Unit)? = null) {
     var team by remember { mutableStateOf<List<TeamMember>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -58,12 +59,33 @@ fun TeamScreen() {
         loading = false
     }
 
+    androidx.compose.material3.Scaffold(
+        containerColor = id.vibetool.app.ui.theme.BgDeep,
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { Text("Tim / Downline") },
+                navigationIcon = {
+                    if (onBack != null) {
+                        androidx.compose.material3.IconButton(onClick = onBack) {
+                            androidx.compose.material3.Icon(
+                                androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Kembali",
+                            )
+                        }
+                    }
+                },
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    containerColor = id.vibetool.app.ui.theme.BgDeep,
+                ),
+            )
+        },
+    ) { padding ->
     when {
-        loading -> CenterLoading()
-        error != null -> CenterMessage(error!!)
-        team.isEmpty() -> CenterMessage("Belum ada anggota tim.\nAjak teman lewat link afiliasimu — mereka jadi downline-mu!")
+        loading -> CenterLoading(Modifier.padding(padding))
+        error != null -> CenterMessage(error!!, Modifier.padding(padding))
+        team.isEmpty() -> CenterMessage("Belum ada anggota tim.\nAjak teman lewat link afiliasimu — mereka jadi downline-mu!", Modifier.padding(padding))
         else -> LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -107,5 +129,6 @@ fun TeamScreen() {
                 }
             }
         }
+    }
     }
 }

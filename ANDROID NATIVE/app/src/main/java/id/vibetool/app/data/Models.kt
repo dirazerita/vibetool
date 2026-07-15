@@ -157,3 +157,71 @@ data class WebLinkResponse(
     val url: String? = null,
     val message: String? = null,
 )
+
+// ===== Kupon =====
+
+data class CouponsResponse(
+    val ok: Boolean,
+    val assigned: List<Coupon> = emptyList(),
+    val global: List<Coupon> = emptyList(),
+)
+
+data class Coupon(
+    val id: Long,
+    val code: String,
+    @SerializedName("discount_type") val discountType: String?,
+    @SerializedName("discount_value") val discountValue: Double,
+    @SerializedName("expired_at") val expiredAt: String?,
+    @SerializedName("is_usable") val isUsable: Boolean,
+    val products: List<String> = emptyList(),
+)
+
+// ===== Pembelian Tim =====
+
+data class TeamPurchasesResponse(
+    val ok: Boolean,
+    val stats: TeamPurchaseStats? = null,
+    val team: List<TeamPurchaseMember> = emptyList(),
+)
+
+data class TeamPurchaseStats(
+    val total: Int,
+    val buyers: Int,
+    @SerializedName("non_buyers") val nonBuyers: Int,
+    @SerializedName("team_commission") val teamCommission: Double,
+)
+
+data class TeamPurchaseMember(
+    val id: Long,
+    val name: String,
+    @SerializedName("joined_at") val joinedAt: String?,
+    @SerializedName("has_purchased") val hasPurchased: Boolean,
+    @SerializedName("purchase_count") val purchaseCount: Int,
+    @SerializedName("total_spent") val totalSpent: Double,
+    @SerializedName("my_commission") val myCommission: Double,
+)
+
+// ===== Penarikan =====
+
+data class WithdrawalsResponse(
+    val ok: Boolean,
+    val balance: Double = 0.0,
+    @SerializedName("min_amount") val minAmount: Double = 50000.0,
+    @SerializedName("email_verified") val emailVerified: Boolean = false,
+    @SerializedName("bank_filled") val bankFilled: Boolean = false,
+    @SerializedName("bank_name") val bankName: String? = null,
+    @SerializedName("bank_account") val bankAccount: String? = null,
+    val withdrawals: List<WithdrawalItem> = emptyList(),
+)
+
+data class WithdrawalItem(
+    val id: Long,
+    val amount: Double,
+    val status: String,
+    @SerializedName("bank_name") val bankName: String?,
+    @SerializedName("bank_account") val bankAccount: String?,
+    val note: String?,
+    @SerializedName("created_at") val createdAt: String?,
+)
+
+data class WithdrawRequest(val amount: Double)

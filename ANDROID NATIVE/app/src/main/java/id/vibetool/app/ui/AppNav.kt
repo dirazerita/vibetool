@@ -2,11 +2,11 @@ package id.vibetool.app.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -26,14 +26,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import id.vibetool.app.data.ApiClient
 import id.vibetool.app.ui.screens.CommissionsScreen
+import id.vibetool.app.ui.screens.CouponsScreen
 import id.vibetool.app.ui.screens.HomeScreen
 import id.vibetool.app.ui.screens.LicensesScreen
 import id.vibetool.app.ui.screens.LoginScreen
+import id.vibetool.app.ui.screens.MenuScreen
 import id.vibetool.app.ui.screens.ProductDetailScreen
 import id.vibetool.app.ui.screens.ProfileScreen
 import id.vibetool.app.ui.screens.PurchasesScreen
 import id.vibetool.app.ui.screens.RegisterScreen
+import id.vibetool.app.ui.screens.TeamPurchasesScreen
 import id.vibetool.app.ui.screens.TeamScreen
+import id.vibetool.app.ui.screens.WithdrawalsScreen
 import id.vibetool.app.ui.theme.BgDeep
 import id.vibetool.app.ui.theme.Indigo
 import id.vibetool.app.ui.theme.Surface1
@@ -49,7 +53,7 @@ private val bottomTabs = listOf(
     BottomTab("home", "Beranda", Icons.Filled.Home),
     BottomTab("commissions", "Komisi", Icons.Filled.Paid),
     BottomTab("licenses", "Lisensi", Icons.Filled.Key),
-    BottomTab("team", "Tim", Icons.Filled.Group),
+    BottomTab("menu", "Menu", Icons.Filled.Apps),
     BottomTab("profile", "Profil", Icons.Filled.Person),
 )
 
@@ -115,18 +119,9 @@ fun AppNav() {
             composable("home") {
                 HomeScreen(
                     onOpenProduct = { slug -> navController.navigate("product/$slug") },
-                    onOpenTeam = {
-                        navController.navigate("team") {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
+                    onOpenTeam = { navController.navigate("team") },
                     onOpenPurchases = { navController.navigate("purchases") },
                 )
-            }
-            composable("purchases") {
-                PurchasesScreen(onBack = { navController.popBackStack() })
             }
             composable("product/{slug}") { entry ->
                 val slug = entry.arguments?.getString("slug") ?: return@composable
@@ -134,7 +129,9 @@ fun AppNav() {
             }
             composable("commissions") { CommissionsScreen() }
             composable("licenses") { LicensesScreen() }
-            composable("team") { TeamScreen() }
+            composable("menu") {
+                MenuScreen(onNavigate = { route -> navController.navigate(route) })
+            }
             composable("profile") {
                 ProfileScreen(
                     onLoggedOut = {
@@ -142,8 +139,25 @@ fun AppNav() {
                             popUpTo(0) { inclusive = true }
                         }
                     },
-                    onOpenPurchases = { navController.navigate("purchases") },
+                    onOpenWithdrawals = { navController.navigate("withdrawals") },
                 )
+            }
+
+            // ===== Layar detail (di-push, punya tombol kembali) =====
+            composable("purchases") {
+                PurchasesScreen(onBack = { navController.popBackStack() })
+            }
+            composable("team") {
+                TeamScreen(onBack = { navController.popBackStack() })
+            }
+            composable("coupons") {
+                CouponsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("team-purchases") {
+                TeamPurchasesScreen(onBack = { navController.popBackStack() })
+            }
+            composable("withdrawals") {
+                WithdrawalsScreen(onBack = { navController.popBackStack() })
             }
         }
     }
