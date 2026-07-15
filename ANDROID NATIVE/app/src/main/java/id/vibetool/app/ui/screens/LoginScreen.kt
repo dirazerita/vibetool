@@ -1,8 +1,7 @@
 package id.vibetool.app.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,11 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
@@ -32,15 +29,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import id.vibetool.app.R
 import id.vibetool.app.data.ApiClient
 import id.vibetool.app.data.LoginRequest
 import id.vibetool.app.ui.components.GradientButton
-import id.vibetool.app.ui.theme.GradientPrimary
 import id.vibetool.app.ui.theme.Red
 import id.vibetool.app.ui.theme.TextMuted
 import kotlinx.coroutines.launch
@@ -96,31 +93,16 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(32.dp))
 
-        // Logo mark
-        Box(
-            modifier = Modifier
-                .size(84.dp)
-                .background(GradientPrimary, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.Bolt,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(44.dp),
-            )
-        }
-        Spacer(Modifier.height(20.dp))
-        Text("VibeTool.Id", style = MaterialTheme.typography.headlineLarge)
-        Text(
-            "Marketplace Produk Digital",
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted,
+        // Logo resmi VibeTool.Id (sudah memuat wordmark + tagline)
+        Image(
+            painter = painterResource(R.drawable.logo),
+            contentDescription = "VibeTool.Id",
+            modifier = Modifier.size(230.dp),
         )
 
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(12.dp))
 
         OutlinedTextField(
             value = email,
