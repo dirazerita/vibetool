@@ -3,6 +3,8 @@ package id.vibetool.app.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,15 +18,25 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import id.vibetool.app.ui.theme.BorderSoft
-import id.vibetool.app.ui.theme.GradientPrimary
-import id.vibetool.app.ui.theme.Surface1
+import id.vibetool.app.ui.theme.BevelInset
+import id.vibetool.app.ui.theme.BevelRaised
+import id.vibetool.app.ui.theme.GradientButtonGloss
+import id.vibetool.app.ui.theme.ShadowAmbient
+import id.vibetool.app.ui.theme.ShadowSpot
+import id.vibetool.app.ui.theme.SurfaceInset
+import id.vibetool.app.ui.theme.SurfaceRaised
 import id.vibetool.app.ui.theme.TextMuted
 import java.text.NumberFormat
 import java.util.Locale
@@ -36,7 +48,20 @@ fun rupiah(amount: Double): String {
     return "Rp " + nf.format(amount)
 }
 
-/** Tombol utama dengan latar gradient indigo-violet. */
+// ===== Modifier skeuomorphic — bahasa visual utama app =====
+
+/** Pelat timbul: bayangan jatuh ke bawah + permukaan bergradasi + bevel rim. */
+fun Modifier.skeuoRaised(shape: Shape, elevation: Dp = 10.dp): Modifier = this
+    .shadow(elevation, shape, ambientColor = ShadowAmbient, spotColor = ShadowSpot)
+    .background(SurfaceRaised, shape)
+    .border(1.dp, BevelRaised, shape)
+
+/** Sumur cekung: seolah dicungkil dari permukaan — untuk field, chip, area detail. */
+fun Modifier.skeuoInset(shape: Shape): Modifier = this
+    .background(SurfaceInset, shape)
+    .border(1.dp, BevelInset, shape)
+
+/** Tombol utama glossy 3D — terlihat bisa ditekan, dan memang "tenggelam" saat ditekan. */
 @Composable
 fun GradientButton(
     text: String,
@@ -45,14 +70,27 @@ fun GradientButton(
     enabled: Boolean = true,
     loading: Boolean = false,
 ) {
+    val shape = RoundedCornerShape(14.dp)
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val active = enabled && !loading
+
     Box(
         modifier = modifier
-            .background(
-                brush = GradientPrimary,
-                shape = RoundedCornerShape(14.dp),
-                alpha = if (enabled && !loading) 1f else 0.55f,
+            .scale(if (pressed && active) 0.97f else 1f)
+            .shadow(
+                if (pressed && active) 2.dp else 10.dp,
+                shape,
+                ambientColor = ShadowAmbient,
+                spotColor = Color(0x994F46E5),
             )
-            .clickable(enabled = enabled && !loading) { onClick() }
+            .background(GradientButtonGloss, shape, alpha = if (active) 1f else 0.55f)
+            .border(1.dp, BevelRaised, shape)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = active,
+            ) { onClick() }
             .padding(vertical = 15.dp, horizontal = 24.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -73,7 +111,7 @@ fun GradientButton(
     }
 }
 
-/** Kartu permukaan gelap dengan border lembut — bahasa visual utama app. */
+/** Kartu pelat timbul dengan bevel — bahasa visual utama app. */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -81,9 +119,7 @@ fun GlassCard(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    var m = modifier
-        .background(Surface1, RoundedCornerShape(18.dp))
-        .border(1.dp, BorderSoft, RoundedCornerShape(18.dp))
+    var m = modifier.skeuoRaised(RoundedCornerShape(18.dp))
     if (onClick != null) m = m.clickable { onClick() }
 
     Box(modifier = m.padding(contentPadding)) {
