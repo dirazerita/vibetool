@@ -46,10 +46,10 @@ import id.vibetool.app.data.License
 import id.vibetool.app.ui.components.CenterLoading
 import id.vibetool.app.ui.components.CenterMessage
 import id.vibetool.app.ui.components.GlassCard
+import id.vibetool.app.ui.components.skeuoInset
 import id.vibetool.app.ui.theme.Green
 import id.vibetool.app.ui.theme.IndigoLight
 import id.vibetool.app.ui.theme.Red
-import id.vibetool.app.ui.theme.Surface2
 import id.vibetool.app.ui.theme.TextMuted
 import kotlinx.coroutines.launch
 
@@ -162,7 +162,7 @@ private fun LicenseCard(lic: License, onCopy: () -> Unit, onReset: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Surface2, RoundedCornerShape(10.dp))
+                    .skeuoInset(RoundedCornerShape(10.dp))
                     .padding(start = 12.dp),
             ) {
                 Text(

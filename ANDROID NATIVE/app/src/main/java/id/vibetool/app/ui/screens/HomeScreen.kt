@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,10 +55,13 @@ import id.vibetool.app.ui.components.CenterLoading
 import id.vibetool.app.ui.components.CenterMessage
 import id.vibetool.app.ui.components.GlassCard
 import id.vibetool.app.ui.components.rupiah
-import id.vibetool.app.ui.theme.Green
-import id.vibetool.app.ui.theme.GradientHero
+import id.vibetool.app.ui.components.skeuoInset
+import id.vibetool.app.ui.theme.BevelRaised
+import id.vibetool.app.ui.theme.GradientHeroGloss
 import id.vibetool.app.ui.theme.GradientPrimary
+import id.vibetool.app.ui.theme.Green
 import id.vibetool.app.ui.theme.IndigoLight
+import id.vibetool.app.ui.theme.ShadowAmbient
 import id.vibetool.app.ui.theme.TextMuted
 
 @Composable
@@ -136,10 +141,13 @@ private fun BalanceHeader(
     onTeamClick: () -> Unit = {},
     onPurchasesClick: () -> Unit = {},
 ) {
+    val heroShape = RoundedCornerShape(20.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GradientHero, RoundedCornerShape(20.dp))
+            .shadow(12.dp, heroShape, ambientColor = ShadowAmbient, spotColor = Color(0x995B21B6))
+            .background(GradientHeroGloss, heroShape)
+            .border(1.dp, BevelRaised, heroShape)
             .padding(20.dp),
     ) {
         Column {
@@ -161,7 +169,7 @@ private fun BalanceHeader(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0x33FFFFFF), RoundedCornerShape(12.dp))
+                        .skeuoInset(RoundedCornerShape(12.dp))
                         .padding(start = 14.dp, top = 2.dp, bottom = 2.dp, end = 2.dp),
                 ) {
                     Text(
@@ -190,7 +198,7 @@ private fun StatChip(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(Color(0x26FFFFFF), RoundedCornerShape(20.dp))
+            .skeuoInset(RoundedCornerShape(20.dp))
             .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {

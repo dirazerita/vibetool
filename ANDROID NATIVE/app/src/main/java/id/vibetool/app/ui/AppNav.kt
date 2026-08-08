@@ -1,6 +1,17 @@
 package id.vibetool.app.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Home
@@ -9,16 +20,16 @@ import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,9 +49,10 @@ import id.vibetool.app.ui.screens.RegisterScreen
 import id.vibetool.app.ui.screens.TeamPurchasesScreen
 import id.vibetool.app.ui.screens.TeamScreen
 import id.vibetool.app.ui.screens.WithdrawalsScreen
+import id.vibetool.app.ui.components.skeuoInset
+import id.vibetool.app.ui.components.skeuoRaised
 import id.vibetool.app.ui.theme.BgDeep
-import id.vibetool.app.ui.theme.Indigo
-import id.vibetool.app.ui.theme.Surface1
+import id.vibetool.app.ui.theme.IndigoLight
 import id.vibetool.app.ui.theme.TextMuted
 
 private data class BottomTab(
@@ -70,31 +82,18 @@ fun AppNav() {
         containerColor = BgDeep,
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(containerColor = Surface1) {
-                    bottomTabs.forEach { tab ->
-                        NavigationBarItem(
-                            selected = currentRoute == tab.route,
-                            onClick = {
-                                navController.navigate(tab.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label, style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color.White,
-                                selectedTextColor = Color.White,
-                                indicatorColor = Indigo,
-                                unselectedIconColor = TextMuted,
-                                unselectedTextColor = TextMuted,
-                            ),
-                        )
-                    }
-                }
+                SkeuoBottomBar(
+                    currentRoute = currentRoute,
+                    onTabClick = { route ->
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             }
         },
     ) { padding ->
@@ -158,6 +157,55 @@ fun AppNav() {
             }
             composable("withdrawals") {
                 WithdrawalsScreen(onBack = { navController.popBackStack() })
+            }
+        }
+    }
+}
+
+/** Dock navigasi timbul; tab terpilih tampak tenggelam ke dalam dock. */
+@Composable
+private fun SkeuoBottomBar(
+    currentRoute: String?,
+    onTabClick: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .skeuoRaised(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp), elevation = 16.dp)
+            .navigationBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        bottomTabs.forEach { tab ->
+            val selected = currentRoute == tab.route
+            var itemModifier = Modifier
+                .weight(1f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) { onTabClick(tab.route) }
+            if (selected) {
+                itemModifier = itemModifier.skeuoInset(RoundedCornerShape(16.dp))
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = itemModifier.padding(vertical = 8.dp),
+            ) {
+                Icon(
+                    tab.icon,
+                    contentDescription = tab.label,
+                    tint = if (selected) IndigoLight else TextMuted,
+                    modifier = Modifier.size(24.dp),
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    tab.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) IndigoLight else TextMuted,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                )
             }
         }
     }

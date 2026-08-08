@@ -48,11 +48,11 @@ import id.vibetool.app.ui.components.CenterLoading
 import id.vibetool.app.ui.components.CenterMessage
 import id.vibetool.app.ui.components.GlassCard
 import id.vibetool.app.ui.components.rupiah
+import id.vibetool.app.ui.components.skeuoInset
 import id.vibetool.app.ui.theme.Amber
 import id.vibetool.app.ui.theme.BgDeep
 import id.vibetool.app.ui.theme.Green
 import id.vibetool.app.ui.theme.IndigoLight
-import id.vibetool.app.ui.theme.Surface2
 import id.vibetool.app.ui.theme.TextMuted
 
 /** Filter daftar downline berdasarkan kotak statistik yang diklik. */
@@ -185,7 +185,7 @@ private fun StatBox(
     onClick: () -> Unit,
 ) {
     var boxModifier = modifier
-        .background(Surface2, RoundedCornerShape(18.dp))
+        .skeuoInset(RoundedCornerShape(18.dp))
         .clickable { onClick() }
     if (selected) {
         boxModifier = boxModifier.border(2.dp, color, RoundedCornerShape(18.dp))
@@ -261,7 +261,7 @@ private fun MemberRow(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Surface2, RoundedCornerShape(12.dp))
+                            .skeuoInset(RoundedCornerShape(12.dp))
                             .padding(12.dp),
                     ) {
                         Text(
