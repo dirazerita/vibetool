@@ -25,14 +25,17 @@ class AiAgentController extends Controller
     }
 
     /** Cek saldo kredit akun FAL (dipakai tombol Cek Saldo di Settings). */
-    public function balance(): JsonResponse
+    public function balance(Request $request): JsonResponse
     {
-        if (! $this->fal->enabled()) {
+        $request->validate(['key' => ['nullable', 'string', 'max:255']]);
+
+        $key = trim((string) $request->input('key', ''));
+        if ($key === '' && ! $this->fal->enabled()) {
             return response()->json(['ok' => false, 'message' => 'FAL.AI API Key belum diisi.'], 422);
         }
 
         try {
-            $data = $this->fal->balance();
+            $data = $this->fal->balance($key !== '' ? $key : null);
 
             return response()->json([
                 'ok' => true,

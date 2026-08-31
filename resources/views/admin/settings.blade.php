@@ -149,48 +149,81 @@
             </div>
         </div>
 
+        <style>[x-cloak]{display:none!important}</style>
         <div class="dk-card" style="padding:24px; margin-bottom:24px;">
             <h2 class="text-lg font-semibold dk-heading mb-1">AI Agent (FAL.AI)</h2>
             <p class="text-xs dk-text-muted mb-4">Dipakai fitur "Buat Produk dengan AI" di halaman Tambah Produk: membaca link repo, membuat judul, deskripsi, thumbnail, dan landing page otomatis. Ambil API Key di <a href="https://fal.ai/dashboard/keys" target="_blank" style="color:#818cf8">fal.ai/dashboard/keys</a>.</p>
             <div class="space-y-4">
-                <div>
-                    <label for="fal_api_key" class="dk-label">FAL API Key</label>
-                    <input type="password" name="fal_api_key" id="fal_api_key" value="{{ old('fal_api_key', $falApiKey) }}" placeholder="key_id:key_secret" class="w-full dk-input" autocomplete="off">
-                    <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk menonaktifkan AI Agent.</p>
-                    @error('fal_api_key') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" id="fal-balance-btn" onclick="falCheckBalance()"
-                            class="px-4 py-2 rounded-lg text-sm font-medium"
-                            style="border:1px solid #6366f1; color:#a5b4fc; background:rgba(99,102,241,.08);">
-                        💰 Cek Saldo
-                    </button>
-                    <span id="fal-balance-result" class="text-sm" style="display:none;"></span>
+                <div x-data="falKeys()">
+                    <label class="dk-label">FAL API Keys <span class="text-xs dk-text-muted font-normal">— bisa lebih dari satu; pilih yang Aktif</span></label>
+                    <template x-for="(row, i) in rows" :key="row.id">
+                        <div class="mb-2">
+                            <div class="flex items-center gap-2">
+                                <input type="radio" name="fal_api_key_active" :value="i" x-model.number="active" title="Jadikan key aktif" style="accent-color:#6366f1; flex-shrink:0;">
+                                <input type="password" name="fal_api_keys[]" x-model="row.key" placeholder="key_id:key_secret" class="w-full dk-input" autocomplete="off">
+                                <button type="button" @click="check(i)" :disabled="row.checking"
+                                        class="px-3 py-2 rounded-lg text-sm" title="Cek saldo key ini"
+                                        style="border:1px solid #6366f1; color:#a5b4fc; background:rgba(99,102,241,.08); flex-shrink:0;"
+                                        x-text="row.checking ? '⏳' : '💰'"></button>
+                                <button type="button" @click="remove(i)"
+                                        class="px-3 py-2 rounded-lg text-sm" title="Hapus key ini"
+                                        style="border:1px solid #475569; color:#94a3b8; flex-shrink:0;">🗑</button>
+                            </div>
+                            <p class="text-xs mt-1" style="margin-left:26px;" x-show="row.result" x-cloak
+                               :style="row.error ? 'color:#f87171; margin-left:26px;' : 'color:#34d399; margin-left:26px;'"
+                               x-text="row.result"></p>
+                            <p class="text-xs mt-0.5 dk-text-muted" style="margin-left:26px;" x-show="i === active" x-cloak>
+                                Key aktif — dipakai duluan. Jika error/kehabisan saldo, agent otomatis pindah ke key berikutnya.
+                            </p>
+                        </div>
+                    </template>
+                    <button type="button" @click="add()"
+                            class="px-4 py-2 rounded-lg text-sm font-medium mt-1"
+                            style="border:1px dashed #6366f1; color:#a5b4fc;">➕ Add Key</button>
+                    <p class="text-xs mt-2 dk-text-muted">Kosongkan semua untuk menonaktifkan AI Agent. Jangan lupa klik <b>Simpan</b> setelah menambah/mengubah key.</p>
+                    @error('fal_api_keys') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    @error('fal_api_keys.*') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <script>
-                async function falCheckBalance() {
-                    const btn = document.getElementById('fal-balance-btn');
-                    const out = document.getElementById('fal-balance-result');
-                    btn.disabled = true;
-                    btn.textContent = '⏳ Mengecek…';
-                    out.style.display = 'inline';
-                    out.style.color = '#94a3b8';
-                    out.textContent = 'Menghubungi FAL.AI…';
-                    try {
-                        const res = await fetch('{{ route('admin.ai-agent.balance') }}', {
-                            headers: { 'Accept': 'application/json' },
-                        });
-                        const data = await res.json().catch(() => ({}));
-                        if (!res.ok || !data.ok) throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
-                        out.style.color = '#34d399';
-                        out.textContent = 'Saldo: ' + data.formatted;
-                    } catch (e) {
-                        out.style.color = '#f87171';
-                        out.textContent = e.message;
-                    } finally {
-                        btn.disabled = false;
-                        btn.textContent = '💰 Cek Saldo';
-                    }
+                function falKeys() {
+                    const initial = @json($falApiKeys);
+                    const activeKey = @json($falApiKey);
+                    let nextId = 1;
+                    const mkRow = (k) => ({ id: nextId++, key: k, result: '', error: false, checking: false });
+                    return {
+                        rows: (initial.length ? initial : ['']).map(mkRow),
+                        active: Math.max(0, initial.indexOf(activeKey)),
+                        add() { this.rows.push(mkRow('')); },
+                        remove(i) {
+                            this.rows.splice(i, 1);
+                            if (!this.rows.length) this.add();
+                            if (this.active >= this.rows.length) this.active = 0;
+                        },
+                        async check(i) {
+                            const row = this.rows[i];
+                            if (!row.key.trim()) { row.error = true; row.result = 'Isi key dulu.'; return; }
+                            row.checking = true; row.error = false; row.result = 'Menghubungi FAL.AI…';
+                            try {
+                                const res = await fetch('{{ route('admin.ai-agent.balance') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    },
+                                    body: JSON.stringify({ key: row.key }),
+                                });
+                                const data = await res.json().catch(() => ({}));
+                                if (!res.ok || !data.ok) throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
+                                row.result = 'Saldo: ' + data.formatted;
+                            } catch (e) {
+                                row.error = true;
+                                row.result = e.message;
+                            } finally {
+                                row.checking = false;
+                            }
+                        },
+                    };
                 }
                 </script>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

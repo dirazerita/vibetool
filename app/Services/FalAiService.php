@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -11,8 +12,12 @@ use RuntimeException;
  * - teks via fal-ai/any-llm (model dipilih dari Settings)
  * - gambar thumbnail via model FLUX.
  *
- * API key disimpan di tabel settings (key: fal_api_key), diisi admin
- * lewat halaman Settings — bukan di .env.
+ * API key disimpan di tabel settings, diisi admin lewat halaman Settings:
+ * - fal_api_keys : JSON array semua key (utama + cadangan)
+ * - fal_api_key  : key yang sedang aktif
+ * Saat key aktif gagal (401/402/403/429 atau kehabisan saldo), request
+ * otomatis dicoba ulang dengan key cadangan; key cadangan yang berhasil
+ * dipromosikan menjadi key aktif.
  */
 class FalAiService
 {
@@ -21,17 +26,27 @@ class FalAiService
 
     public function enabled(): bool
     {
-        return trim((string) Setting::get('fal_api_key', '')) !== '';
+        return $this->keys() !== [];
     }
 
-    private function apiKey(): string
+    /** Semua key tersimpan: key aktif di urutan pertama, lalu cadangan. */
+    public function keys(): array
     {
-        $key = trim((string) Setting::get('fal_api_key', ''));
-        if ($key === '') {
-            throw new RuntimeException('FAL.AI API Key belum diisi. Buka Admin → Settings → AI Agent (FAL.AI).');
+        $active = trim((string) Setting::get('fal_api_key', ''));
+
+        $stored = json_decode((string) Setting::get('fal_api_keys', '[]'), true);
+        $all = array_values(array_unique(array_filter(array_map(
+            fn ($k) => trim((string) $k),
+            is_array($stored) ? $stored : [],
+        ))));
+
+        if ($active !== '' && ! in_array($active, $all, true)) {
+            array_unshift($all, $active);
+        } elseif ($active !== '') {
+            $all = array_merge([$active], array_values(array_diff($all, [$active])));
         }
 
-        return $key;
+        return $all;
     }
 
     public function llmModel(): string
@@ -48,20 +63,62 @@ class FalAiService
         return $model !== '' ? $model : self::DEFAULT_IMAGE_MODEL;
     }
 
+    /**
+     * Jalankan request dengan failover antar key.
+     * $request menerima satu key dan mengembalikan Response.
+     */
+    private function withFailover(callable $request, string $label): Response
+    {
+        $keys = $this->keys();
+        if ($keys === []) {
+            throw new RuntimeException('FAL.AI API Key belum diisi. Buka Admin → Settings → AI Agent (FAL.AI).');
+        }
+
+        $lastMessage = 'Semua API Key gagal.';
+        foreach ($keys as $i => $key) {
+            /** @var Response $response */
+            $response = $request($key);
+
+            if ($response->successful()) {
+                if ($i > 0) {
+                    // Key cadangan berhasil — jadikan key aktif untuk request berikutnya.
+                    Setting::set('fal_api_key', $key);
+                }
+
+                return $response;
+            }
+
+            $body = strtolower($response->body());
+            $keyProblem = in_array($response->status(), [401, 402, 403, 429], true)
+                || str_contains($body, 'balance')
+                || str_contains($body, 'exhausted')
+                || str_contains($body, 'insufficient');
+
+            $lastMessage = "FAL.AI {$label} error (" . $response->status() . ', key #' . ($i + 1) . '): '
+                . mb_substr($response->body(), 0, 300);
+
+            if (! $keyProblem) {
+                // Error bukan karena key (mis. prompt tidak valid) — percuma ganti key.
+                break;
+            }
+        }
+
+        throw new RuntimeException($lastMessage);
+    }
+
     /** Kirim prompt ke LLM via fal-ai/any-llm, kembalikan teks jawaban. */
     public function llm(string $systemPrompt, string $prompt): string
     {
-        $response = Http::withHeaders(['Authorization' => 'Key ' . $this->apiKey()])
-            ->timeout(180)
-            ->post('https://fal.run/fal-ai/any-llm', [
-                'model' => $this->llmModel(),
-                'system_prompt' => $systemPrompt,
-                'prompt' => $prompt,
-            ]);
-
-        if (! $response->successful()) {
-            throw new RuntimeException('FAL.AI LLM error (' . $response->status() . '): ' . mb_substr($response->body(), 0, 300));
-        }
+        $response = $this->withFailover(
+            fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
+                ->timeout(180)
+                ->post('https://fal.run/fal-ai/any-llm', [
+                    'model' => $this->llmModel(),
+                    'system_prompt' => $systemPrompt,
+                    'prompt' => $prompt,
+                ]),
+            'LLM',
+        );
 
         $output = (string) $response->json('output');
         if (trim($output) === '') {
@@ -74,17 +131,16 @@ class FalAiService
     /** Generate gambar, kembalikan URL hasil dari FAL. */
     public function generateImageUrl(string $prompt, string $imageSize = 'square_hd'): string
     {
-        $response = Http::withHeaders(['Authorization' => 'Key ' . $this->apiKey()])
-            ->timeout(180)
-            ->post('https://fal.run/' . ltrim($this->imageModel(), '/'), [
-                'prompt' => $prompt,
-                'image_size' => $imageSize,
-                'num_images' => 1,
-            ]);
-
-        if (! $response->successful()) {
-            throw new RuntimeException('FAL.AI image error (' . $response->status() . '): ' . mb_substr($response->body(), 0, 300));
-        }
+        $response = $this->withFailover(
+            fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
+                ->timeout(180)
+                ->post('https://fal.run/' . ltrim($this->imageModel(), '/'), [
+                    'prompt' => $prompt,
+                    'image_size' => $imageSize,
+                    'num_images' => 1,
+                ]),
+            'image',
+        );
 
         $url = (string) data_get($response->json(), 'images.0.url');
         if ($url === '') {
@@ -94,10 +150,18 @@ class FalAiService
         return $url;
     }
 
-    /** Cek saldo kredit akun FAL. Return: ['balance' => float, 'currency' => string]. */
-    public function balance(): array
+    /**
+     * Cek saldo kredit sebuah key (default: key aktif).
+     * Return: ['balance' => float, 'currency' => string].
+     */
+    public function balance(?string $key = null): array
     {
-        $response = Http::withHeaders(['Authorization' => 'Key ' . $this->apiKey()])
+        $key = trim((string) ($key ?? ($this->keys()[0] ?? '')));
+        if ($key === '') {
+            throw new RuntimeException('FAL.AI API Key belum diisi.');
+        }
+
+        $response = Http::withHeaders(['Authorization' => 'Key ' . $key])
             ->timeout(30)
             ->get('https://api.fal.ai/v1/account/billing', ['expand' => 'credits']);
 
