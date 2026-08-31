@@ -29,9 +29,27 @@ class SettingController extends Controller
             'pakasirSlug' => Setting::get('pakasir_slug', ''),
             'pakasirApiKey' => Setting::get('pakasir_api_key', ''),
             'falApiKey' => Setting::get('fal_api_key', ''),
+            'falApiKeys' => $this->falApiKeys(),
             'falLlmModel' => Setting::get('fal_llm_model', ''),
             'falImageModel' => Setting::get('fal_image_model', ''),
         ]);
+    }
+
+    /** Daftar FAL API key tersimpan; fallback ke key tunggal lama. */
+    private function falApiKeys(): array
+    {
+        $stored = json_decode((string) Setting::get('fal_api_keys', '[]'), true);
+        $keys = array_values(array_unique(array_filter(array_map(
+            fn ($k) => trim((string) $k),
+            is_array($stored) ? $stored : [],
+        ))));
+
+        $single = trim((string) Setting::get('fal_api_key', ''));
+        if ($keys === [] && $single !== '') {
+            $keys = [$single];
+        }
+
+        return $keys;
     }
 
     public function update(Request $request): RedirectResponse
@@ -54,7 +72,9 @@ class SettingController extends Controller
                 'telegram_enabled' => ['nullable'],
                 'telegram_bot_token' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'telegram_chat_id' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:50'],
-                'fal_api_key' => ['nullable', 'string', 'max:255'],
+                'fal_api_keys' => ['nullable', 'array', 'max:10'],
+                'fal_api_keys.*' => ['nullable', 'string', 'max:255'],
+                'fal_api_key_active' => ['nullable', 'integer', 'min:0'],
                 'fal_llm_model' => ['nullable', 'string', 'max:150'],
                 'fal_image_model' => ['nullable', 'string', 'max:150'],
             ],
@@ -88,7 +108,19 @@ class SettingController extends Controller
         Setting::set('telegram_bot_token', trim((string) $request->input('telegram_bot_token')));
         Setting::set('telegram_chat_id', trim((string) $request->input('telegram_chat_id')));
 
-        Setting::set('fal_api_key', trim((string) $request->input('fal_api_key')));
+        // AI Agent: simpan semua key; index terpilih menjadi key aktif.
+        $rawKeys = array_map(
+            fn ($k) => trim((string) $k),
+            array_values((array) $request->input('fal_api_keys', [])),
+        );
+        $activeIndex = (int) $request->input('fal_api_key_active', 0);
+        $activeKey = $rawKeys[$activeIndex] ?? '';
+        $falKeys = array_values(array_unique(array_filter($rawKeys)));
+        if ($activeKey === '' && $falKeys !== []) {
+            $activeKey = $falKeys[0];
+        }
+        Setting::set('fal_api_keys', json_encode($falKeys));
+        Setting::set('fal_api_key', $activeKey);
         Setting::set('fal_llm_model', trim((string) $request->input('fal_llm_model')));
         Setting::set('fal_image_model', trim((string) $request->input('fal_image_model')));
 
