@@ -8,6 +8,7 @@
     <nav class="flex space-x-8">
         <a href="{{ route('admin.products.edit', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid transparent;color:#64748b">Produk</a>
         <a href="{{ route('admin.products.landing-page', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid transparent;color:#64748b">Landing Page</a>
+        <a href="{{ route('admin.products.landing-page-ai', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid transparent;color:#64748b">Landing Page AI</a>
         <a href="{{ route('admin.products.video-tutorials', $product) }}" class="px-1 pb-3 text-sm font-medium" style="border-bottom:2px solid #6366f1;color:#a5b4fc">Video Tutorial</a>
     </nav>
 </div>

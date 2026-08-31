@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AiAgentController;
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\CommissionController as AdminCommissionController;
 use App\Http\Controllers\Admin\CouponController;
@@ -197,6 +198,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/products-pending', [AdminProductController::class, 'pendingProducts'])->name('products.pending');
         Route::post('/products/{product}/approve', [AdminProductController::class, 'approve'])->name('products.approve');
         Route::post('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
+        // AI Agent (FAL.AI): tambah produk + landing page otomatis dari link repo
+        Route::post('/ai-agent/analyze', [AiAgentController::class, 'analyze'])->name('ai-agent.analyze');
+        Route::post('/ai-agent/thumbnail', [AiAgentController::class, 'thumbnail'])->name('ai-agent.thumbnail');
+        Route::post('/ai-agent/create-product', [AiAgentController::class, 'createProduct'])->name('ai-agent.create-product');
+        Route::post('/ai-agent/landing-page/{product}', [AiAgentController::class, 'generateLandingPage'])->name('ai-agent.landing-page');
+        Route::get('/products/{product}/landing-page-ai', [AiAgentController::class, 'landingPageAi'])->name('products.landing-page-ai');
+        Route::post('/products/{product}/landing-page-ai/apply', [AiAgentController::class, 'applyLandingPage'])->name('products.landing-page-ai.apply');
         Route::get('/page-builder', [PageBuilderController::class, 'index'])->name('page-builder.index');
         Route::get('/page-builder/{product}', [PageBuilderController::class, 'edit'])->name('page-builder.edit');
         Route::put('/page-builder/{product}', [PageBuilderController::class, 'update'])->name('page-builder.update');

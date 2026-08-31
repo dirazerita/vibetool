@@ -32,6 +32,8 @@ class ProductLandingPage extends Model
         'full_html',
         'use_full_html',
         'builder_json',
+        'ai_html',
+        'ai_generated_at',
     ];
 
     protected function casts(): array

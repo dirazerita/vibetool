@@ -149,6 +149,31 @@
             </div>
         </div>
 
+        <div class="dk-card" style="padding:24px; margin-bottom:24px;">
+            <h2 class="text-lg font-semibold dk-heading mb-1">AI Agent (FAL.AI)</h2>
+            <p class="text-xs dk-text-muted mb-4">Dipakai fitur "Buat Produk dengan AI" di halaman Tambah Produk: membaca link repo, membuat judul, deskripsi, thumbnail, dan landing page otomatis. Ambil API Key di <a href="https://fal.ai/dashboard/keys" target="_blank" style="color:#818cf8">fal.ai/dashboard/keys</a>.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="fal_api_key" class="dk-label">FAL API Key</label>
+                    <input type="password" name="fal_api_key" id="fal_api_key" value="{{ old('fal_api_key', $falApiKey) }}" placeholder="key_id:key_secret" class="w-full dk-input" autocomplete="off">
+                    <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk menonaktifkan AI Agent.</p>
+                    @error('fal_api_key') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="fal_llm_model" class="dk-label">Model Teks (any-llm) <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
+                        <input type="text" name="fal_llm_model" id="fal_llm_model" value="{{ old('fal_llm_model', $falLlmModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_LLM_MODEL }}" class="w-full dk-input">
+                        <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default.</p>
+                    </div>
+                    <div>
+                        <label for="fal_image_model" class="dk-label">Model Gambar <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
+                        <input type="text" name="fal_image_model" id="fal_image_model" value="{{ old('fal_image_model', $falImageModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_IMAGE_MODEL }}" class="w-full dk-input">
+                        <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default (FLUX schnell).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
                     class="px-6 py-2.5 rounded-lg font-medium"
