@@ -200,6 +200,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
         // AI Agent (FAL.AI): tambah produk + landing page otomatis dari link repo
         Route::match(['get', 'post'], '/ai-agent/balance', [AiAgentController::class, 'balance'])->name('ai-agent.balance');
+        Route::get('/ai-agent/models', [AiAgentController::class, 'models'])->name('ai-agent.models');
         Route::post('/ai-agent/analyze', [AiAgentController::class, 'analyze'])->name('ai-agent.analyze');
         Route::post('/ai-agent/thumbnail', [AiAgentController::class, 'thumbnail'])->name('ai-agent.thumbnail');
         Route::post('/ai-agent/create-product', [AiAgentController::class, 'createProduct'])->name('ai-agent.create-product');

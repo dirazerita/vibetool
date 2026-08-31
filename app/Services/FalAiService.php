@@ -151,6 +151,89 @@ class FalAiService
     }
 
     /**
+     * Daftar model teks yang didukung fal-ai/any-llm (dari enum di skema
+     * OpenAPI endpoint-nya). Cache 1 jam. Return: [['id' =>, 'name' =>], ...]
+     */
+    public function listTextModels(): array
+    {
+        return cache()->remember('fal_text_models', 3600, function () {
+            $response = $this->platformGet('https://api.fal.ai/v1/models', [
+                'endpoint_id' => 'fal-ai/any-llm',
+                'expand' => 'openapi-3.0',
+            ]);
+
+            $enum = data_get(
+                $response->json(),
+                'models.0.openapi.components.schemas.AnyLlmInput.properties.model.enum',
+            );
+            if (! is_array($enum) || $enum === []) {
+                throw new RuntimeException('Daftar model teks tidak ditemukan di skema any-llm.');
+            }
+
+            return array_map(fn ($id) => ['id' => (string) $id, 'name' => (string) $id], $enum);
+        });
+    }
+
+    /**
+     * Daftar model text-to-image di FAL (maks 2 halaman × 100). Cache 1 jam.
+     * Return: [['id' => endpoint_id, 'name' => display name], ...]
+     */
+    public function listImageModels(): array
+    {
+        return cache()->remember('fal_image_models', 3600, function () {
+            $models = [];
+            $cursor = null;
+
+            for ($page = 0; $page < 2; $page++) {
+                $query = ['category' => 'text-to-image', 'limit' => 100];
+                if ($cursor) {
+                    $query['cursor'] = $cursor;
+                }
+
+                $json = $this->platformGet('https://api.fal.ai/v1/models', $query)->json();
+
+                foreach ((array) data_get($json, 'models', []) as $m) {
+                    if (data_get($m, 'metadata.status') === 'deprecated') {
+                        continue;
+                    }
+                    $models[] = [
+                        'id' => (string) data_get($m, 'endpoint_id'),
+                        'name' => (string) (data_get($m, 'metadata.display_name') ?: data_get($m, 'endpoint_id')),
+                    ];
+                }
+
+                $cursor = data_get($json, 'next_cursor');
+                if (! data_get($json, 'has_more') || ! $cursor) {
+                    break;
+                }
+            }
+
+            if ($models === []) {
+                throw new RuntimeException('Daftar model gambar kosong dari FAL.');
+            }
+
+            return $models;
+        });
+    }
+
+    /** GET ke Platform API FAL; sertakan key aktif bila ada (rate limit lebih tinggi). */
+    private function platformGet(string $url, array $query): Response
+    {
+        $request = Http::timeout(30);
+        $key = $this->keys()[0] ?? '';
+        if ($key !== '') {
+            $request = $request->withHeaders(['Authorization' => 'Key ' . $key]);
+        }
+
+        $response = $request->get($url, $query);
+        if (! $response->successful()) {
+            throw new RuntimeException('FAL Platform API error (' . $response->status() . '): ' . mb_substr($response->body(), 0, 200));
+        }
+
+        return $response;
+    }
+
+    /**
      * Cek saldo kredit sebuah key (default: key aktif).
      * Return: ['balance' => float, 'currency' => string].
      */
