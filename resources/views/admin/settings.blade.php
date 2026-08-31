@@ -227,17 +227,71 @@
                 }
                 </script>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div x-data="falModelPicker('text', 'fal_llm_model')">
                         <label for="fal_llm_model" class="dk-label">Model Teks (any-llm) <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
-                        <input type="text" name="fal_llm_model" id="fal_llm_model" value="{{ old('fal_llm_model', $falLlmModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_LLM_MODEL }}" class="w-full dk-input">
+                        <div class="flex gap-2">
+                            <input type="text" name="fal_llm_model" id="fal_llm_model" value="{{ old('fal_llm_model', $falLlmModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_LLM_MODEL }}" class="w-full dk-input">
+                            <button type="button" @click="load()" :disabled="loading"
+                                    class="px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap"
+                                    style="border:1px solid #6366f1; color:#a5b4fc; background:rgba(99,102,241,.08); flex-shrink:0;"
+                                    x-text="loading ? '⏳' : '🔄 Load Model'"></button>
+                        </div>
+                        <select x-show="models.length" x-cloak class="w-full dk-input mt-2" @change="pick($event.target.value)">
+                            <option value="" x-text="'— pilih dari ' + models.length + ' model —'"></option>
+                            <template x-for="m in models" :key="m.id">
+                                <option :value="m.id" x-text="m.name === m.id ? m.id : (m.name + ' — ' + m.id)"></option>
+                            </template>
+                        </select>
+                        <p class="text-xs mt-1" style="color:#f87171;" x-show="error" x-cloak x-text="error"></p>
                         <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default.</p>
                     </div>
-                    <div>
+                    <div x-data="falModelPicker('image', 'fal_image_model')">
                         <label for="fal_image_model" class="dk-label">Model Gambar <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
-                        <input type="text" name="fal_image_model" id="fal_image_model" value="{{ old('fal_image_model', $falImageModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_IMAGE_MODEL }}" class="w-full dk-input">
+                        <div class="flex gap-2">
+                            <input type="text" name="fal_image_model" id="fal_image_model" value="{{ old('fal_image_model', $falImageModel) }}" placeholder="{{ \App\Services\FalAiService::DEFAULT_IMAGE_MODEL }}" class="w-full dk-input">
+                            <button type="button" @click="load()" :disabled="loading"
+                                    class="px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap"
+                                    style="border:1px solid #6366f1; color:#a5b4fc; background:rgba(99,102,241,.08); flex-shrink:0;"
+                                    x-text="loading ? '⏳' : '🔄 Load Model'"></button>
+                        </div>
+                        <select x-show="models.length" x-cloak class="w-full dk-input mt-2" @change="pick($event.target.value)">
+                            <option value="" x-text="'— pilih dari ' + models.length + ' model —'"></option>
+                            <template x-for="m in models" :key="m.id">
+                                <option :value="m.id" x-text="m.name === m.id ? m.id : (m.name + ' — ' + m.id)"></option>
+                            </template>
+                        </select>
+                        <p class="text-xs mt-1" style="color:#f87171;" x-show="error" x-cloak x-text="error"></p>
                         <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default (FLUX schnell).</p>
                     </div>
                 </div>
+                <script>
+                function falModelPicker(type, inputId) {
+                    return {
+                        models: [],
+                        loading: false,
+                        error: null,
+                        async load() {
+                            this.loading = true;
+                            this.error = null;
+                            try {
+                                const res = await fetch('{{ route('admin.ai-agent.models') }}?type=' + type, {
+                                    headers: { 'Accept': 'application/json' },
+                                });
+                                const data = await res.json().catch(() => ({}));
+                                if (!res.ok || !data.ok) throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
+                                this.models = data.models;
+                            } catch (e) {
+                                this.error = e.message;
+                            } finally {
+                                this.loading = false;
+                            }
+                        },
+                        pick(id) {
+                            if (id) document.getElementById(inputId).value = id;
+                        },
+                    };
+                }
+                </script>
             </div>
         </div>
 

@@ -24,6 +24,22 @@ class AiAgentController extends Controller
     {
     }
 
+    /** Daftar model FAL untuk dropdown di Settings (?type=text|image). */
+    public function models(Request $request): JsonResponse
+    {
+        $request->validate(['type' => ['required', 'in:text,image']]);
+
+        try {
+            $models = $request->input('type') === 'text'
+                ? $this->fal->listTextModels()
+                : $this->fal->listImageModels();
+
+            return response()->json(['ok' => true, 'models' => $models]);
+        } catch (Throwable $e) {
+            return $this->fail($e);
+        }
+    }
+
     /** Cek saldo kredit akun FAL (dipakai tombol Cek Saldo di Settings). */
     public function balance(Request $request): JsonResponse
     {
