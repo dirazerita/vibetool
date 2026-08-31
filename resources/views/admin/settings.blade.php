@@ -159,6 +159,40 @@
                     <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk menonaktifkan AI Agent.</p>
                     @error('fal_api_key') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" id="fal-balance-btn" onclick="falCheckBalance()"
+                            class="px-4 py-2 rounded-lg text-sm font-medium"
+                            style="border:1px solid #6366f1; color:#a5b4fc; background:rgba(99,102,241,.08);">
+                        💰 Cek Saldo
+                    </button>
+                    <span id="fal-balance-result" class="text-sm" style="display:none;"></span>
+                </div>
+                <script>
+                async function falCheckBalance() {
+                    const btn = document.getElementById('fal-balance-btn');
+                    const out = document.getElementById('fal-balance-result');
+                    btn.disabled = true;
+                    btn.textContent = '⏳ Mengecek…';
+                    out.style.display = 'inline';
+                    out.style.color = '#94a3b8';
+                    out.textContent = 'Menghubungi FAL.AI…';
+                    try {
+                        const res = await fetch('{{ route('admin.ai-agent.balance') }}', {
+                            headers: { 'Accept': 'application/json' },
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok || !data.ok) throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
+                        out.style.color = '#34d399';
+                        out.textContent = 'Saldo: ' + data.formatted;
+                    } catch (e) {
+                        out.style.color = '#f87171';
+                        out.textContent = e.message;
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = '💰 Cek Saldo';
+                    }
+                }
+                </script>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="fal_llm_model" class="dk-label">Model Teks (any-llm) <span class="text-xs dk-text-muted font-normal">— opsional</span></label>
@@ -176,8 +210,8 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
-                    class="px-6 py-2.5 rounded-lg font-medium"
-                    class="dk-btn dk-btn-primary" style="
+                    class="dk-btn dk-btn-primary px-6 py-2.5 rounded-lg font-medium"
+                    style="background-color:#4f46e5; color:#fff;"
                     onmouseover="this.style.backgroundColor='#4338ca'"
                     onmouseout="this.style.backgroundColor='#4f46e5'">Simpan</button>
         </div>

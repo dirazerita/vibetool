@@ -24,6 +24,27 @@ class AiAgentController extends Controller
     {
     }
 
+    /** Cek saldo kredit akun FAL (dipakai tombol Cek Saldo di Settings). */
+    public function balance(): JsonResponse
+    {
+        if (! $this->fal->enabled()) {
+            return response()->json(['ok' => false, 'message' => 'FAL.AI API Key belum diisi.'], 422);
+        }
+
+        try {
+            $data = $this->fal->balance();
+
+            return response()->json([
+                'ok' => true,
+                'balance' => $data['balance'],
+                'currency' => $data['currency'],
+                'formatted' => '$' . number_format($data['balance'], 2) . ' ' . $data['currency'],
+            ]);
+        } catch (Throwable $e) {
+            return $this->fail($e);
+        }
+    }
+
     /** Step 1: baca repo lalu minta LLM menyusun data produk (JSON). */
     public function analyze(Request $request): JsonResponse
     {

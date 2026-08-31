@@ -94,6 +94,32 @@ class FalAiService
         return $url;
     }
 
+    /** Cek saldo kredit akun FAL. Return: ['balance' => float, 'currency' => string]. */
+    public function balance(): array
+    {
+        $response = Http::withHeaders(['Authorization' => 'Key ' . $this->apiKey()])
+            ->timeout(30)
+            ->get('https://api.fal.ai/v1/account/billing', ['expand' => 'credits']);
+
+        if (! $response->successful()) {
+            throw new RuntimeException(
+                'Gagal cek saldo FAL (' . $response->status() . '). '
+                . 'Pastikan API Key valid dan punya scope ADMIN. Detail: '
+                . mb_substr($response->body(), 0, 200),
+            );
+        }
+
+        $balance = data_get($response->json(), 'credits.current_balance');
+        if ($balance === null) {
+            throw new RuntimeException('Respons FAL tidak memuat saldo. Key mungkin bukan tipe ADMIN.');
+        }
+
+        return [
+            'balance' => (float) $balance,
+            'currency' => (string) data_get($response->json(), 'credits.currency', 'USD'),
+        ];
+    }
+
     /** Ambil objek JSON pertama dari jawaban LLM (toleran terhadap ```json fence). */
     public static function extractJson(string $text): array
     {
