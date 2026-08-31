@@ -40,6 +40,23 @@ class ImageResizer
     }
 
     /**
+     * Same as resizeThumbnail but for raw image bytes (e.g. downloaded from
+     * an image-generation API). Throws on invalid image data.
+     */
+    public static function resizeThumbnailFromBytes(string $bytes, string $directory = 'products'): string
+    {
+        $image = self::manager()->read($bytes);
+        $image->scaleDown(600, 600);
+
+        $filename = uniqid('thumb_ai_') . '.webp';
+        $path = $directory . '/' . $filename;
+
+        Storage::disk('public')->put($path, $image->toWebp(82)->toString());
+
+        return $path;
+    }
+
+    /**
      * Compress a payment-proof screenshot: scale down to max 1600x1600
      * (keep aspect ratio, no upscaling), save as JPEG 80%.
      * Falls back to raw store if processing fails.

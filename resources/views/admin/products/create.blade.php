@@ -4,7 +4,130 @@
 @section('content')
 <h1 class="text-2xl font-bold dk-heading mb-6">Tambah Produk</h1>
 
+{{-- ===== AI Agent: buat produk + landing page otomatis dari link repo ===== --}}
+<style>[x-cloak]{display:none!important}</style>
+<div class="max-w-2xl mb-6" x-data="aiAgent()">
+    <div class="dk-card" style="padding:24px; border:1px solid rgba(139,92,246,.35);">
+        <div class="flex items-center gap-2 mb-1">
+            <span style="font-size:20px;">🤖</span>
+            <h2 class="text-lg font-semibold dk-heading">Buat Produk dengan AI Agent</h2>
+        </div>
+        <p class="text-xs dk-text-muted mb-4">Tempel link repo (GitHub) — AI akan membaca repo, membuat judul, deskripsi, thumbnail, menambahkan produk, lalu langsung menyusun landing page-nya. Powered by FAL.AI.</p>
+
+        <div class="space-y-3" x-show="!running && !done">
+            <div>
+                <label class="dk-label">Link Repo / Halaman Produk</label>
+                <input type="url" x-model="repoUrl" placeholder="https://github.com/username/nama-repo" class="w-full dk-input" :disabled="running">
+            </div>
+            <label class="flex items-center gap-2 text-sm dk-text-muted cursor-pointer">
+                <input type="checkbox" x-model="activate" class="rounded">
+                Langsung aktifkan produk setelah dibuat (harga bisa diedit belakangan)
+            </label>
+            <button type="button" @click="run()" :disabled="!repoUrl || running"
+                    class="dk-btn dk-btn-primary px-5 py-2.5 rounded-lg font-medium"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;">
+                🚀 Jalankan AI Agent
+            </button>
+        </div>
+
+        <div x-show="running || done" x-cloak class="space-y-2">
+            <template x-for="(step, i) in steps" :key="i">
+                <div class="flex items-center gap-2 text-sm">
+                    <span x-text="step.state === 'done' ? '✅' : (step.state === 'run' ? '⏳' : (step.state === 'fail' ? '❌' : '·'))"></span>
+                    <span :style="step.state === 'pending' ? 'color:#64748b' : 'color:#e2e8f0'" x-text="step.label"></span>
+                </div>
+            </template>
+            <div x-show="error" x-cloak class="text-sm mt-2 p-3 rounded-lg" style="background:rgba(248,113,113,.1); color:#f87171;" x-text="error"></div>
+            <div class="flex gap-2 mt-2" x-show="error" x-cloak>
+                <button type="button" @click="reset()" class="dk-btn px-4 py-2 rounded-lg text-sm" style="border:1px solid #334155; color:#cbd5e1;">Coba Lagi</button>
+            </div>
+            <div x-show="done" x-cloak class="text-sm mt-2 p-3 rounded-lg" style="background:rgba(52,211,153,.1); color:#34d399;">
+                Produk & landing page berhasil dibuat! Mengarahkan ke tab Landing Page AI…
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function aiAgent() {
+    return {
+        repoUrl: '',
+        activate: true,
+        running: false,
+        done: false,
+        error: null,
+        steps: [],
+        reset() { this.running = false; this.done = false; this.error = null; this.steps = []; },
+        async post(url, body) {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        || '{{ csrf_token() }}',
+                },
+                body: JSON.stringify(body),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) {
+                throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
+            }
+            return data;
+        },
+        async run() {
+            this.reset();
+            this.running = true;
+            this.steps = [
+                { label: 'Membaca repo & menyusun data produk…', state: 'run' },
+                { label: 'Membuat thumbnail produk (FLUX)…', state: 'pending' },
+                { label: 'Menambahkan produk…', state: 'pending' },
+                { label: 'Menyusun landing page…', state: 'pending' },
+            ];
+            try {
+                const analysis = await this.post('{{ route('admin.ai-agent.analyze') }}', { repo_url: this.repoUrl });
+                this.steps[0].state = 'done';
+                this.steps[0].label = 'Data produk siap: "' + analysis.title + '"';
+
+                this.steps[1].state = 'run';
+                const thumb = await this.post('{{ route('admin.ai-agent.thumbnail') }}', { prompt: analysis.thumbnail_prompt });
+                this.steps[1].state = 'done';
+                this.steps[1].label = 'Thumbnail dibuat';
+
+                this.steps[2].state = 'run';
+                const product = await this.post('{{ route('admin.ai-agent.create-product') }}', {
+                    title: analysis.title,
+                    description: analysis.description,
+                    product_type: analysis.product_type,
+                    price: analysis.price_suggestion,
+                    thumbnail_path: thumb.thumbnail_path,
+                    repo_url: this.repoUrl,
+                    activate: this.activate,
+                });
+                this.steps[2].state = 'done';
+                this.steps[2].label = 'Produk ditambahkan';
+
+                this.steps[3].state = 'run';
+                const lpUrl = '{{ url('admin/ai-agent/landing-page') }}/' + product.product_id;
+                await this.post(lpUrl, { summary: analysis.summary + '\n\nPoin jual:\n- ' + (analysis.selling_points || []).join('\n- ') });
+                this.steps[3].state = 'done';
+                this.steps[3].label = 'Landing page selesai & dipublikasikan';
+
+                this.done = true;
+                setTimeout(() => { window.location.href = product.lp_ai_url; }, 1200);
+            } catch (e) {
+                this.error = e.message;
+                this.steps.forEach(s => { if (s.state === 'run') s.state = 'fail'; });
+            } finally {
+                this.running = this.done; // biarkan log tampil saat redirect
+            }
+        },
+    };
+}
+</script>
+
 <div class="max-w-2xl">
+    <p class="text-sm dk-text-muted mb-3">Atau isi manual:</p>
     <div class="dk-card" style="padding:24px;">
         <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
             @csrf

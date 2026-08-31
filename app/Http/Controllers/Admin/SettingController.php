@@ -28,6 +28,9 @@ class SettingController extends Controller
             'pakasirEnabled' => Setting::get('pakasir_enabled') === '1',
             'pakasirSlug' => Setting::get('pakasir_slug', ''),
             'pakasirApiKey' => Setting::get('pakasir_api_key', ''),
+            'falApiKey' => Setting::get('fal_api_key', ''),
+            'falLlmModel' => Setting::get('fal_llm_model', ''),
+            'falImageModel' => Setting::get('fal_image_model', ''),
         ]);
     }
 
@@ -51,6 +54,9 @@ class SettingController extends Controller
                 'telegram_enabled' => ['nullable'],
                 'telegram_bot_token' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:255'],
                 'telegram_chat_id' => [$telegramEnabled ? 'required' : 'nullable', 'string', 'max:50'],
+                'fal_api_key' => ['nullable', 'string', 'max:255'],
+                'fal_llm_model' => ['nullable', 'string', 'max:150'],
+                'fal_image_model' => ['nullable', 'string', 'max:150'],
             ],
             [
                 'whatsapp_admin.required' => 'Nomor WhatsApp admin wajib diisi.',
@@ -81,6 +87,10 @@ class SettingController extends Controller
         Setting::set('telegram_enabled', $telegramEnabled ? '1' : '0');
         Setting::set('telegram_bot_token', trim((string) $request->input('telegram_bot_token')));
         Setting::set('telegram_chat_id', trim((string) $request->input('telegram_chat_id')));
+
+        Setting::set('fal_api_key', trim((string) $request->input('fal_api_key')));
+        Setting::set('fal_llm_model', trim((string) $request->input('fal_llm_model')));
+        Setting::set('fal_image_model', trim((string) $request->input('fal_image_model')));
 
         if (empty(Setting::get('telegram_webhook_secret'))) {
             Setting::set('telegram_webhook_secret', Str::random(40));
