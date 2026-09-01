@@ -235,21 +235,22 @@ SYS;
 
             $sanitized = $this->sanitizeFullHtml($html);
 
-            $lp = ProductLandingPage::updateOrCreate(
-                ['product_id' => $product->id],
-                [
-                    'ai_html' => $sanitized,
-                    'ai_generated_at' => now(),
-                    // Langsung terapkan & publikasikan (alur full otomatis).
-                    'full_html' => $sanitized,
-                    'use_full_html' => true,
-                    'is_published' => true,
-                ],
-            );
+            $values = [
+                'ai_html' => $sanitized,
+                'ai_generated_at' => now(),
+                // Langsung terapkan & publikasikan (alur full otomatis).
+                'full_html' => $sanitized,
+                'use_full_html' => true,
+                'is_published' => true,
+            ];
 
-            if (! $lp->hero_title) {
-                $lp->update(['hero_title' => $product->title]);
+            // hero_title NOT NULL di tabel — wajib ikut saat insert pertama.
+            $existing = ProductLandingPage::where('product_id', $product->id)->first();
+            if (! $existing || trim((string) $existing->hero_title) === '') {
+                $values['hero_title'] = $product->title;
             }
+
+            ProductLandingPage::updateOrCreate(['product_id' => $product->id], $values);
 
             return response()->json([
                 'ok' => true,
