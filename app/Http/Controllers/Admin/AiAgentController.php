@@ -295,7 +295,7 @@ SYS;
     /** Ambil konteks dari GitHub API (meta + README) atau halaman web biasa. */
     private function fetchRepoContext(string $url): string
     {
-        if (preg_match('#github\.com/([^/\s]+)/([^/\s#?]+)#i', $url, $m)) {
+        if (preg_match('~github\.com/([^/\s]+)/([^/\s#?]+)~i', $url, $m)) {
             $owner = $m[1];
             $repo = preg_replace('/\.git$/', '', $m[2]);
             $headers = ['User-Agent' => 'VibeTool-AI-Agent', 'Accept' => 'application/vnd.github+json'];
