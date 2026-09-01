@@ -109,16 +109,21 @@ class FalAiService
     /** Kirim prompt ke LLM via fal-ai/any-llm, kembalikan teks jawaban. */
     public function llm(string $systemPrompt, string $prompt): string
     {
-        $response = $this->withFailover(
-            fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
-                ->timeout(180)
-                ->post('https://fal.run/fal-ai/any-llm', [
-                    'model' => $this->llmModel(),
-                    'system_prompt' => $systemPrompt,
-                    'prompt' => $prompt,
-                ]),
-            'LLM',
-        );
+        $payload = [
+            'model' => $this->llmModel(),
+            'system_prompt' => $systemPrompt,
+            'prompt' => $prompt,
+        ];
+
+        try {
+            $response = $this->llmRequest($payload);
+        } catch (RuntimeException $e) {
+            // Sebagian model (mis. gpt-5-nano) wajib reasoning=true — ulangi otomatis.
+            if (! str_contains(strtolower($e->getMessage()), 'reasoning')) {
+                throw $e;
+            }
+            $response = $this->llmRequest($payload + ['reasoning' => true]);
+        }
 
         $output = (string) $response->json('output');
         if (trim($output) === '') {
@@ -126,6 +131,16 @@ class FalAiService
         }
 
         return $output;
+    }
+
+    private function llmRequest(array $payload): Response
+    {
+        return $this->withFailover(
+            fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
+                ->timeout(180)
+                ->post('https://fal.run/fal-ai/any-llm', $payload),
+            'LLM',
+        );
     }
 
     /** Generate gambar, kembalikan URL hasil dari FAL. */

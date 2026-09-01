@@ -14,7 +14,7 @@
         </div>
         <p class="text-xs dk-text-muted mb-4">Tempel link repo (GitHub) — AI akan membaca repo, membuat judul, deskripsi, thumbnail, menambahkan produk, lalu langsung menyusun landing page-nya. Powered by FAL.AI.</p>
 
-        <div class="space-y-3" x-show="!running && !done">
+        <div class="space-y-3" x-show="!running && !done && !error">
             <div>
                 <label class="dk-label">Link Repo / Halaman Produk</label>
                 <input type="url" x-model="repoUrl" placeholder="https://github.com/username/nama-repo" class="w-full dk-input" :disabled="running">
@@ -30,7 +30,7 @@
             </button>
         </div>
 
-        <div x-show="running || done" x-cloak class="space-y-2">
+        <div x-show="running || done || error" x-cloak class="space-y-2">
             <template x-for="(step, i) in steps" :key="i">
                 <div class="flex items-center gap-2 text-sm">
                     <span x-text="step.state === 'done' ? '✅' : (step.state === 'run' ? '⏳' : (step.state === 'fail' ? '❌' : '·'))"></span>
@@ -88,6 +88,13 @@ function aiAgent() {
                 const analysis = await this.post('{{ route('admin.ai-agent.analyze') }}', { repo_url: this.repoUrl });
                 this.steps[0].state = 'done';
                 this.steps[0].label = 'Data produk siap: "' + analysis.title + '"';
+                // Isi juga form manual di bawah, biar hasil AI terlihat & bisa diedit.
+                try {
+                    document.getElementById('title').value = analysis.title;
+                    document.getElementById('description').value = analysis.description;
+                    document.getElementById('product_type').value = analysis.product_type;
+                    document.getElementById('price').value = analysis.price_suggestion;
+                } catch (e) { /* form manual opsional */ }
 
                 this.steps[1].state = 'run';
                 const thumb = await this.post('{{ route('admin.ai-agent.thumbnail') }}', { prompt: analysis.thumbnail_prompt });
