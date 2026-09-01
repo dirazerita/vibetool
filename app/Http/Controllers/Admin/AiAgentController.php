@@ -262,6 +262,49 @@ SYS;
         }
     }
 
+    /**
+     * Isi konten tab "Landing Page" klasik via AI: judul hero, subjudul,
+     * dan konten tentang produk (HTML untuk editor TinyMCE).
+     */
+    public function generateLandingContent(Product $product): JsonResponse
+    {
+        if (! $this->fal->enabled()) {
+            return response()->json(['ok' => false, 'message' => 'FAL.AI API Key belum diisi.'], 422);
+        }
+
+        try {
+            $system = <<<'SYS'
+Kamu adalah copywriter landing page produk digital Indonesia.
+Jawab HANYA dengan satu objek JSON valid, key persis:
+{
+ "hero_title": "judul hero menarik & menjual, maks 70 karakter, Bahasa Indonesia",
+ "hero_subtitle": "subjudul 1 kalimat yang memperkuat judul, maks 140 karakter",
+ "about_html": "konten 'tentang produk' dalam HTML bersih: gunakan hanya tag <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>. Struktur: 1 paragraf pembuka masalah-solusi, <h2> keunggulan dengan <ul> 5-6 poin manfaat, <h2> untuk siapa produk ini dengan <ul>, <h2> cara kerja singkat dengan 3 langkah, paragraf penutup ajakan. Bahasa Indonesia persuasif dan spesifik ke produk. TANPA testimoni, TANPA klaim angka pengguna atau rating yang dibuat-buat."
+}
+SYS;
+
+            $prompt = "Produk: {$product->title}\nDeskripsi: {$product->description}\n"
+                . 'Harga: Rp ' . number_format((float) $product->price, 0, ',', '.');
+
+            $data = FalAiService::extractJson($this->fal->llm($system, $prompt));
+
+            foreach (['hero_title', 'hero_subtitle', 'about_html'] as $key) {
+                if (trim((string) ($data[$key] ?? '')) === '') {
+                    throw new \RuntimeException("AI tidak mengembalikan field '{$key}'.");
+                }
+            }
+
+            return response()->json([
+                'ok' => true,
+                'hero_title' => Str::limit(trim($data['hero_title']), 150, ''),
+                'hero_subtitle' => Str::limit(trim($data['hero_subtitle']), 255, ''),
+                'about_html' => $this->sanitizeFullHtml($data['about_html']),
+            ]);
+        } catch (Throwable $e) {
+            return $this->fail($e);
+        }
+    }
+
     /** Tab "Landing Page AI" di halaman edit produk. */
     public function landingPageAi(Product $product)
     {

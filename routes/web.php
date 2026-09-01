@@ -205,6 +205,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/ai-agent/thumbnail', [AiAgentController::class, 'thumbnail'])->name('ai-agent.thumbnail');
         Route::post('/ai-agent/create-product', [AiAgentController::class, 'createProduct'])->name('ai-agent.create-product');
         Route::post('/ai-agent/landing-page/{product}', [AiAgentController::class, 'generateLandingPage'])->name('ai-agent.landing-page');
+        Route::post('/ai-agent/landing-content/{product}', [AiAgentController::class, 'generateLandingContent'])->name('ai-agent.landing-content');
         Route::get('/products/{product}/landing-page-ai', [AiAgentController::class, 'landingPageAi'])->name('products.landing-page-ai');
         Route::post('/products/{product}/landing-page-ai/apply', [AiAgentController::class, 'applyLandingPage'])->name('products.landing-page-ai.apply');
         Route::get('/page-builder', [PageBuilderController::class, 'index'])->name('page-builder.index');

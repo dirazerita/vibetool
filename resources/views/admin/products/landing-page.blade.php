@@ -28,7 +28,55 @@
 {{-- Hero & Video & About Section --}}
 <div class="max-w-3xl mb-8">
     <div class="dk-card" style="padding:24px;">
-        <h2 class="text-lg font-semibold dk-heading mb-4">Konten Utama Landing Page</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-lg font-semibold dk-heading">Konten Utama Landing Page</h2>
+            <button type="button" id="ai-fill-btn" onclick="aiFillContent()"
+                    class="px-4 py-2 rounded-lg text-sm font-medium"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;">
+                🤖 Isi dengan AI
+            </button>
+        </div>
+        <p id="ai-fill-status" class="text-sm mb-4 p-3 rounded-lg" style="display:none;"></p>
+        <script>
+        async function aiFillContent() {
+            const btn = document.getElementById('ai-fill-btn');
+            const status = document.getElementById('ai-fill-status');
+            const show = (msg, ok) => {
+                status.style.display = 'block';
+                status.style.background = ok ? 'rgba(52,211,153,.1)' : 'rgba(248,113,113,.1)';
+                status.style.color = ok ? '#34d399' : '#f87171';
+                status.textContent = msg;
+            };
+            btn.disabled = true;
+            btn.textContent = '⏳ AI sedang menulis…';
+            show('AI sedang menyusun judul, subjudul, dan konten produk — sekitar 30-60 detik…', true);
+            try {
+                const res = await fetch('{{ route('admin.ai-agent.landing-content', $product) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.ok) throw new Error(data.message || ('Gagal (HTTP ' + res.status + ')'));
+                document.getElementById('hero_title').value = data.hero_title;
+                document.getElementById('hero_subtitle').value = data.hero_subtitle;
+                const editor = (typeof tinymce !== 'undefined') ? tinymce.get('about_content') : null;
+                if (editor) {
+                    editor.setContent(data.about_html);
+                } else {
+                    document.getElementById('about_content').value = data.about_html;
+                }
+                show('Selesai! Judul, subjudul, dan konten terisi — silakan rapikan lalu klik Simpan Konten Utama.', true);
+            } catch (e) {
+                show(e.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🤖 Isi dengan AI';
+            }
+        }
+        </script>
         <form method="POST" action="{{ route('admin.products.landing-page.update', $product) }}" enctype="multipart/form-data">
             @csrf @method('PUT')
             <div class="space-y-6">
