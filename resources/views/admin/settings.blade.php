@@ -261,7 +261,7 @@
                             </template>
                         </select>
                         <p class="text-xs mt-1" style="color:#f87171;" x-show="error" x-cloak x-text="error"></p>
-                        <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default (FLUX schnell).</p>
+                        <p class="text-xs mt-1 dk-text-muted">Kosongkan untuk pakai default (FLUX schnell). Untuk teks judul di gambar paling tajam: <code style="color:#a5b4fc;">fal-ai/ideogram/v3</code> atau <code style="color:#a5b4fc;">fal-ai/nano-banana-pro</code>.</p>
                     </div>
                 </div>
                 <script>
