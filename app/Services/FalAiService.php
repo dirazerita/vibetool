@@ -143,26 +143,43 @@ class FalAiService
         );
     }
 
-    /** Generate gambar, kembalikan URL hasil dari FAL. */
+    /** Generate gambar persegi (thumbnail), kembalikan URL hasil dari FAL. */
     public function generateImageUrl(string $prompt, string $imageSize = 'square_hd'): string
     {
-        $response = $this->withFailover(
-            fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
-                ->timeout(180)
-                ->post('https://fal.run/' . ltrim($this->imageModel(), '/'), [
-                    'prompt' => $prompt,
-                    'image_size' => $imageSize,
-                    'num_images' => 1,
-                ]),
-            'image',
-        );
+        // Tiap keluarga model beda nama parameter ukuran: FLUX pakai
+        // image_size, nano-banana/ideogram/gpt-image pakai aspect_ratio.
+        // Kirim keduanya (parameter asing umumnya diabaikan); kalau model
+        // strict menolak (422), ulangi dengan prompt saja.
+        $payloads = [
+            ['prompt' => $prompt, 'image_size' => $imageSize, 'aspect_ratio' => '1:1', 'num_images' => 1],
+            ['prompt' => $prompt],
+        ];
 
-        $url = (string) data_get($response->json(), 'images.0.url');
-        if ($url === '') {
-            throw new RuntimeException('FAL.AI tidak mengembalikan gambar.');
+        $lastError = null;
+        foreach ($payloads as $payload) {
+            try {
+                $response = $this->withFailover(
+                    fn (string $key) => Http::withHeaders(['Authorization' => 'Key ' . $key])
+                        ->timeout(180)
+                        ->post('https://fal.run/' . ltrim($this->imageModel(), '/'), $payload),
+                    'image',
+                );
+
+                $url = (string) data_get($response->json(), 'images.0.url');
+                if ($url === '') {
+                    throw new RuntimeException('FAL.AI tidak mengembalikan gambar.');
+                }
+
+                return $url;
+            } catch (RuntimeException $e) {
+                $lastError = $e;
+                if (! str_contains($e->getMessage(), '422')) {
+                    throw $e;
+                }
+            }
         }
 
-        return $url;
+        throw $lastError;
     }
 
     /**
