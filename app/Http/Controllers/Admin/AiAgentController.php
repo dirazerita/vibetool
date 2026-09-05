@@ -90,7 +90,7 @@ Jawab HANYA dengan satu objek JSON valid tanpa teks lain, dengan key persis:
  "price_suggestion": harga wajar dalam Rupiah (integer, kelipatan 1000, antara 50000-500000),
  "summary": "ringkasan fungsi produk 3-5 kalimat, untuk bahan landing page",
  "selling_points": ["5-7 poin manfaat singkat Bahasa Indonesia"],
- "thumbnail_prompt": "English prompt for a premium product thumbnail image: modern 3D illustration, dark background with indigo-violet gradient accents, representing the product function. No text, no words, no letters in the image."
+ "thumbnail_prompt": "English prompt for a premium product thumbnail image, style of app-store promo art: the product name rendered as large bold glossy 3D title text as the focal point (put the exact short product name in double quotes in the prompt, max 3-4 words so the text stays legible), surrounded by a modern 3D illustration representing the product function, dark background with vibrant indigo-violet gradient accents, dramatic lighting. Only that one title text — no other words or letters in the image."
 }
 SYS;
 
